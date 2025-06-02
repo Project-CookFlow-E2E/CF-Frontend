@@ -1,38 +1,25 @@
 import React from "react";
 import Card from "../components/Card";
+import useRecipe from "../hooks/useRecipe";
 
-const config = {
-  categories: ["Breakfast", "Brunch", "Lunch", "Dinner", "Dessert", "Snack"],
-  latestRecipes: [
-    {
-      id: 1,
-      image: "https://via.placeholder.com/300x200",
-      name: "Swamp Soup",
-      category: "Lunch",
-      time: "20 min",
-    },
-    {
-      id: 2,
-      image: "https://via.placeholder.com/300x200",
-      name: "Cherry Pie",
-      category: "Dessert",
-      time: "30 min",
-    },
-    {
-      id: 3,
-      image: "https://via.placeholder.com/300x200",
-      name: "Vegan Patty Melt",
-      category: "Dinner",
-      time: "15 min",
-    },
-  ],
-};
+const recipeIds = [1, 2, 3]; 
 
 const CheckboxCategoria = ({ name }) => (
   <button className="px-4 py-2 bg-accent text-white rounded-full text-sm hover:opacity-90 transition-opacity">
     {name}
   </button>
 );
+
+const categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Dessert", "Snack"];
+
+const RecipeCard = ({ id }) => {
+  const { recipe, loading } = useRecipe(id);
+
+  if (loading) return <p className="text-center">Loading recipe {id}…</p>;
+  if (!recipe) return <p className="text-center">Recipe {id} not found 😢</p>;
+
+  return <Card {...recipe} />;
+};
 
 const Home = () => {
   return (
@@ -47,7 +34,7 @@ const Home = () => {
               What are you<br />in the mood for?
             </h1>
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-              {config.categories.map((category) => (
+              {categories.map((category) => (
                 <CheckboxCategoria key={category} name={category} />
               ))}
             </div>
@@ -70,8 +57,8 @@ const Home = () => {
             Latest recipes
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {config.latestRecipes.map((recipe) => (
-              <Card key={recipe.id} {...recipe} />
+            {recipeIds.map((id) => (
+              <RecipeCard key={id} id={id} />
             ))}
           </div>
         </div>
