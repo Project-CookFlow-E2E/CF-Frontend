@@ -1,10 +1,15 @@
 import React from 'react'
 
-const Input = () => {
+const Input = ({ type = "text", onChange, placeholder, value }) => {
   return (
-    <div>Este es mi componente Input.</div>
+    <input
+      type={type}
+      onChange={onChange}
+      value={value}
+      placeholder={placeholder}
+      className='bg-white-500'
+    />
+  );
+};
 
-  )
-}
-
-export default Input
+export default Input;
