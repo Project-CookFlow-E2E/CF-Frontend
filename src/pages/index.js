@@ -1,9 +1,9 @@
-import AddRecipe from "./AddRecipe";
-import AdminDashboard from "./AdminDashboard";
-import Home from "./Home";
-import InspireMe from "./InspireMe";
-import Login from "./Login";
-import Profile from "./Profile";
-import Recipe from "./Recipe";
-import Search from "./Search";
-import SignIn from "./SignIn";
+export { default as AddRecipe } from './AddRecipe';
+export { default as AdminDashboard } from './AdminDashboard';
+export { default as Home } from './Home';
+export { default as InspireMe } from './InspireMe';
+export { default as Login } from './Login';
+export { default as Profile } from './Profile';
+export { default as Recipe } from './Recipe';
+export { default as Search } from './Search';
+export { default as SignIn } from './SignIn';

@@ -1,9 +1,8 @@
-import Boton from './Boton';
-import Card from './Card';
-import CheckboxCategoria from './CheckboxCategoria';
-import CheckboxFiltro from './CheckboxFiltro';
-import Footer from './Footer';
-import Header from './Header';
-import Imagen from './Imagen';
-import Input from './Input';
-
+export { default as Boton } from './Boton';
+export { default as Card } from './Card';
+export { default as CheckboxCategoria } from './CheckboxCategoria';
+export { default as CheckboxFiltro } from './CheckboxFiltro';
+export { default as Footer } from './Footer';
+export { default as Header } from './Header';
+export { default as Imagen } from './Imagen';
+export { default as Input } from './Input';
