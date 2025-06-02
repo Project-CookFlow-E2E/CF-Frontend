@@ -1,6 +1,7 @@
 import React from "react";
 import Card from "../components/Card";
 import useRecipe from "../hooks/useRecipe";
+import Footer from "../components/Footer";
 
 const recipeIds = [1, 2, 3]; 
 
@@ -75,7 +76,7 @@ const Home = () => {
           </button>
         </div>
       </div>
-
+<Footer />
     </div>
   );
 };
