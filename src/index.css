@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Mate+SC&display=swap');
 
 @theme {
   --color-primary: #D5D1B0;
@@ -6,4 +7,5 @@
   --color-accent: #F37A7E;
   --color-background: #FDF3E8;
   --color-footer: #5B7870;
+  --font-mate: 'Mate SC', cursive;
 }

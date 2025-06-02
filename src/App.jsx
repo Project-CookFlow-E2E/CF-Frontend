@@ -1,11 +1,13 @@
 import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignIn } from './pages'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css'
+import { Header } from './components';
 
 function App() {
 
   return (
     <BrowserRouter>
+    <Header/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
