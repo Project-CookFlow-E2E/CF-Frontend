@@ -7,7 +7,7 @@ const Input = ({ type = "text", onChange, placeholder, value }) => {
       onChange={onChange}
       value={value}
       placeholder={placeholder}
-      className='bg-gray-500'
+      className='bg-white-500'
     />
   );
 };
