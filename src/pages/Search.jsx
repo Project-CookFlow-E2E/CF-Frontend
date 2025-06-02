@@ -1,7 +1,10 @@
 // src/pages/Search.jsx
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CategoryCheckbox from '../components/CategoryCheckbox';
+
+// Please note: This page has mock data for viewing Category Checkbox Component
+// Remove the mock data when connecting the backend with this
 
 const sampleCategories = [
   { id: 'books',      label: 'Books',       available: true  },
