@@ -7,3 +7,4 @@ export { default as Profile } from './Profile';
 export { default as Recipe } from './Recipe';
 export { default as Search } from './Search';
 export { default as SignIn } from './SignIn';
+export { default as ShoppingList } from './ShoppingList';
