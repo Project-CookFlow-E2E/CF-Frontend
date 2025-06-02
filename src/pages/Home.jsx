@@ -6,7 +6,7 @@ import Header from "../components/Header";
 
 const recipeIds = [1, 2, 3]; 
 
-const CheckboxCategoria = ({ name }) => (
+const CategoryCheckbox = ({ name }) => (
   <button className="px-4 py-2 bg-accent text-white rounded-full text-sm hover:opacity-90 transition-opacity">
     {name}
   </button>
@@ -37,7 +37,7 @@ const Home = () => {
             </h1>
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
               {categories.map((category) => (
-                <CheckboxCategoria key={category} name={category} />
+                <CategoryCheckbox key={category} name={category} />
               ))}
             </div>
           </div>
