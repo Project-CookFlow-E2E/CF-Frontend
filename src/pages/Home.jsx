@@ -1,8 +1,10 @@
 import React from "react";
 import Card from "../components/Card";
 import useRecipe from "../hooks/useRecipe";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+
 
 const recipeIds = [1, 2, 3]; 
 
@@ -24,6 +26,12 @@ const RecipeCard = ({ id }) => {
 };
 
 const Home = () => {
+  const navigate = useNavigate(); 
+
+  const handleInspireClick = () => { 
+    navigate("/inspire-me");
+  };
+
   return (
     <div className="min-h-screen bg-background w-full">
 <Header/>
@@ -66,17 +74,20 @@ const Home = () => {
   </div>
 </div>
 
-   {/* Inspire Me */}
-<div className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8">
-  <div className="max-w-7xl mx-auto text-center">
-    <h2 className="text-3xl font-bold text-gray-900 mb-12">
-      You don't know what to make yet?
-    </h2>
-    <button className="w-40 h-40 md:w-48 md:h-48 bg-accent rounded-full text-white font-semibold text-lg hover:opacity-90 mx-auto">
-      Inspire me
-    </button>
-  </div>
-</div>
+ {/* Inspire Me */}
+ <div className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-12">
+          You don't know what to make yet?
+        </h2>
+        <button
+          onClick={handleInspireClick}
+          className="w-40 h-40 md:w-48 md:h-48 bg-accent rounded-full text-white font-semibold text-lg hover:opacity-90 flex items-center justify-center mx-auto"
+        >
+          Inspire me
+        </button>
+      </div>
+    </div>
 <Footer />
     </div>
   );
