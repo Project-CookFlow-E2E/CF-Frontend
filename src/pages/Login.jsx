@@ -7,7 +7,7 @@ const Login = () => {
     // lógica de inicio de sesión
   };
   return (
-    <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-60">
+    <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-50">
       <h2 className="text-3xl font-bold mb-2 text-black">Hello again!</h2>
       <h4 className=" text-sm mb-12 text-black" >Enter your details to continue</h4>
       <div className="flex flex-col mb-4">
@@ -19,7 +19,7 @@ const Login = () => {
         <Input placeholder = "Contraseña" type="email"/>
       </div>
       <div>
-        <Boton onClick={handleLogin} className='mb-3'>Iniciar sesión</Boton>
+        <Boton onClick={handleLogin} className="mb-3 w-40 px-1">Iniciar sesión</Boton>
       </div>
       <h4 className="text-xs mb-12 text-black" >Don't have an account? Sign up here</h4>
     </div>
