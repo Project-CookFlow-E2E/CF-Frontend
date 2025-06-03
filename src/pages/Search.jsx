@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import CategoryFilter from '../components/CategoryFilter';
+import { Input, Boton } from '../components';
+// import {Search} from "lucide-react";
 
 // Mock data for CategoryFilter component
 const mockCategories = [
@@ -43,6 +45,7 @@ const Search = () => {
         maxRowsWhenCollapsed={4}
         itemsPerRow={2}
       />
+      <Input></Input>
     </div>
   );
 };
