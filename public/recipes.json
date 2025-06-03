@@ -4,14 +4,16 @@
       "image": "/soup.jpg",
       "name": "Soup of the Day",
       "category": "HEALTHY",
-      "time": "30 m"
+      "time": "30 m",
+      "isCreatedByUser": "true"
     },
     {
       "id": 2,
       "image": "/salad.jpg",
       "name": "Fresh Salad",
       "category": "VEGAN",
-      "time": "15 m"
+      "time": "15 m",
+      "isCreatedByUser": "true"
     },
   
 {
@@ -19,21 +21,183 @@
     "image": "/pasta.jpg",
     "name": "Creamy Pasta",
     "category": "VEGETARIAN",
-    "time": "20 m"
+    "time": "20 m",
+    "isCreatedByUser": "true"
   },
   {
     "id": 4,
     "image": "/burger.svg",
     "name": "Classic Burger",
     "category": "MEAT",
-    "time": "25 m"
+    "time": "25 m",
+    "isCreatedByUser": "true"
   },
    {
         "id": 5,
         "image": "/dessert.svg",
         "name": "Chocolate Dessert",
         "category": "DESSERT",
-        "time": "40 m"
-}   
-
+        "time": "40 m",
+      "isCreatedByUser": "true"
+},
+  {
+    "id": 60,
+    "image": "/dessert1.svg",
+    "name": "Vanilla Cupcake",
+    "category": "DESSERT",
+    "time": "30 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 61,
+    "image": "/dessert2.svg",
+    "name": "Strawberry Tart",
+    "category": "DESSERT",
+    "time": "45 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 62,
+    "image": "/dessert3.svg",
+    "name": "Lemon Pie",
+    "category": "DESSERT",
+    "time": "50 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 63,
+    "image": "/dessert4.svg",
+    "name": "Caramel Flan",
+    "category": "DESSERT",
+    "time": "40 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 64,
+    "image": "/dessert5.svg",
+    "name": "Berry Cheesecake",
+    "category": "DESSERT",
+    "time": "1 h",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 65,
+    "image": "/dessert6.svg",
+    "name": "Mango Sorbet",
+    "category": "DESSERT",
+    "time": "20 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 66,
+    "image": "/dessert7.svg",
+    "name": "Coconut Macaroons",
+    "category": "DESSERT",
+    "time": "35 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 67,
+    "image": "/dessert8.svg",
+    "name": "Raspberry Mousse",
+    "category": "DESSERT",
+    "time": "25 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 68,
+    "image": "/dessert9.svg",
+    "name": "Banana Bread",
+    "category": "DESSERT",
+    "time": "1 h",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 69,
+    "image": "/dessert10.svg",
+    "name": "Peach Crumble",
+    "category": "DESSERT",
+    "time": "50 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 70,
+    "image": "/dessert11.svg",
+    "name": "Apple Strudel",
+    "category": "DESSERT",
+    "time": "1 h",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 71,
+    "image": "/dessert12.svg",
+    "name": "Churros",
+    "category": "DESSERT",
+    "time": "30 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 72,
+    "image": "/dessert13.svg",
+    "name": "Panna Cotta",
+    "category": "DESSERT",
+    "time": "3 h",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 73,
+    "image": "/dessert14.svg",
+    "name": "Pumpkin Pie",
+    "category": "DESSERT",
+    "time": "1 h",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 74,
+    "image": "/dessert15.svg",
+    "name": "Red Velvet Cake",
+    "category": "DESSERT",
+    "time": "1 h 15 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 75,
+    "image": "/dessert16.svg",
+    "name": "Hazelnut Brownie",
+    "category": "DESSERT",
+    "time": "40 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 76,
+    "image": "/dessert17.svg",
+    "name": "Tiramisu",
+    "category": "DESSERT",
+    "time": "4 h",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 77,
+    "image": "/dessert18.svg",
+    "name": "Baklava",
+    "category": "DESSERT",
+    "time": "1 h 30 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 78,
+    "image": "/dessert19.svg",
+    "name": "Chocolate Soufflé",
+    "category": "DESSERT",
+    "time": "35 m",
+    "isCreatedByUser": "true"
+  },
+  {
+    "id": 79,
+    "image": "/dessert20.svg",
+    "name": "Crème Brûlée",
+    "category": "DESSERT",
+    "time": "1 h",
+    "isCreatedByUser": "true"
+  }
 ]

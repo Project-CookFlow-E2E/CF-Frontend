@@ -1,3 +1,4 @@
+import RecipeIngredientsChecklist from '../components/RecipeIngredientsChecklist';
 import React from 'react'
 import { Boton } from '../components/index'
 

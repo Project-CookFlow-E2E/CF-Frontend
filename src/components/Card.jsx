@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Card = ({ id, image, name, category, time }) => {
-  const storageKey = `favorite-${id}`;
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    setIsFavorite(saved === 'true');
-  }, [storageKey]);
-
-  const toggleFavorite = () => {
-    const newState = !isFavorite;
-    setIsFavorite(newState);
-    localStorage.setItem(storageKey, newState);
-  };
-
+const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite }) => {
   return (
     <div className="w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
       {/* Image */}
@@ -34,7 +20,7 @@ const Card = ({ id, image, name, category, time }) => {
             {name || 'Swamp Soup'}
           </h3>
           <button
-            onClick={toggleFavorite}
+            onClick={() => onToggleFavorite(id)}
             className="p-1 -mt-1 -mr-1"
             aria-label="Toggle favorite"
           >
