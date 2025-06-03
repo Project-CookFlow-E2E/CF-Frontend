@@ -2,11 +2,16 @@ import React from 'react'
 import Input from "../components/Input"
 import Boton from "../components/Boton"
 import { Mail, Lock} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const handleLogin = () => {
-    // lógica de inicio de sesión
+    navigate("/");
   };
+
   return (
     <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-50">
       <h2 className="text-3xl font-bold mb-2 text-black">Hello again!</h2>
