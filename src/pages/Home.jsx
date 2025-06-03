@@ -34,7 +34,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background w-full">
-<Header/>
       {/* Hero Section */}
       <div className="w-full bg-background pt-16 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
