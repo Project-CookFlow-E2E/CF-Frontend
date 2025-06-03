@@ -1,14 +1,14 @@
 [
     {
       "id": 1,
-      "image": "/soup.svg",
+      "image": "/soup.jpg",
       "name": "Soup of the Day",
       "category": "HEALTHY",
       "time": "30 m"
     },
     {
       "id": 2,
-      "image": "/salad.svg",
+      "image": "/salad.jpg",
       "name": "Fresh Salad",
       "category": "VEGAN",
       "time": "15 m"
@@ -16,7 +16,7 @@
   
 {
     "id": 3,
-    "image": "/pasta.svg",
+    "image": "/pasta.jpg",
     "name": "Creamy Pasta",
     "category": "VEGETARIAN",
     "time": "20 m"
