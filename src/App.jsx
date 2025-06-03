@@ -1,4 +1,4 @@
-import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignIn, ShoppingList } from './pages'
+import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList } from './pages'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import './App.css'
@@ -13,7 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path="/search" element={<Search />} />
