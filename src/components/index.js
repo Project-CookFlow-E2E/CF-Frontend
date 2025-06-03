@@ -1,7 +1,7 @@
 export { default as Boton } from './Boton';
 export { default as Card } from './Card';
 export { default as CategoryCheckbox } from './CategoryCheckbox';
-export { default as CheckboxFiltro } from './CheckboxFiltro';
+export { default as CategoryFilter } from './CategoryFilter';
 export { default as Footer } from './Footer';
 export { default as Header } from './Header';
 export { default as Imagen } from './Imagen';
