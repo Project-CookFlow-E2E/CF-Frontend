@@ -1,17 +1,28 @@
 import React from "react";
 import logo from "../assets/logo.svg";
+import { Link } from 'react-router-dom'; 
 
 const Header = ({ isLoggedIn = true, onLogOut }) => {
     return (
         <header className="bg-background px-4 py-3">
-            {isLoggedIn ? (
-                <div className="flex justify-center items-center mx-auto">
-                    <div className="flex text-center justify-center items-center gap-3">
-                        <img src={logo} alt="Logo" width={35} height={35} />
-                        <h1 className="text-xl font-mate"><span className="text-3xl">C</span>OOK<span className="text-3xl">F</span>LOW</h1>
-                    </div>
-                </div>
-            ) : (
+        {isLoggedIn ? (
+          <div className="flex justify-between items-center mx-auto max-w-6xl">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="Logo" width={35} height={35} />
+              <h1 className="text-xl font-mate">
+                <span className="text-3xl">C</span>OOK
+                <span className="text-3xl">F</span>LOW
+              </h1>
+            </div>
+      
+            <Link
+              to="/profile"
+              className="px-4 py-2 rounded-lg text-white bg-accent hover:opacity-90 transition"
+            >
+              Mi Perfil
+            </Link>
+          </div>
+        ) : (
               <div className="flex justify-between items-center max-w-screen-2xl mx-auto">
               <div className="flex items-center gap-3">
                         <img src={logo} alt="Logo" width={35} height={35} />
