@@ -1,5 +1,7 @@
 import React from "react";
+import React from "react";
 
+const Boton = ({ children, onClick, type = "button", className = "", disabled = false }) => {
 const Boton = ({ children, onClick, type = "button", className = "", disabled = false }) => {
   return (
     <button
