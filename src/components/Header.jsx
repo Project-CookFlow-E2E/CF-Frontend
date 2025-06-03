@@ -7,13 +7,13 @@ const Header = ({ isLoggedIn = true, onLogOut }) => {
         <header className="bg-background px-4 py-3">
         {isLoggedIn ? (
           <div className="flex justify-between items-center mx-auto max-w-6xl">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo" width={35} height={35} />
-              <h1 className="text-xl font-mate">
-                <span className="text-3xl">C</span>OOK
-                <span className="text-3xl">F</span>LOW
-              </h1>
-            </div>
+            <Link to="/" className="flex items-center gap-3">
+  <img src={logo} alt="Logo" width={35} height={35} />
+  <h1 className="text-xl font-mate">
+    <span className="text-3xl">C</span>OOK
+    <span className="text-3xl">F</span>LOW
+  </h1>
+</Link>
       
             <Link
               to="/profile"
