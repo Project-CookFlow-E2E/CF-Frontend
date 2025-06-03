@@ -12,7 +12,7 @@ const SignUp = () => {
     };
   return (
     <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-20">
-      <h2 className="text-3xl font-bold mb-5 text-black">¡Bienvenido!</h2>
+      <h2 className="text-3xl font-bold mb-4 text-black">¡Bienvenido!</h2>
       <h4 className=" text-sm mb-8 text-black" >Únete a CookFlow y empieza tu viaje culinario</h4>
 
        <div className="flex flex-col mb-4" >
@@ -38,7 +38,7 @@ const SignUp = () => {
 
 
       <div className="flex flex-col mb-4">
-        <label className="text-xs mb-2 font-bold text-black">Repite Contraseña</label>
+        <label className="text-xs mb-2 font-bold text-black">Contraseña</label>
         <div className="peer border border-black rounded-md">
           <Input placeholder = "Contraseña" type="email" icon={Lock}/>
         </div>
