@@ -2,7 +2,9 @@ import React from 'react'
 
 const CategoryCheckbox = () => {
   return (
-    <div>CategoryCheckbox</div>
+    <div>Este es mi componente CategoryCheckbox.</div>
+
   )
 }
+
 export default CategoryCheckbox

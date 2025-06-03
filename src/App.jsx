@@ -4,6 +4,7 @@ import { Footer } from './components';
 import './App.css'
 import { Header } from './components';
 
+
 function App() {
 
   return (
@@ -12,7 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signin" element={<SignUp />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path="/search" element={<Search />} />
