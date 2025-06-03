@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 const Input = ({ type = "text", onChange, placeholder, value }) => {
   return (
@@ -7,7 +7,7 @@ const Input = ({ type = "text", onChange, placeholder, value }) => {
       onChange={onChange}
       value={value}
       placeholder={placeholder}
-      className='bg-white-500'
+      className="bg-white rounded-lg border border-gray-300 px-6 py-3 w-full"
     />
   );
 };
