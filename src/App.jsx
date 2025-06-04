@@ -1,7 +1,6 @@
 import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList } from './pages'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
-import './App.css'
 import { Header } from './components';
 
 
