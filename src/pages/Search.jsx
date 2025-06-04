@@ -3,6 +3,7 @@ import CategoryFilter from '../components/CategoryFilter';
 import { Input } from '../components';
 import { Plus, Minus } from "lucide-react";
 import Card from '../components/Card';
+import Button from '../components/Button';
 
 // Mock data para las recetas
 const popularRecipes = [
@@ -43,7 +44,7 @@ const mockTypeCooking = [
 const Search = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [showAll, setShowAll] = useState(false); // Nuevo estado
+  const [showAll, setShowAll] = useState(false);
   const carouselRef = useRef(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -110,13 +111,20 @@ const Search = () => {
       </div>
 
       <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
-
       <div>
         {isOpen && (
           <>
             <CategoryFilter categories={mockCategories} initialSelected={selectedCategories} onSelectionChange={handleCategoryChange} title="Categories" maxRowsWhenCollapsed={4} itemsPerRow={2} className="mb-6" />
             <CategoryFilter categories={mockTypeCooking} initialSelected={selectedCategories} onSelectionChange={handleCategoryChange} title="Tipo de cocina" maxRowsWhenCollapsed={4} itemsPerRow={2} className="mb-6" />
             <CategoryFilter categories={mockOrigin} initialSelected={selectedCategories} onSelectionChange={handleCategoryChange} title="Origen" maxRowsWhenCollapsed={4} itemsPerRow={2} className="mb-6" />
+            <div className="flex justify-center">
+              <Button
+                className="mb-3 w-40 px-1"
+                onClick={() => setShowAll(true)} 
+              >
+                Buscar
+              </Button>
+            </div>
           </>
         )}
       </div>
@@ -127,7 +135,7 @@ const Search = () => {
           <h4 className="text-xl font-bold text-black">Recetas populares</h4>
           <h4
             className="text-l text-gray-500 cursor-pointer"
-            onClick={() => setShowAll(!showAll)}
+            onClick={() => setShowAll(!showAll)} // Toggle normal para activar/desactivar
           >
             {showAll ? "Ver menos" : "Ver todas"}
           </h4>
