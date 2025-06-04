@@ -1,6 +1,6 @@
 import React from 'react'
 import Input from "../components/Input"
-import Boton from "../components/Boton"
+import Button from "../components/Button"
 import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,7 +44,7 @@ const Login = () => {
           </div>
 
           <div>
-            <Boton onClick={handleLogin} className="mb-3 w-40 px-1">Iniciar sesión</Boton>
+            <Button onClick={handleLogin} className="mb-3 w-40 px-1">Iniciar sesión</Button>
           </div>
 
           <h4 className="text-xs mb-12 text-black">¿No tienes cuenta? Regístrate aquí.</h4>
