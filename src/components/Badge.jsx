@@ -1,7 +1,8 @@
 import React from 'react'
 
-export const Badge = () => {
+const Badge = () => {
   return (
     <div>Badge</div>
   )
 }
+export default Badge;

@@ -14,3 +14,9 @@ export const ingredientesMock = [
   "Plátano",
   "Chocolate",
 ];
+
+export const  shoppingListItemsMock = [
+  "Sal ",
+  "Pimienta",
+  "Harina",
+]
