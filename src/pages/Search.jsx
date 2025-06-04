@@ -13,25 +13,25 @@ const mockCategories = [
 
 ];
 
-// const mockOrigin = [
-//   { id: 'italia', label: 'Italiana', available: true },
-//   { id: 'grecia', label: 'Griega', available: true },
-//   { id: 'españa', label: 'Española', available: true },
-//   { id: 'corea', label: 'Coreana', available: true },
-//   { id: 'inglaterra', label: 'Inglesa', available: true }
+const mockOrigin = [
+  { id: 'italia', label: 'Italiana', available: true },
+  { id: 'grecia', label: 'Griega', available: true },
+  { id: 'españa', label: 'Española', available: true },
+  { id: 'corea', label: 'Coreana', available: true },
+  { id: 'inglaterra', label: 'Inglesa', available: true }
 
-// ];
+];
 
-// const mockTypeCooking = [
-//   { id: 'cocido', label: 'Cocido', available: true },
-//   { id: 'vapor', label: 'Al vapor', available: true },
-//   { id: 'hervido', label: 'Hervido', available: true },
-//   { id: 'guiso', label: 'Guiso', available: true },
-//   { id: 'frito', label: 'Frito', available: true },
-//   { id: 'plancha', label: 'A la plancha', available: true },
-//   { id: 'asado', label: 'Asado', available: true }
+const mockTypeCooking = [
+  { id: 'cocido', label: 'Cocido', available: true },
+  { id: 'vapor', label: 'Al vapor', available: true },
+  { id: 'hervido', label: 'Hervido', available: true },
+  { id: 'guiso', label: 'Guiso', available: true },
+  { id: 'frito', label: 'Frito', available: true },
+  { id: 'plancha', label: 'A la plancha', available: true },
+  { id: 'asado', label: 'Asado', available: true }
 
-// ];
+];
 
 const Search = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -48,30 +48,30 @@ const Search = () => {
 
 
   function FiltroToggle({ isOpen, toggleOpen }) {
-    return (
-      <div
-        className="flex items-center gap-2 cursor-pointer"
-        onClick={toggleOpen}
-      >
-        <h4 className="text-lg sm:text-xl font-semibold m-0">
-          Filtros
-        </h4>
+  return (
+    <div className="flex items-center justify-between w-full px-4 cursor-pointer mb-3" onClick={toggleOpen}>
+      <h4 className="text-lg sm:text-xl font-semibold m-0">
+      Filtros
+      </h4>
 
-        {isOpen ? (
-          <Minus className="w-5 h-5 -mt-1 ml-auto" />
-        ) : (
-          <Plus className="w-5 h-5 -mt-1 ml-auto" />
-        )}
-      </div>
-    );
-  }
+     {isOpen ? (
+        <Minus className="w-5 h-5" />
+      ) : (
+        <Plus className="w-5 h-5" />
+      )}
+    </div>
+  );
+}
+
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <h4 className="text-2xl mb-4 font-bold text-black">¿Qué quieres cocinar?</h4>
-
-      <div className="peer border border-black rounded-lg mb-15">
-        <Input placeholder="Correo electrónico" type="email" icon={SearchIcon} />
+    <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-50">
+      
+      <div className="w-full max-w-screen-lg mx-auto px-4">
+        <h4 className="text-xl font-bold text-black mb-2">¿Qué quieres cocinar?</h4>
+        <div className="w-full border border-black rounded-lg mb-15">
+          <Input placeholder="Correo electrónico" type="email" icon={SearchIcon} className="w-full"/>
+        </div>
       </div>
 
       {/* Pasa estado y función al toggle */}
@@ -80,7 +80,9 @@ const Search = () => {
         toggleOpen={() => setIsOpen(!isOpen)}
       />
 
-      {/* Muestra CategoryFilter solo si isOpen es true */}
+      {/*Categorias filtros*/}
+      <div> 
+        {/* Muestra CategoryFilter solo si isOpen es true */}
       {isOpen && (
         <CategoryFilter
           categories={mockCategories}
@@ -89,9 +91,41 @@ const Search = () => {
           title="Categories"
           maxRowsWhenCollapsed={4}
           itemsPerRow={2}
-        />
+          className= "mb-6"
+        /> 
       )}
+
+      {isOpen && (
+        <CategoryFilter
+          categories={mockTypeCooking}
+          initialSelected={selectedCategories}
+          onSelectionChange={handleCategoryChange}
+          title="Tipo de cocina"
+          maxRowsWhenCollapsed={4}
+          itemsPerRow={2}
+          className= "mb-6"
+        /> 
+      )}
+
+      {isOpen && (
+        <CategoryFilter
+          categories={mockOrigin}
+          initialSelected={selectedCategories}
+          onSelectionChange={handleCategoryChange}
+          title="Origen"
+          maxRowsWhenCollapsed={4}
+          itemsPerRow={2}
+          className= "mb-6"
+        /> 
+      )}
+      </div>
+
+      <div className="w-full max-w-screen-lg mx-auto px-4">
+        <h4 className="text-xl font-bold text-black mb-2">Recetas populares</h4>
+        
+      </div>
     </div>
+    
   );
 };
 
