@@ -91,25 +91,29 @@ const Profile = () => {
 // Define the initial favorites from localStorage
 useEffect(() => {
   const savedFavorites = localStorage.getItem('favorites');
+  console.log('📥 Cargando favoritos de localStorage:', savedFavorites);
   if (savedFavorites) {
     try {
       const parsed = JSON.parse(savedFavorites);
-      setFavorites(new Set(parsed));
+      setFavorites(new Set(parsed.map(String)));
     } catch {
       setFavorites(new Set());
     }
   }
 }, []);
 
-// Save favorites to localStorage whenever they change
+// Save favorites to localStorage whenever they change, but only if not loading
 useEffect(() => {
-  localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
-}, [favorites]);
+  if (!isLoading) {
+    console.log('💾 Guardando favoritos en localStorage:', JSON.stringify(Array.from(favorites)));
+    localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
+  }
+}, [favorites, isLoading]);
 
 // Filter recipes based on the active tab
 const filteredRecipes = recipes.filter(recipe => {
   if (activeTab === 'saved') {
-    return favorites.has(recipe.id);
+    return favorites.has(String(recipe.id));
   } else {
     return recipe.isCreatedByUser;
   }
@@ -126,17 +130,19 @@ const filteredRecipes = recipes.filter(recipe => {
     setCurrentPage(1);
   }, [activeTab]);
 
-  const handleToggleFavorite = (recipeId) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(recipeId)) {
-        newFavorites.delete(recipeId);
-      } else {
-        newFavorites.add(recipeId);
-      }
-      return newFavorites;
-    });
-  };
+const handleToggleFavorite = (recipeId) => {
+  const id = String(recipeId);
+  setFavorites(prev => {
+    const updated = new Set(prev);
+    if (updated.has(id)) {
+      updated.delete(id);
+    } else {
+      updated.add(id);
+    }
+    console.log('⭐ Favoritos actualizados:', Array.from(updated));
+    return new Set(updated); // <- nueva instancia
+  });
+};
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -190,7 +196,7 @@ const filteredRecipes = recipes.filter(recipe => {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Recetas guardadas ({recipes.filter(r => favorites.has(r.id)).length})
+            Recetas guardadas ({recipes.filter(r => favorites.has(String(r.id))).length})
           </button>
           <button
             onClick={() => handleTabChange('created')}
@@ -217,7 +223,7 @@ const filteredRecipes = recipes.filter(recipe => {
             name={recipe.name}
             category={recipe.category}
             time={recipe.time}
-            isFavorite={favorites.has(recipe.id)}
+            isFavorite={favorites.has(String(recipe.id))}
             onToggleFavorite={handleToggleFavorite}
           />
         ))}

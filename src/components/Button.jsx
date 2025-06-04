@@ -1,5 +1,5 @@
 import React from "react";
-const Boton = ({ children, onClick, type = "button", className = "", disabled = false }) => {
+const Button = ({ children, onClick, type = "button", className = "", disabled = false }) => {
   return (
     <button
       type={type}
@@ -14,4 +14,4 @@ const Boton = ({ children, onClick, type = "button", className = "", disabled = 
   );
 };
 
-export default Boton;
+export default Button;
