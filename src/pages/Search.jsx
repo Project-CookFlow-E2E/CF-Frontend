@@ -208,13 +208,13 @@ const Search = () => {
         )}
       </div>
 
-      {/* Recetas populares con carousel */}
+      {/* Recetas carousel */}
       <div className="w-full max-w-screen-lg mx-auto px-4 mt-6">
-        <h4 className="text-xl font-bold text-black mb-4">Recetas populares</h4>
-
+        <div className="flex justify-between items-center px-1 sm:px-2 mb-4">
+          <h4 className="text-xl font-bold text-black">Recetas populares</h4>
+          <h4 className="text-l  text-gray-500 cursor-pointer">Ver todas</h4>
+        </div>
         <div className="relative">
-          {/* Botones quitados */}
-
           <div
             ref={carouselRef}
             className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab"
