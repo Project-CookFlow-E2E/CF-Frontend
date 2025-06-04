@@ -6,12 +6,11 @@ const mockRecipes = [
     duration_minutes: 20,
     commensals: 4,
     category_id: 5,
+    category: "Italian",
     user_id: 1,
     created_at: "2023-06-01T12:00:00Z",
     updated_at: "2023-06-01T12:00:00Z",
-    // Image data from images table
     image_url: "https://images.unsplash.com/photo-1598866594230-a7c12756260f",
-    // Favorites data placeholder
     is_favorite: false
   },
   {
@@ -21,6 +20,7 @@ const mockRecipes = [
     duration_minutes: 15,
     commensals: 2,
     category_id: 3,
+    category: "Lunch",
     user_id: 2,
     created_at: "2023-06-02T10:30:00Z",
     updated_at: "2023-06-02T10:30:00Z",
@@ -34,6 +34,7 @@ const mockRecipes = [
     duration_minutes: 30,
     commensals: 6,
     category_id: 8,
+    category: "Snack",
     user_id: 3,
     created_at: "2023-06-03T14:15:00Z",
     updated_at: "2023-06-03T14:15:00Z",

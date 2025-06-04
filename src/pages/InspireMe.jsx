@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import RecipeCard from '../components/cards/RecipeCard';
 import mockRecipes from '../data/mockRecipes';
 
-
 const InspireMe = () => {
   const [recipes, setRecipes] = useState(mockRecipes);
   const [currentRecipeIndex, setCurrentRecipeIndex] = useState(0);
@@ -25,7 +24,7 @@ const InspireMe = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4" style={{ backgroundColor: '#FDF3E8' }}>
       <div className="max-w-md mx-auto">
         <h1 className="text-2xl sm:text-3xl md:text-4xl text-center mb-6 sm:mb-8 text-gray-900">
           Swipe the Dish
