@@ -90,7 +90,6 @@ const Search = () => {
           maxRowsWhenCollapsed={4}
           itemsPerRow={2}
         />
-        
       )}
     </div>
   );
