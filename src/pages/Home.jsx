@@ -22,21 +22,33 @@ const categories = [
   "Snack",
 ];
 
-const RecipeCard = ({ id }) => {
+const RecipeCard = ({ id, favorites, setFavorites }) => {
   const { recipe, loading } = useRecipe(id);
+  const isFavorite = favorites.includes(String(id));
 
-  // Read favorites from localStorage and determine if this id is a favorite
-  const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-  const isFavorite = savedFavorites.includes(String(id));
+  const handleToggleFavorite = () => {
+    const idStr = String(id);
+    const updated = isFavorite
+      ? favorites.filter(fav => fav !== idStr)
+      : [...favorites, idStr];
+
+    setFavorites(updated);
+    localStorage.setItem('favorites', JSON.stringify(updated));
+  };
 
   if (loading) return <p className="text-center">Loading recipe {id}…</p>;
   if (!recipe) return <p className="text-center">Recipe {id} not found 😢</p>;
 
-  return <Card {...recipe} isFavorite={isFavorite} />;
+  return <Card {...recipe} isFavorite={isFavorite} onToggleFavorite={handleToggleFavorite} />;
 };
 
 const Home = () => {
   const navigate = useNavigate();
+
+  const [favorites, setFavorites] = React.useState(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const handleInspireClick = () => {
     navigate("/inspire-me");
@@ -78,7 +90,7 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {recipeIds.map((id) => (
-              <RecipeCard key={id} id={id} />
+              <RecipeCard key={id} id={id} favorites={favorites} setFavorites={setFavorites} />
             ))}
           </div>
         </div>
