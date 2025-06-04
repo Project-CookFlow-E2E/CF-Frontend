@@ -1,22 +1,24 @@
 // src/pages/ShoppingList.jsx
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 // IMPORTANTE: Ahora importamos Badge desde la carpeta 'components'
 // gracias a tu archivo src/components/index.js
-import { Badge } from '../components';
-import { shoppingListItemsMock } from '../data/mockData';
+import { Badge } from "../components";
+import { shoppingListItemsMock } from "../data/mockData";
 
 const ShoppingList = () => {
-  const items = shoppingListItemsMock; 
+  const [items, setItems] = useState(shoppingListItemsMock);
 
   const handleToggleCheck = (id) => {
-    setItems(items.map(item =>
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
+    setItems(
+      items.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item,
+      ),
+    );
   };
 
   const handleDeleteItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+    setItems(items.filter((item) => item.id !== id));
   };
 
   const handleClearAll = () => {
@@ -31,7 +33,12 @@ const ShoppingList = () => {
   return (
     <div className="border">
       <header className="">
-        <button className="" onClick={() => console.log("Botón de volver clickeado")}>&lt;</button>
+        <button
+          className=""
+          onClick={() => console.log("Botón de volver clickeado")}
+        >
+          &lt;
+        </button>
         <h1>Grocery List</h1>
         <div className=""></div>
       </header>
@@ -39,7 +46,7 @@ const ShoppingList = () => {
       <main className="">
         {items.length > 0 ? (
           <div className="">
-            {items.map(item => (
+            {items.map((item) => (
               <div
                 key={item.id}
                 onClick={() => handleToggleCheck(item.id)}
@@ -48,10 +55,11 @@ const ShoppingList = () => {
               >
                 <span className="">{item}</span>
                 <span className="">{item.quantity}</span>
-
               </div>
             ))}
-            <button className="" onClick={handleClearAll}>Clear all</button>
+            <button className="" onClick={handleClearAll}>
+              Clear all
+            </button>
           </div>
         ) : (
           <p className="">Tu lista de la compra está vacía.</p>
@@ -59,12 +67,16 @@ const ShoppingList = () => {
       </main>
 
       <footer className="">
-        <button className="" onClick={handleLetsCook}>Let's Cook!</button>
+        <button className="" onClick={handleLetsCook}>
+          Let's Cook!
+        </button>
       </footer>
 
       <nav className="">
         <button className="">
-          <span role="img" aria-label="recipe">🍽️</span>
+          <span role="img" aria-label="recipe">
+            🍽️
+          </span>
           Recipe
         </button>
         <button className="">
@@ -72,7 +84,9 @@ const ShoppingList = () => {
           Add Recipe
         </button>
         <button className="">
-          <span role="img" aria-label="profile">👤</span>
+          <span role="img" aria-label="profile">
+            👤
+          </span>
           Profile
         </button>
       </nav>
@@ -81,3 +95,4 @@ const ShoppingList = () => {
 };
 
 export default ShoppingList;
+
