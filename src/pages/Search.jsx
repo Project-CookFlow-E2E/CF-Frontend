@@ -1,45 +1,94 @@
-import { useState, useRef } from 'react';
-import CategoryFilter from '../components/CategoryFilter';
-import { Input } from '../components';
+import { useState, useRef } from "react";
+import CategoryFilter from "../components/CategoryFilter";
+import { Input } from "../components";
 import { Plus, Minus } from "lucide-react";
-import Card from '../components/Card';
-import Button from '../components/Button';
-import AutocompleteInput from '../components/AutocompleteInput';
+import Card from "../components/Card";
+import Button from "../components/Button";
+import AutocompleteInput from "../components/AutocompleteInput";
 
-// Datos actualizados para las recetas
 const popularRecipes = [
-  { id: 1, image: "/pasta.jpg", name: "Pasta Carbonara", category: "comida", origin: "italia", type: "cocido", time: "30 m" },
-  { id: 2, image: "/salad.jpg", name: "Ensalada rica", category: "cena", origin: "grecia", type: "frito", time: "15 m" },
-  { id: 3, image: "/soup.jpg", name: "Sopa de calabaza", category: "cena", origin: "españa", type: "hervido", time: "20 m" },
-  { id: 4, image: "/pancakes.jpg", name: "Tortitas", category: "desayuno", origin: "americana", type: "plancha", time: "25 m" },
-  { id: 5, image: "/tortilla.jpg", name: "Tortilla de patata", category: "comida", origin: "españa", type: "frito", time: "45 m" },
-  { id: 6, image: "/sushi.jpeg", name: "Sushi", category: "cena", origin: "japonesa", type: "vapor", time: "55 m" },
+  {
+    id: 1,
+    image: "/pasta.jpg",
+    name: "Pasta Carbonara",
+    category: "comida",
+    origin: "italia",
+    type: "cocido",
+    time: "30 m",
+  },
+  {
+    id: 2,
+    image: "/salad.jpg",
+    name: "Ensalada rica",
+    category: "cena",
+    origin: "grecia",
+    type: "frito",
+    time: "15 m",
+  },
+  {
+    id: 3,
+    image: "/soup.jpg",
+    name: "Sopa de calabaza",
+    category: "cena",
+    origin: "españa",
+    type: "sopa",
+    time: "20 m",
+  },
+  {
+    id: 4,
+    image: "/pancakes.jpg",
+    name: "Tortitas",
+    category: "desayuno",
+    origin: "americana",
+    type: "plancha",
+    time: "25 m",
+  },
+  {
+    id: 5,
+    image: "/tortilla.jpg",
+    name: "Tortilla de patata",
+    category: "comida",
+    origin: "españa",
+    type: "frito",
+    time: "45 m",
+  },
+  {
+    id: 6,
+    image: "/sushi.jpeg",
+    name: "Sushi",
+    category: "cena",
+    origin: "japonesa",
+    type: "crudo",
+    time: "55 m",
+  },
 ];
 
 const mockCategories = [
-  { id: 'comida', label: 'Comida', available: true },
-  { id: 'desayuno', label: 'Desayuno', available: true },
-  { id: 'cena', label: 'Cena', available: true },
-  { id: 'merienda', label: 'Merienda', available: true },
-  { id: 'snack', label: 'Snack', available: true }
+  { id: "comida", label: "Comida", available: true },
+  { id: "desayuno", label: "Desayuno", available: true },
+  { id: "cena", label: "Cena", available: true },
+  { id: "merienda", label: "Merienda", available: true },
+  { id: "snack", label: "Snack", available: true },
 ];
 
 const mockOrigin = [
-  { id: 'italia', label: 'Italiana', available: true },
-  { id: 'grecia', label: 'Griega', available: true },
-  { id: 'españa', label: 'Española', available: true },
-  { id: 'japon', label: 'Japonesa', available: true },
-  { id: 'americana', label: 'Americana', available: true }
+  { id: "italia", label: "Italiana", available: true },
+  { id: "grecia", label: "Griega", available: true },
+  { id: "españa", label: "Española", available: true },
+  { id: "japon", label: "Japonesa", available: true },
+  { id: "americana", label: "Americana", available: true },
 ];
 
 const mockTypeCooking = [
-  { id: 'cocido', label: 'Cocido', available: true },
-  { id: 'vapor', label: 'Al vapor', available: true },
-  { id: 'hervido', label: 'Hervido', available: true },
-  { id: 'guiso', label: 'Guiso', available: true },
-  { id: 'frito', label: 'Frito', available: true },
-  { id: 'plancha', label: 'A la plancha', available: true },
-  { id: 'asado', label: 'Asado', available: true }
+  { id: "cocido", label: "Cocido", available: true },
+  { id: "vapor", label: "Al vapor", available: true },
+  { id: "hervido", label: "Hervido", available: true },
+  { id: "guiso", label: "Guiso", available: true },
+  { id: "frito", label: "Frito", available: true },
+  { id: "plancha", label: "A la plancha", available: true },
+  { id: "asado", label: "Asado", available: true },
+  { id: "sopa", label: "Sopas", available: true },
+  { id: "crudo", label: "Crudo", available: true },
 ];
 
 const Search = () => {
@@ -55,31 +104,62 @@ const Search = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeftStart, setScrollLeftStart] = useState(0);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const getFilteredRecipes = () => {
     return popularRecipes.filter((recipe) => {
-      const matchCategory = selectedCategory.length === 0 || selectedCategory.includes(recipe.category);
-      const matchOrigin = selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin);
-      const matchType = selectedCookingType.length === 0 || selectedCookingType.includes(recipe.type);
-      return matchCategory && matchOrigin && matchType;
+      const matchCategory =
+        selectedCategory.length === 0 ||
+        selectedCategory.includes(recipe.category);
+      const matchOrigin =
+        selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin);
+      const matchType =
+        selectedCookingType.length === 0 ||
+        selectedCookingType.includes(recipe.type);
+      const matchSearch = recipe.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      return matchCategory && matchOrigin && matchType && matchSearch;
     });
   };
 
   const filteredRecipes = getFilteredRecipes();
 
   const SearchIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-search"
+    >
+      <path d="m21 21-4.34-4.34" />
+      <circle cx="11" cy="11" r="8" />
+    </svg>
   );
 
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
-      <div className="flex items-center justify-between w-full px-4 cursor-pointer mb-3" onClick={toggleOpen}>
+      <div
+        className="flex items-center justify-between w-full px-4 cursor-pointer mb-3"
+        onClick={toggleOpen}
+      >
         <h4 className="text-lg sm:text-xl font-semibold m-0">Filtros</h4>
         {isOpen ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
       </div>
     );
   }
 
-  // Handlers para scroll en carousel
+  const [tempSelectedCategory, setTempSelectedCategory] = useState([]);
+  const [tempSelectedOrigin, setTempSelectedOrigin] = useState([]);
+  const [tempSelectedCookingType, setTempSelectedCookingType] = useState([]);
+
   const onMouseDown = (e) => {
     setIsDragging(true);
     setStartX(e.pageX - carouselRef.current.offsetLeft);
@@ -112,12 +192,33 @@ const Search = () => {
     carouselRef.current.scrollLeft = scrollLeftStart - walk;
   };
 
+  const handleSearch = () => {
+    setSearchTerm(searchQuery.trim());
+    setShowAll(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-start items-center bg-background px-4 pt-6">
       <div className="w-full max-w-screen-lg mx-auto px-4">
-        <h4 className="text-xl font-bold text-black mb-2">¿Qué quieres cocinar?</h4>
+        <h4 className="text-xl font-bold text-black mb-2">
+          ¿Qué quieres cocinar?
+        </h4>
         <div className="w-full border border-black rounded-lg mb-10">
-          <Input placeholder="Correo electrónico" type="email" icon={SearchIcon} className="w-full" />
+          <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 w-full">
+            <input
+              type="text"
+              placeholder="Buscar receta..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              className="outline-none w-full bg-transparent"
+            />
+            <button onClick={handleSearch}>
+              <SearchIcon className="text-black w-5 h-5 ml-2 cursor-pointer" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -125,11 +226,44 @@ const Search = () => {
       <div>
         {isOpen && (
           <>
-            <CategoryFilter categories={mockCategories} initialSelected={selectedCategory} onSelectionChange={setSelectedCategory} title="Categorías" maxRowsWhenCollapsed={4} itemsPerRow={2} className="mb-6" />
-            <CategoryFilter categories={mockTypeCooking} initialSelected={selectedCookingType} onSelectionChange={setSelectedCookingType} title="Tipo de cocina" maxRowsWhenCollapsed={4} itemsPerRow={2} className="mb-6" />
-            <CategoryFilter categories={mockOrigin} initialSelected={selectedOrigin} onSelectionChange={setSelectedOrigin} title="Origen" maxRowsWhenCollapsed={4} itemsPerRow={2} className="mb-6" />
+            <CategoryFilter
+              categories={mockCategories}
+              initialSelected={tempSelectedCategory}
+              onSelectionChange={setTempSelectedCategory}
+              title="Categorías"
+              maxRowsWhenCollapsed={4}
+              itemsPerRow={2}
+              className="mb-6"
+            />
+            <CategoryFilter
+              categories={mockTypeCooking}
+              initialSelected={tempSelectedCookingType}
+              onSelectionChange={setTempSelectedCookingType}
+              title="Tipo de cocina"
+              maxRowsWhenCollapsed={4}
+              itemsPerRow={2}
+              className="mb-6"
+            />
+            <CategoryFilter
+              categories={mockOrigin}
+              initialSelected={tempSelectedOrigin}
+              onSelectionChange={setTempSelectedOrigin}
+              title="Origen"
+              maxRowsWhenCollapsed={4}
+              itemsPerRow={2}
+              className="mb-6"
+            />
+
             <div className="flex justify-center">
-              <Button className="mb-3 w-40 px-1" onClick={() => setShowAll(true)}>
+              <Button
+                className="mb-3 w-40 px-1"
+                onClick={() => {
+                  setSelectedCategory(tempSelectedCategory);
+                  setSelectedOrigin(tempSelectedOrigin);
+                  setSelectedCookingType(tempSelectedCookingType);
+                  setShowAll(true);
+                }}
+              >
                 Buscar
               </Button>
             </div>
@@ -137,7 +271,6 @@ const Search = () => {
         )}
       </div>
 
-      {/* Recetas populares */}
       <div className="w-full max-w-screen-lg mx-auto px-4 mt-6">
         <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
           <h4 className="text-xl font-bold text-black">Recetas populares</h4>
@@ -150,19 +283,25 @@ const Search = () => {
         </div>
 
         {showAll ? (
-          <div className="flex justify-center">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-30">
-              {filteredRecipes.map(recipe => (
-                <Card key={recipe.id} {...recipe} />
-              ))}
+          filteredRecipes.length > 0 ? (
+            <div className="flex justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-30">
+                {filteredRecipes.map((recipe) => (
+                  <Card key={recipe.id} {...recipe} />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center text-gray-600 text-lg mt-10">
+              Lo siento, no tenemos resultados para esa receta.
+            </div>
+          )
         ) : (
           <div className="relative">
             <div
               ref={carouselRef}
               className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab"
-              style={{ scrollSnapType: 'x mandatory' }}
+              style={{ scrollSnapType: "x mandatory" }}
               onMouseDown={onMouseDown}
               onMouseLeave={onMouseLeave}
               onMouseUp={onMouseUp}
@@ -171,8 +310,8 @@ const Search = () => {
               onTouchEnd={onTouchEnd}
               onTouchMove={onTouchMove}
             >
-              {filteredRecipes.map(recipe => (
-                <div key={recipe.id} style={{ scrollSnapAlign: 'start' }}>
+              {filteredRecipes.map((recipe) => (
+                <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
                   <Card {...recipe} />
                 </div>
               ))}
