@@ -1,9 +1,16 @@
-import React from 'react';
 import TimerBadge from '../buttons/TimerBadge';
-import ActionButton from '../buttons/ActionButton';
 import OpenRecipeButton from '../buttons/OpenRecipeButton';
+import FavoriteButton from '../buttons/FavoriteButton';
 
-const RecipeCard = ({ recipe, onLike, onDislike }) => {
+const RecipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
+  const handleFavoriteToggle = () => {
+    onToggleFavorite(recipe.id);
+  };
+
+  const handleSkip = () => {
+    onSkip();
+  };
+
   return (
     <div className="flex flex-col items-center w-full px-4" style={{ backgroundColor: '#FDF3E8' }}>
       {/* Recipe Image */}
@@ -78,20 +85,37 @@ const RecipeCard = ({ recipe, onLike, onDislike }) => {
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Favorite and Skip */}
       <div className="flex justify-center w-full mb-3 gap-20">
-        <ActionButton
-          icon="x"
-          onClick={onDislike}
-          ariaLabel="Dislike"
-          size="lg"
-        />
-        <ActionButton
-          icon="heart"
-          onClick={onLike}
-          ariaLabel="Like"
-          size="lg"
-        />
+        {/* Skip Button */}
+        <button
+          onClick={handleSkip}
+          className="p-3 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200"
+          aria-label="Skip recipe"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#6B7280"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Favorite Button */}
+        <div className="p-3 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+          <FavoriteButton 
+            isFavorite={recipe.is_favorite}
+            onToggle={handleFavoriteToggle}
+            className="p-0 m-0"
+          />
+        </div>
       </div>
 
       {/* Open Recipe Button */}

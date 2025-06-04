@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import RecipeCard from '../components/cards/RecipeCard';
-import mockRecipes from '../data/mockRecipes';
+import { mockRecipes } from '../data/mockData';
 
 const InspireMe = () => {
   const [recipes, setRecipes] = useState(mockRecipes);
@@ -8,14 +8,17 @@ const InspireMe = () => {
   
   const currentRecipe = recipes[currentRecipeIndex];
 
-  const handleLike = () => {
-    setRecipes(prev => prev.map((recipe, idx) => 
-      idx === currentRecipeIndex ? {...recipe, is_favorite: true} : recipe
+  const handleToggleFavorite = (recipeId) => {
+    setRecipes(prev => prev.map(recipe => 
+      recipe.id === recipeId 
+        ? { ...recipe, is_favorite: !recipe.is_favorite }
+        : recipe
     ));
+
     goToNextRecipe();
   };
 
-  const handleDislike = () => {
+  const handleSkip = () => {
     goToNextRecipe();
   };
 
@@ -30,9 +33,9 @@ const InspireMe = () => {
           Swipe the Dish
         </h1>
         <RecipeCard 
-          recipe={currentRecipe} 
-          onLike={handleLike}
-          onDislike={handleDislike}
+          recipe={currentRecipe}
+          onToggleFavorite={handleToggleFavorite}
+          onSkip={handleSkip}
         />
       </div>
     </div>
