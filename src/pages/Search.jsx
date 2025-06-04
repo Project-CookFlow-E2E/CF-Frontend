@@ -102,10 +102,10 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-50">
+    <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-6">
       <div className="w-full max-w-screen-lg mx-auto px-4">
         <h4 className="text-xl font-bold text-black mb-2">¿Qué quieres cocinar?</h4>
-        <div className="w-full border border-black rounded-lg mb-15">
+        <div className="w-full border border-black rounded-lg mb-10">
           <Input placeholder="Correo electrónico" type="email" icon={SearchIcon} className="w-full" />
         </div>
       </div>
@@ -131,7 +131,7 @@ const Search = () => {
 
       {/* Recetas populares */}
       <div className="w-full max-w-screen-lg mx-auto px-4 mt-6">
-        <div className="flex justify-between items-center px-1 sm:px-2 mb-8">
+        <div className="flex justify-between items-center px-1 sm:px-2 mb-1.5">
           <h4 className="text-xl font-bold text-black">Recetas populares</h4>
           <h4
             className="text-l text-gray-500 cursor-pointer"
