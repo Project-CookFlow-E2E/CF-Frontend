@@ -19,4 +19,5 @@ export const  shoppingListItemsMock = [
   "Sal ",
   "Pimienta",
   "Harina",
+  "Zanahoria",
 ]
