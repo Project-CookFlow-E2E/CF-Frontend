@@ -25,10 +25,14 @@ const categories = [
 const RecipeCard = ({ id }) => {
   const { recipe, loading } = useRecipe(id);
 
+  // Read favorites from localStorage and determine if this id is a favorite
+  const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+  const isFavorite = savedFavorites.includes(String(id));
+
   if (loading) return <p className="text-center">Loading recipe {id}…</p>;
   if (!recipe) return <p className="text-center">Recipe {id} not found 😢</p>;
 
-  return <Card {...recipe} />;
+  return <Card {...recipe} isFavorite={isFavorite} />;
 };
 
 const Home = () => {
