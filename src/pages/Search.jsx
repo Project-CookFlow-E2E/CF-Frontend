@@ -123,7 +123,7 @@ const Search = () => {
 
       {/* Recetas populares */}
       <div className="w-full max-w-screen-lg mx-auto px-4 mt-6">
-        <div className="flex justify-between items-center px-1 sm:px-2 mb-4">
+        <div className="flex justify-between items-center px-1 sm:px-2 mb-8">
           <h4 className="text-xl font-bold text-black">Recetas populares</h4>
           <h4
             className="text-l text-gray-500 cursor-pointer"
@@ -134,10 +134,12 @@ const Search = () => {
         </div>
 
         {showAll ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {popularRecipes.map(recipe => (
-              <Card key={recipe.id} {...recipe} />
-            ))}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {popularRecipes.map(recipe => (
+                <Card key={recipe.id} {...recipe} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="relative">
