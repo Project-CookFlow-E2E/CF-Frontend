@@ -1,10 +1,10 @@
 import React from 'react'
 
-const Imagen = () => {
+const Image = () => {
   return (
     <div>Este es mi componente Imagen.</div>
 
   )
 }
 
-export default Imagen
+export default Image

@@ -1,11 +1,43 @@
-// This page is mobile only. the page will have a heading "Swipe the dish" and below it a small rounded button like thinggy which will show a 
+import React, { useState } from 'react';
+import RecipeCard from '../components/cards/RecipeCard';
+import mockRecipes from '../data/mockRecipes';
 
-import React from 'react'
 
 const InspireMe = () => {
-  return (
-    <div>InspireMe</div>
-  )
-}
+  const [recipes, setRecipes] = useState(mockRecipes);
+  const [currentRecipeIndex, setCurrentRecipeIndex] = useState(0);
+  
+  const currentRecipe = recipes[currentRecipeIndex];
 
-export default InspireMe
+  const handleLike = () => {
+    setRecipes(prev => prev.map((recipe, idx) => 
+      idx === currentRecipeIndex ? {...recipe, is_favorite: true} : recipe
+    ));
+    goToNextRecipe();
+  };
+
+  const handleDislike = () => {
+    goToNextRecipe();
+  };
+
+  const goToNextRecipe = () => {
+    setCurrentRecipeIndex(prev => (prev >= recipes.length - 1) ? 0 : prev + 1);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-md mx-auto">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl text-center mb-6 sm:mb-8 text-gray-900">
+          Swipe the Dish
+        </h1>
+        <RecipeCard 
+          recipe={currentRecipe} 
+          onLike={handleLike}
+          onDislike={handleDislike}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default InspireMe;
