@@ -1,6 +1,6 @@
 // components/RecipeIngredientsChecklist.jsx
 import { useState } from 'react';
-import { Boton } from '../components/index';
+import { Button } from '../components/index';
 
 export default function RecipeIngredientsChecklist({ ingredients = [], onStartCooking }) {
   // ========== BACKEND INTEGRATION SECTION START ==========
@@ -124,7 +124,7 @@ export default function RecipeIngredientsChecklist({ ingredients = [], onStartCo
 
       {/* Mobile Buttons */}
       <div className=" grid grid-cols-2 gap-3 mt-6">
-        <Boton
+        <Button
           onClick={handleAddToShoppingList}
           disabled={!isAnyChecked}
            className={`w-full py-3 rounded-lg font-medium transition duration-300
@@ -134,9 +134,9 @@ export default function RecipeIngredientsChecklist({ ingredients = [], onStartCo
               : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
           }`}
         >
-          A comprar!
-        </Boton>
-        <Boton
+          ¡A comprar!
+        </Button>
+        <Button
   onClick={onStartCooking}
   className={`py-3 rounded-lg font-medium border transition duration-300 ${
     areAllChecked
@@ -144,8 +144,8 @@ export default function RecipeIngredientsChecklist({ ingredients = [], onStartCo
       : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
   }`}
 >
-  A cocinar!
-</Boton>
+  ¡A cocinar!
+</Button>
       </div>
     </div>
   );
