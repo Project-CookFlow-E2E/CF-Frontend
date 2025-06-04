@@ -1,23 +1,18 @@
 // components/RecipeIngredientsChecklist.jsx
 import { useState } from 'react';
+import { Button } from '../components/index';
 
-export default function RecipeIngredientsChecklist() {
+export default function RecipeIngredientsChecklist({ ingredients = [], onStartCooking }) {
   // ========== BACKEND INTEGRATION SECTION START ==========
   // TODO: Replace this mock data with actual API call to fetch recipe ingredients
   // Expected API endpoint: GET /api/recipes/{recipeId}/ingredients/
   // Django REST Framework will likely return: { "ingredients": [...] }
-  const mockIngredients = [
-    { id: 1, name: 'All-Purpose Flour', quantity: 200, unit: 'g' },
-    { id: 2, name: 'Granulated Sugar', quantity: 150, unit: 'g' },
-    { id: 3, name: 'Eggs', quantity: 2, unit: 'large' },
-    { id: 4, name: 'Milk', quantity: 120, unit: 'ml' },
-    { id: 5, name: 'Vanilla Extract', quantity: 1, unit: 'tsp' },
-    { id: 6, name: 'Baking Powder', quantity: 2, unit: 'tsp' },
-  ];
+ 
   // ========== BACKEND INTEGRATION SECTION END ==========
-
+ 
   const [checkedItems, setCheckedItems] = useState({});
-  const [ingredients] = useState(mockIngredients);
+  
+   const areAllChecked = ingredients.every(item => checkedItems[item.id]);
   
   const handleCheckChange = (id) => {
     setCheckedItems(prev => ({
@@ -54,18 +49,18 @@ export default function RecipeIngredientsChecklist() {
   // ========== BACKEND INTEGRATION SECTION END ==========
 
   // ========== BACKEND INTEGRATION SECTION START ==========
-  const handleStartCooking = () => {
-    // TODO: Implement navigation to cooking mode
-    // This might involve:
-    // 1. API call to track cooking session start
-    // 2. Navigation to cooking instructions page
-    // 3. Timer functionality setup
-    console.log('Starting cooking process');
-    alert('Starting cooking mode!');
+  // const handleStartCooking = () => {
+  //   // TODO: Implement navigation to cooking mode
+  //   // This might involve:
+  //   // 1. API call to track cooking session start
+  //   // 2. Navigation to cooking instructions page
+  //   // 3. Timer functionality setup
+  //   console.log('Starting cooking process');
+  //   alert('Starting cooking mode!');
     
     // Example navigation (when router is set up):
     // router.push('/recipe/cooking-mode');
-  };
+  // };
   // ========== BACKEND INTEGRATION SECTION END ==========
 
   const isAnyChecked = Object.values(checkedItems).some(Boolean);
@@ -124,38 +119,33 @@ export default function RecipeIngredientsChecklist() {
 
       {/* Desktop Button */}
       <div className="hidden sm:block mt-6">
-        <button
-          onClick={handleAddToShoppingList}
-          disabled={!isAnyChecked}
-          className={`w-full py-3 rounded-lg font-medium transition ${
-            isAnyChecked
-              ? 'bg-black text-white hover:bg-gray-800'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          Add to Shopping List
-        </button>
+     
       </div>
 
       {/* Mobile Buttons */}
-      <div className="sm:hidden grid grid-cols-2 gap-3 mt-6">
-        <button
+      <div className=" grid grid-cols-2 gap-3 mt-6">
+        <Button
           onClick={handleAddToShoppingList}
           disabled={!isAnyChecked}
-          className={`py-3 rounded-lg font-medium ${
+           className={`w-full py-3 rounded-lg font-medium transition duration-300
+          ${
             isAnyChecked
-              ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-accent text-white hover:bg-accent/90'
+              : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
           }`}
         >
-          Add to List
-        </button>
-        <button 
-          onClick={handleStartCooking}
-          className="py-3 rounded-lg font-medium border border-gray-300 bg-white text-gray-800"
-        >
-          Start Cooking
-        </button>
+          ¡A comprar!
+        </Button>
+        <Button
+  onClick={onStartCooking}
+  className={`py-3 rounded-lg font-medium border transition duration-300 ${
+    areAllChecked
+      ? 'bg-accent text-white hover:bg-accent/90'
+      : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
+  }`}
+>
+  ¡A cocinar!
+</Button>
       </div>
     </div>
   );
