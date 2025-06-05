@@ -33,7 +33,15 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
   if (loading) return <p className="text-center">Loading recipe {id}…</p>;
   if (!recipe) return <p className="text-center">Recipe {id} not found 😢</p>;
 
-  return <Card {...recipe} isFavorite={isFavorite} onToggleFavorite={handleToggleFavorite} />;
+  return <Card 
+      id={recipe.id}
+      image={recipe.image_url}
+      name={recipe.name}
+      category={recipe.category}
+      time={`${recipe.duration_minutes} m`}
+      isFavorite={isFavorite}
+      onToggleFavorite={handleToggleFavorite}
+    />
 };
 
 const Home = () => {

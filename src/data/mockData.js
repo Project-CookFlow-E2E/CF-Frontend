@@ -36,6 +36,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
     category: "LUNCH",
     is_favorite: false,
+    isCreatedByUser: true,
     ingredients: [
       { id: 1, name: "Quinoa", quantity: 1, unit: "cup" },
       { id: 2, name: "Cherry Tomatoes", quantity: 200, unit: "g" },
@@ -56,6 +57,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&h=300&fit=crop",
     category: "DINNER",
     is_favorite: true,
+    isCreatedByUser: false,
     ingredients: [
       { id: 5, name: "Chicken Breast", quantity: 300, unit: "g" },
       { id: 6, name: "Thai Basil", quantity: 1, unit: "bunch" },
@@ -76,6 +78,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop",
     category: "DINNER",
     is_favorite: false,
+    isCreatedByUser: true,
     ingredients: [
       { id: 9, name: "Pizza Dough", quantity: 1, unit: "piece" },
       { id: 10, name: "Mozzarella", quantity: 200, unit: "g" },
@@ -96,6 +99,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=300&fit=crop",
     category: "DINNER",
     is_favorite: false,
+    isCreatedByUser: false,
     ingredients: [
       { id: 13, name: "Arborio Rice", quantity: 200, unit: "g" },
       { id: 14, name: "Mixed Mushrooms", quantity: 300, unit: "g" },
@@ -116,6 +120,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop",
     category: "DESSERT",
     is_favorite: true,
+    isCreatedByUser: true,
     ingredients: [
       { id: 17, name: "Flour", quantity: 250, unit: "g" },
       { id: 18, name: "Chocolate Chips", quantity: 150, unit: "g" },
@@ -136,6 +141,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
     category: "BREAKFAST",
     is_favorite: false,
+    isCreatedByUser: false,
     ingredients: [
       { id: 21, name: "Spinach", quantity: 100, unit: "g" },
       { id: 22, name: "Banana", quantity: 2, unit: "pieces" },
@@ -156,6 +162,7 @@ export const mockRecipes = [
     image_url: "https://images.unsplash.com/photo-1565299585323-38174c4a6706?w=400&h=300&fit=crop",
     category: "LUNCH",
     is_favorite: true,
+    isCreatedByUser: true,
     ingredients: [
       { id: 25, name: "Ground Beef", quantity: 400, unit: "g" },
       { id: 26, name: "Taco Shells", quantity: 8, unit: "pieces" },
@@ -176,6 +183,7 @@ export const mockRecipes = [
     image_url: null, // No image for testing
     category: "LUNCH",
     is_favorite: false,
+    isCreatedByUser: false,
     ingredients: [
       { id: 29, name: "Broccoli", quantity: 300, unit: "g" },
       { id: 30, name: "Spinach", quantity: 200, unit: "g" },

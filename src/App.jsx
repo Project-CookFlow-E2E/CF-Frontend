@@ -1,4 +1,4 @@
-import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList } from './pages'
+import { AddRecipe, AdminDashboard, Home, Login, Recipe, Profile, Search, SignUp, ShoppingList, InspireMe } from './pages'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
