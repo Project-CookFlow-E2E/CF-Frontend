@@ -1,3 +1,5 @@
+// src/data/mockData.js
+
 export const categoriasMock = [
   "Desayuno",
   "Almuerzo",
@@ -5,6 +7,7 @@ export const categoriasMock = [
   "Merienda",
   "Postre",
 ];
+
 export const ingredientesMock = [
   "Huevos",
   "Leche",
@@ -15,9 +18,14 @@ export const ingredientesMock = [
   "Chocolate",
 ];
 
-export const  shoppingListItemsMock = [
-  "Sal ",
+export const shoppingListItemsMock = [
+  "Sal",
   "Pimienta",
   "Harina",
   "Zanahoria",
-]
+].map((name, index) => ({
+  id: index + 1,
+  name,
+  checked: false,
+  quantity: "1", // Puedes personalizar esto más adelante
+}));
