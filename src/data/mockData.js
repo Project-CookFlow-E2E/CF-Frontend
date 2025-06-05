@@ -1,3 +1,44 @@
+// /src/data/mockData.js
+
+// ========= Search‐related mock data =========
+export const popularRecipes = [
+  { id: 1, image: "/pasta.jpg", name: "Pasta Carbonara", category: "comida", origin: "italia", type: "cocido", time: "30 m" },
+  { id: 2, image: "/salad.jpg", name: "Ensalada rica", category: "cena", origin: "grecia", type: "frito", time: "15 m" },
+  { id: 3, image: "/soup.jpg", name: "Sopa de calabaza", category: "cena", origin: "españa", type: "sopa", time: "20 m" },
+  { id: 4, image: "/pancakes.jpg", name: "Tortitas", category: "desayuno", origin: "americana", type: "plancha", time: "25 m" },
+  { id: 5, image: "/tortilla.jpg", name: "Tortilla de patata", category: "comida", origin: "españa", type: "frito", time: "45 m" },
+  { id: 6, image: "/sushi.jpeg", name: "Sushi", category: "cena", origin: "japonesa", type: "crudo", time: "55 m" },
+];
+
+export const mockCategories = [
+  { id: "comida", label: "Comida", available: true },
+  { id: "desayuno", label: "Desayuno", available: true },
+  { id: "cena", label: "Cena", available: true },
+  { id: "merienda", label: "Merienda", available: true },
+  { id: "snack", label: "Snack", available: true },
+];
+
+export const mockOrigin = [
+  { id: "italia", label: "Italiana", available: true },
+  { id: "grecia", label: "Griega", available: true },
+  { id: "españa", label: "Española", available: true },
+  { id: "japon", label: "Japonesa", available: true },
+  { id: "americana", label: "Americana", available: true },
+];
+
+export const mockTypeCooking = [
+  { id: "cocido", label: "Cocido", available: true },
+  { id: "vapor", label: "Al vapor", available: true },
+  { id: "hervido", label: "Hervido", available: true },
+  { id: "guiso", label: "Guiso", available: true },
+  { id: "frito", label: "Frito", available: true },
+  { id: "plancha", label: "A la plancha", available: true },
+  { id: "asado", label: "Asado", available: true },
+  { id: "sopa", label: "Sopas", available: true },
+  { id: "crudo", label: "Crudo", available: true },
+];
+
+// ========= Other existing mocks (unchanged) =========
 export const categoriasMock = [
   "Desayuno",
   "Almuerzo",
@@ -5,6 +46,7 @@ export const categoriasMock = [
   "Merienda",
   "Postre",
 ];
+
 export const ingredientesMock = [
   "Huevos",
   "Leche",
@@ -15,13 +57,11 @@ export const ingredientesMock = [
   "Chocolate",
 ];
 
-
 export const shoppingListItemsMock = [
   { id: 1, name: "Sal", checked: false },
   { id: 2, name: "Pimienta", checked: false },
   { id: 3, name: "Harina", checked: false },
 ];
-
 
 export const mockRecipes = [
   {
@@ -182,7 +222,7 @@ export const mockRecipes = [
     commensals: 4,
     created_at: "2024-01-22T17:00:00Z",
     updated_at: "2024-01-22T17:00:00Z",
-    image_url: null, // No image for testing
+    image_url: null,
     category: "LUNCH",
     is_favorite: false,
     isCreatedByUser: false,
@@ -232,36 +272,3 @@ export const mockUsers = [
   }
 ];
 
-// Mock categories data
-export const mockCategories = [
-  {
-    id: 1,
-    name: "Lunch",
-    user_id: 1,
-    parent_category_id: null,
-    created_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: 2,
-    name: "Dinner", 
-    user_id: 1,
-    parent_category_id: null,
-    created_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: 3,
-    name: "Dessert",
-    user_id: 1,
-    parent_category_id: null,
-    created_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: 4,
-    name: "Breakfast",
-    user_id: 1,
-    parent_category_id: null,
-    created_at: "2024-01-01T00:00:00Z"
-  }
-];
-
-export default { mockRecipes, mockUsers, mockCategories };
