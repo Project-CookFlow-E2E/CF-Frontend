@@ -28,7 +28,6 @@ const ShoppingList = () => {
 
       <div className="w-full max-w-md text-center mb-6">
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-          
           Lista de la Compra
         </h1>
       </div>
@@ -41,7 +40,6 @@ const ShoppingList = () => {
                 <div
                   key={item.id}
                   className="flex items-center justify-between p-4 bg-primary rounded-lg shadow-sm"
-
                 >
                   <div className="flex-grow flex items-center">
                     <input
@@ -59,9 +57,6 @@ const ShoppingList = () => {
                     >
                       {item.name}
                     </span>
-                    {/* <span className="ml-auto text-lg text-gray-600 font-medium">
-                      {item.quantity}
-                    </span> */}
                   </div>
                   <button
                     onClick={(e) => {
@@ -92,7 +87,6 @@ const ShoppingList = () => {
                 className="block mx-auto mt-6 py-2 px-6 border-2 border-gray-400 text-gray-700 font-semibold rounded-full hover:bg-gray-100 transition duration-200"
                 onClick={handleClearAll}
               >
-               
                 Eliminar Todo
               </button>
             </div>
