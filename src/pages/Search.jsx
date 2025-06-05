@@ -4,7 +4,11 @@ import { Input } from "../components";
 import { Plus, Minus } from "lucide-react";
 import Card from "../components/Card";
 import Button from "../components/Button";
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
 import AutocompleteInput from "../components/AutocompleteInput";
+
 
 const popularRecipes = [
   {
@@ -144,6 +148,21 @@ const Search = () => {
     </svg>
   );
 
+  const location = useLocation();
+
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const categoryFromURL = params.get("category");
+
+  if (categoryFromURL) {
+    setSelectedCategory([categoryFromURL]);
+    setTempSelectedCategory([categoryFromURL]);
+    setIsOpen(true);
+    setShowAll(true);
+  }
+}, [location.search]);
+
+
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
       <div
@@ -198,12 +217,12 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-start items-center bg-background px-4 pt-6">
-      <div className="w-full max-w-screen-lg mx-auto px-4">
+    <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-26 lg:px-10">
+      <div className="w-full max-w-screen-lg px-0 lg:pl-4">
         <h4 className="text-xl font-bold text-black mb-2">
           ¿Qué quieres cocinar?
         </h4>
-        <div className="w-full border border-black rounded-lg mb-10">
+        <div className="w-full max-w-xl lg:max-w-2xl border border-black rounded-lg mb-10 mt-0 lg:mt-4">
           <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 w-full">
             <input
               type="text"
@@ -222,102 +241,104 @@ const Search = () => {
         </div>
       </div>
 
-      <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
-      <div>
-        {isOpen && (
-          <>
-            <CategoryFilter
-              categories={mockCategories}
-              initialSelected={tempSelectedCategory}
-              onSelectionChange={setTempSelectedCategory}
-              title="Categorías"
-              maxRowsWhenCollapsed={4}
-              itemsPerRow={2}
-              className="mb-6"
-            />
-            <CategoryFilter
-              categories={mockTypeCooking}
-              initialSelected={tempSelectedCookingType}
-              onSelectionChange={setTempSelectedCookingType}
-              title="Tipo de cocina"
-              maxRowsWhenCollapsed={4}
-              itemsPerRow={2}
-              className="mb-6"
-            />
-            <CategoryFilter
-              categories={mockOrigin}
-              initialSelected={tempSelectedOrigin}
-              onSelectionChange={setTempSelectedOrigin}
-              title="Origen"
-              maxRowsWhenCollapsed={4}
-              itemsPerRow={2}
-              className="mb-6"
-            />
+      <div className="w-full flex flex-col lg:flex-row gap-8 px-0 lg:pl-4">
+        {/* Filtros */}
+        <div className="w-full lg:w-1/3">
+          <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
+          {isOpen && (
+            <>
+              <CategoryFilter
+                categories={mockCategories}
+                initialSelected={tempSelectedCategory}
+                onSelectionChange={setTempSelectedCategory}
+                title="Categorías"
+                maxRowsWhenCollapsed={4}
+                itemsPerRow={2}
+                className="mb-6"
+              />
+              <CategoryFilter
+                categories={mockTypeCooking}
+                initialSelected={tempSelectedCookingType}
+                onSelectionChange={setTempSelectedCookingType}
+                title="Tipo de cocina"
+                maxRowsWhenCollapsed={4}
+                itemsPerRow={2}
+                className="mb-6"
+              />
+              <CategoryFilter
+                categories={mockOrigin}
+                initialSelected={tempSelectedOrigin}
+                onSelectionChange={setTempSelectedOrigin}
+                title="Origen"
+                maxRowsWhenCollapsed={4}
+                itemsPerRow={2}
+                className="mb-6"
+              />
 
-            <div className="flex justify-center">
-              <Button
-                className="mb-3 w-40 px-1"
-                onClick={() => {
-                  setSelectedCategory(tempSelectedCategory);
-                  setSelectedOrigin(tempSelectedOrigin);
-                  setSelectedCookingType(tempSelectedCookingType);
-                  setShowAll(true);
-                }}
-              >
-                Buscar
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="w-full max-w-screen-lg mx-auto px-4 mt-6">
-        <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
-          <h4 className="text-xl font-bold text-black">Recetas populares</h4>
-          <h4
-            className="text-l text-gray-500 cursor-pointer"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? "Ver menos" : "Ver todas"}
-          </h4>
+              <div className="flex justify-center">
+                <Button
+                  className="mb-3 w-40 px-1"
+                  onClick={() => {
+                    setSelectedCategory(tempSelectedCategory);
+                    setSelectedOrigin(tempSelectedOrigin);
+                    setSelectedCookingType(tempSelectedCookingType);
+                    setShowAll(true);
+                  }}
+                >
+                  Buscar
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
-        {showAll ? (
-          filteredRecipes.length > 0 ? (
-            <div className="flex justify-center">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-30">
+        {/* Cards */}
+        <div className="w-full lg:w-2/3">
+          <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
+            <h4 className="text-xl font-bold text-black">Recetas populares</h4>
+            <h4
+              className="text-l text-gray-500 cursor-pointer"
+              onClick={() => setShowAll(!showAll)}
+            >
+              {showAll ? "Ver menos" : "Ver todas"}
+            </h4>
+          </div>
+
+          {showAll ? (
+            filteredRecipes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30">
                 {filteredRecipes.map((recipe) => (
                   <Card key={recipe.id} {...recipe} />
                 ))}
               </div>
-            </div>
+            ) : (
+              <div className="text-center text-gray-600 text-lg mt-10 mb-40">
+                Lo siento, no tenemos resultados para esa receta.
+              </div>
+            )
           ) : (
-            <div className="text-center text-gray-600 text-lg mt-10 mb-40">
-              Lo siento, no tenemos resultados para esa receta.
+            <div className="relative">
+              <div
+                ref={carouselRef}
+                className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab"
+                style={{ scrollSnapType: "x mandatory" }}
+                onMouseDown={onMouseDown}
+                onMouseLeave={onMouseLeave}
+                onMouseUp={onMouseUp}
+                onMouseMove={onMouseMove}
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
+                onTouchMove={onTouchMove}
+              >
+                {filteredRecipes.map((recipe) => (
+                  <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
+                    <Card {...recipe} />
+                  </div>
+                ))}
+              </div>
             </div>
-          )
-        ) : (
-          <div className="relative">
-            <div
-              ref={carouselRef}
-              className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab"
-              style={{ scrollSnapType: "x mandatory" }}
-              onMouseDown={onMouseDown}
-              onMouseLeave={onMouseLeave}
-              onMouseUp={onMouseUp}
-              onMouseMove={onMouseMove}
-              onTouchStart={onTouchStart}
-              onTouchEnd={onTouchEnd}
-              onTouchMove={onTouchMove}
-            >
-              {filteredRecipes.map((recipe) => (
-                <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
-                  <Card {...recipe} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

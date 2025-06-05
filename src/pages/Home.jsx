@@ -7,14 +7,16 @@ import { Badge } from "../components";
 
 const recipeIds = [1, 2, 3];
 
-const categories = [
-  "Breakfast",
-  "Brunch",
-  "Lunch",
-  "Dinner",
-  "Dessert",
-  "Snack",
-];
+const categoryMap = {
+  Breakfast: "desayuno",
+  Brunch: "desayuno",
+  Lunch: "comida",
+  Dinner: "cena",
+  Dessert: "merienda",
+  Snack: "snack",
+};
+
+const categories = Object.keys(categoryMap);
 
 const RecipeCard = ({ id, favorites, setFavorites }) => {
   const { recipe, loading } = useRecipe(id);
@@ -44,6 +46,13 @@ const Home = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const handleCategoryClick = (category) => {
+    const mapped = categoryMap[category];
+    if (mapped) {
+      navigate(`/search?category=${mapped}`);
+    }
+  };
+
   const handleInspireClick = () => {
     navigate("/inspire-me");
   };
@@ -61,7 +70,11 @@ const Home = () => {
             </h1>
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
               {categories.map((category) => (
-                <Badge key={category}>
+                <Badge
+                  key={category}
+                  className="cursor-pointer"
+                  onClick={() => handleCategoryClick(category)}
+                >
                   {category}
                 </Badge>
               ))}
@@ -78,7 +91,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Latest Recipes */}
       <div className="w-full bg-primary py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
@@ -92,7 +104,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Inspire Me */}
       <div className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-12">
