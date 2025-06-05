@@ -1,9 +1,8 @@
-import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList } from './pages'
+import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing } from './pages'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
 import { FavoritesProvider } from './contexts/FavoritesProvider';
-import { Landing } from './pages/Landing';
 
 
 function App() {
