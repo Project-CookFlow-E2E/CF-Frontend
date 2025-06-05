@@ -1,32 +1,67 @@
 import { useState, useEffect } from 'react';
 import Card from '../components/Card';
+import useRecipe from '../hooks/useRecipe';
 import { mockRecipes } from '../data/mockData';
-import { useFavorites } from '../contexts/FavoritesProvider.jsx';
 import Pagination from '../components/ui/Pagination.jsx';
+
+// Component to render individual recipe cards
+const RecipeCard = ({ id, favorites, setFavorites }) => {
+  const { recipe, loading } = useRecipe(id);
+  const isFavorite = favorites.includes(String(id));
+
+  const handleToggleFavorite = () => {
+    const idStr = String(id);
+    const updated = isFavorite
+      ? favorites.filter(fav => fav !== idStr)
+      : [...favorites, idStr];
+
+    setFavorites(updated);
+    localStorage.setItem('favorites', JSON.stringify(updated));
+  };
+
+  if (loading) return <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>;
+  if (!recipe) return null;
+
+  return (
+    <Card 
+      id={recipe.id}
+      image={recipe.image_url}
+      name={recipe.name}
+      category={recipe.category}
+      time={`${recipe.duration_minutes} m`}
+      isFavorite={isFavorite}
+      onToggleFavorite={handleToggleFavorite}
+    />
+  );
+};
 
 // Main Profile component
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('saved'); 
   const [currentPage, setCurrentPage] = useState(1);
-  const recipesPerPage = 8;
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : [];
+  });
   
-  const { toggleFavorite, isFavorite, getFavoriteCount, isLoading } = useFavorites();
+  const recipesPerPage = 8;
 
   // Filter recipes based on the active tab
   const filteredRecipes = mockRecipes.filter(recipe => {
     if (activeTab === 'saved') {
-      return isFavorite(recipe.id);
+      return favorites.includes(String(recipe.id));
     } else {
-      // For "created" recipes, you can add a field like isCreatedByUser to mockData
-      // For now, we'll use user_id === 1 (assuming current user has ID 1)
-      return recipe.user_id === 1;
+      return recipe.isCreatedByUser;
     }
   });
+  
+  // Get recipe IDs for pagination
+  const filteredRecipeIds = filteredRecipes.map(recipe => recipe.id);
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
+  const totalPages = Math.ceil(filteredRecipeIds.length / recipesPerPage);
   const startIndex = (currentPage - 1) * recipesPerPage;
-  const currentRecipes = filteredRecipes.slice(startIndex, startIndex + recipesPerPage);
+  const currentRecipeIds = filteredRecipeIds.slice(startIndex, startIndex + recipesPerPage);
 
   // Reset current page when the active tab changes
   useEffect(() => {
@@ -42,18 +77,7 @@ const Profile = () => {
   };
 
   // Get count of user's created recipes
-  const createdRecipesCount = mockRecipes.filter(r => r.user_id === 1).length;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando recetas...</p>
-        </div>
-      </div>
-    );
-  }
+  const createdRecipesCount = mockRecipes.filter(recipe => recipe.isCreatedByUser).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -88,7 +112,7 @@ const Profile = () => {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Recetas guardadas ({getFavoriteCount()})
+            Recetas guardadas ({favorites.length})
           </button>
           <button
             onClick={() => handleTabChange('created')}
@@ -107,16 +131,12 @@ const Profile = () => {
           <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
-                {currentRecipes.map(recipe => (
-                  <Card
-                    key={recipe.id}
-                    id={recipe.id}
-                    image={recipe.image_url}
-                    name={recipe.name}
-                    category={recipe.category}
-                    time={`${recipe.duration_minutes} m`}
-                    isFavorite={isFavorite(recipe.id)}
-                    onToggleFavorite={toggleFavorite}
+                {currentRecipeIds.map(id => (
+                  <RecipeCard 
+                    key={id} 
+                    id={id} 
+                    favorites={favorites} 
+                    setFavorites={setFavorites} 
                   />
                 ))}
               </div>
@@ -125,7 +145,7 @@ const Profile = () => {
         </div>
 
         {/* Empty State */}
-        {filteredRecipes.length === 0 && (
+        {filteredRecipeIds.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">
               {activeTab === 'saved' ? '🔖' : '👨‍🍳'}

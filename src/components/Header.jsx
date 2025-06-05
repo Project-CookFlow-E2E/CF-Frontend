@@ -3,7 +3,7 @@ import logo from "../assets/logo.svg";
 import { Link } from 'react-router-dom'; 
 import Button from "./Button";
 
-const Header = ({ isLoggedIn = true, onLogOut }) => {
+const Header = ({ isLoggedIn = true }) => {
     return (
         <header className="bg-background px-4 py-3">
         {isLoggedIn ? (
