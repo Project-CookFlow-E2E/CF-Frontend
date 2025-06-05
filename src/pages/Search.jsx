@@ -19,7 +19,7 @@ const mockCategories = [
   { id: "desayuno", label: "Desayuno", available: true },
   { id: "brunch", label: "Brunch", available: true },
   { id: "cena", label: "Cena", available: true },
-  { id: "brunch", label: "Brunch", available: true },
+  { id: "postre", label: "Postre", available: true },
   { id: "merienda", label: "Merienda", available: true },
   { id: "snack", label: "Snack", available: true },
 ];
