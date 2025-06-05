@@ -1,8 +1,17 @@
+/**
+ * AddRecipe Page Component
+ *
+ * Allows users to add a new recipe, including image upload, ingredients, steps, category and preparation time.
+ * Validates image type and size before upload. Uses mock data for categories and ingredients.
+ *
+ * @author Nico
+ * @module AddRecipe
+ */
 import { useState } from "react";
 import { Image, Plus } from "lucide-react";
 import { Input } from "../components/";
 import { categoriasMock, ingredientesMock } from "../data/mockData";
-import AutocompleteInput from "../components/AutocompleteInput";
+import { AutocompleteInput, Button } from "../components/";
 
 const AddRecipe = () => {
   const [ingredients, setIngredients] = useState([""]);
@@ -34,7 +43,7 @@ const AddRecipe = () => {
     }
 
     setFoto(file);
-    setPreview(URL.createObjectURL(file)); // ✅ crea la vista previa temporal
+    setPreview(URL.createObjectURL(file));
   };
 
   const deleteImg = () => {
@@ -57,7 +66,6 @@ const AddRecipe = () => {
     if (foto) {
       console.log("Simulando subida de imagen...");
 
-      // Simulación con setTimeout
       setTimeout(() => {
         console.log(`Imagen "${foto.name}" subida y procesada correctamente.`);
       }, 1000);
@@ -201,12 +209,12 @@ const AddRecipe = () => {
             </div>
           </div>
 
-          <button
+          <Button
             onClick={handleSubmit}
             className="w-full border border-accent text-accent rounded-full py-2 mt-6"
           >
             Guardar
-          </button>
+          </Button>
         </div>
       </div>
     </div>
