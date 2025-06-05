@@ -8,3 +8,4 @@ export { default as Recipe } from './Recipe';
 export { default as Search } from './Search';
 export { default as SignUp } from './SignUp';
 export { default as ShoppingList } from './ShoppingList';
+export { default as Landing } from './Landing';

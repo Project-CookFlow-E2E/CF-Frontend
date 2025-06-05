@@ -1,12 +1,14 @@
-import { AddRecipe, AdminDashboard, Home, Login, Recipe, Profile, Search, SignUp, ShoppingList, InspireMe } from './pages'
+import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing } from './pages'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
+import { FavoritesProvider } from './contexts/FavoritesProvider';
 
 
 function App() {
 
   return (
+    <FavoritesProvider>
       <BrowserRouter>
         <Header />
         <Routes>
@@ -20,9 +22,11 @@ function App() {
           <Route path="/add-recipe" element={<AddRecipe />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
+          <Route path="/main" element={<Landing/>} />
         </Routes>
         <Footer />
       </BrowserRouter>
+    </FavoritesProvider>
   )
 }
 
