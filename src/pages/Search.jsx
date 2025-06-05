@@ -12,7 +12,7 @@ import {
   mockCategories,
   mockOrigin,
   mockTypeCooking,
-  mockRecipes
+  mockRecipes,
 } from "../data/mockData";
 
 const Search = () => {
@@ -42,7 +42,7 @@ const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // "Favorites" state
+  // “Favorites” state (added)
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
@@ -124,7 +124,6 @@ const Search = () => {
     const { recipe, loading } = useRecipe(id);
     const isFavorite = favorites.includes(String(id));
 
-    // Toggle favorite logic
     const handleToggleFavorite = () => {
       const idStr = String(id);
       let updatedList;
@@ -153,6 +152,7 @@ const Search = () => {
     );
   }
 
+  // FiltroToggle (unchanged)
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
       <div
@@ -272,7 +272,10 @@ const Search = () => {
             filteredRecipes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30">
                 {filteredRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} id={recipe.id} />
+                  <RecipeCard
+                    key={recipe.id}
+                    id={recipe.id}
+                  />
                 ))}
               </div>
             ) : (
@@ -296,7 +299,9 @@ const Search = () => {
               >
                 {filteredRecipes.map((recipe) => (
                   <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
-                    <RecipeCard id={recipe.id} />
+                    <RecipeCard
+                      id={recipe.id}
+                    />
                   </div>
                 ))}
               </div>
