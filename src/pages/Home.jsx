@@ -4,15 +4,16 @@ import useRecipe from "../hooks/useRecipe";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { Badge } from "../components";
+import Button from "../components/Button";
 
 const recipeIds = [1, 2, 3];
 
 const categoryMap = {
-  Breakfast: "desayuno",
+  Desayuno: "desayuno",
   Brunch: "desayuno",
-  Lunch: "comida",
-  Dinner: "cena",
-  Dessert: "merienda",
+  Comida: "comida",
+  Cena: "cena",
+  Postre: "merienda",
   Snack: "snack",
 };
 
@@ -46,11 +47,23 @@ const Home = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const handleCategoryClick = (category) => {
-    const mapped = categoryMap[category];
-    if (mapped) {
-      navigate(`/search?category=${mapped}`);
-    }
+  const [selectedCategories, setSelectedCategories] = React.useState([]);
+
+  const toggleCategory = (category) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const handleSearchClick = () => {
+    if (selectedCategories.length === 0) return;
+
+    const mapped = selectedCategories.map(c => categoryMap[c]);
+    const uniqueMapped = Array.from(new Set(mapped));
+
+    navigate(`/search?category=${uniqueMapped.join(",")}`);
   };
 
   const handleInspireClick = () => {
@@ -62,23 +75,29 @@ const Home = () => {
       <div className="w-full bg-background pt-16 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
-            <p className="text-gray-600 mb-2">Having trouble deciding?</p>
+            <p className="text-gray-600 mb-2">¿No sabes que elegir?</p>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              What are you
-              <br />
-              in the mood for?
+              ¿Qué te apetece?
             </h1>
-            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-              {categories.map((category) => (
-                <Badge
-                  key={category}
-                  className="cursor-pointer"
-                  onClick={() => handleCategoryClick(category)}
-                >
-                  {category}
-                </Badge>
-              ))}
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start mb-4">
+              {categories.map((category) => {
+                const isSelected = selectedCategories.includes(category);
+                return (
+                  <Badge
+                    key={category}
+                    className={`cursor-pointer ${
+                      isSelected
+                        ? "bg-pink-500 text-white"
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                    }`}
+                    onClick={() => toggleCategory(category)}
+                  >
+                    {category}
+                  </Badge>
+                );
+              })}
             </div>
+            <Button onClick={handleSearchClick}>Buscar</Button>
           </div>
 
           <div className="flex justify-center lg:justify-end">
@@ -94,7 +113,7 @@ const Home = () => {
       <div className="w-full bg-primary py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-            Latest recipes
+            Últimas recetas
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {recipeIds.map((id) => (
@@ -107,7 +126,7 @@ const Home = () => {
       <div className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-12">
-            You don't know what to make yet?
+            ¿Aún no sabes que hacer?
           </h2>
           <button
             onClick={handleInspireClick}

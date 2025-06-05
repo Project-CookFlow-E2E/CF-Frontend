@@ -1,70 +1,17 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import CategoryFilter from "../components/CategoryFilter";
-import { Input } from "../components";
 import { Plus, Minus } from "lucide-react";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-
-import AutocompleteInput from "../components/AutocompleteInput";
-
 
 const popularRecipes = [
-  {
-    id: 1,
-    image: "/pasta.jpg",
-    name: "Pasta Carbonara",
-    category: "comida",
-    origin: "italia",
-    type: "cocido",
-    time: "30 m",
-  },
-  {
-    id: 2,
-    image: "/salad.jpg",
-    name: "Ensalada rica",
-    category: "cena",
-    origin: "grecia",
-    type: "frito",
-    time: "15 m",
-  },
-  {
-    id: 3,
-    image: "/soup.jpg",
-    name: "Sopa de calabaza",
-    category: "cena",
-    origin: "españa",
-    type: "sopa",
-    time: "20 m",
-  },
-  {
-    id: 4,
-    image: "/pancakes.jpg",
-    name: "Tortitas",
-    category: "desayuno",
-    origin: "americana",
-    type: "plancha",
-    time: "25 m",
-  },
-  {
-    id: 5,
-    image: "/tortilla.jpg",
-    name: "Tortilla de patata",
-    category: "comida",
-    origin: "españa",
-    type: "frito",
-    time: "45 m",
-  },
-  {
-    id: 6,
-    image: "/sushi.jpeg",
-    name: "Sushi",
-    category: "cena",
-    origin: "japonesa",
-    type: "crudo",
-    time: "55 m",
-  },
+  { id: 1, image: "/pasta.jpg", name: "Pasta Carbonara", category: "comida", origin: "italia", type: "cocido", time: "30 m" },
+  { id: 2, image: "/salad.jpg", name: "Ensalada rica", category: "cena", origin: "grecia", type: "frito", time: "15 m" },
+  { id: 3, image: "/soup.jpg", name: "Sopa de calabaza", category: "cena", origin: "españa", type: "sopa", time: "20 m" },
+  { id: 4, image: "/pancakes.jpg", name: "Tortitas", category: "desayuno", origin: "americana", type: "plancha", time: "25 m" },
+  { id: 5, image: "/tortilla.jpg", name: "Tortilla de patata", category: "comida", origin: "españa", type: "frito", time: "45 m" },
+  { id: 6, image: "/sushi.jpeg", name: "Sushi", category: "cena", origin: "japonesa", type: "crudo", time: "55 m" },
 ];
 
 const mockCategories = [
@@ -111,13 +58,33 @@ const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [tempSelectedCategory, setTempSelectedCategory] = useState([]);
+  const [tempSelectedOrigin, setTempSelectedOrigin] = useState([]);
+  const [tempSelectedCookingType, setTempSelectedCookingType] = useState([]);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get("category");
+
+    if (categoryParam) {
+      const categories = categoryParam.split(",").map(c => c.trim());
+      setSelectedCategory(categories);
+      setTempSelectedCategory(categories);
+      setIsOpen(true);
+      setShowAll(true);
+    }
+  }, [location.search]);
+
   const getFilteredRecipes = () => {
     return popularRecipes.filter((recipe) => {
       const matchCategory =
         selectedCategory.length === 0 ||
         selectedCategory.includes(recipe.category);
       const matchOrigin =
-        selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin);
+        selectedOrigin.length === 0 ||
+        selectedOrigin.includes(recipe.origin);
       const matchType =
         selectedCookingType.length === 0 ||
         selectedCookingType.includes(recipe.type);
@@ -130,38 +97,10 @@ const Search = () => {
 
   const filteredRecipes = getFilteredRecipes();
 
-  const SearchIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="lucide lucide-search"
-    >
-      <path d="m21 21-4.34-4.34" />
-      <circle cx="11" cy="11" r="8" />
-    </svg>
-  );
-
-  const location = useLocation();
-
-useEffect(() => {
-  const params = new URLSearchParams(location.search);
-  const categoryFromURL = params.get("category");
-
-  if (categoryFromURL) {
-    setSelectedCategory([categoryFromURL]);
-    setTempSelectedCategory([categoryFromURL]);
-    setIsOpen(true);
+  const handleSearch = () => {
+    setSearchTerm(searchQuery.trim());
     setShowAll(true);
-  }
-}, [location.search]);
-
+  };
 
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
@@ -175,19 +114,13 @@ useEffect(() => {
     );
   }
 
-  const [tempSelectedCategory, setTempSelectedCategory] = useState([]);
-  const [tempSelectedOrigin, setTempSelectedOrigin] = useState([]);
-  const [tempSelectedCookingType, setTempSelectedCookingType] = useState([]);
-
   const onMouseDown = (e) => {
     setIsDragging(true);
     setStartX(e.pageX - carouselRef.current.offsetLeft);
     setScrollLeftStart(carouselRef.current.scrollLeft);
   };
-
   const onMouseLeave = () => setIsDragging(false);
   const onMouseUp = () => setIsDragging(false);
-
   const onMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
@@ -201,19 +134,12 @@ useEffect(() => {
     setStartX(e.touches[0].pageX - carouselRef.current.offsetLeft);
     setScrollLeftStart(carouselRef.current.scrollLeft);
   };
-
   const onTouchEnd = () => setIsDragging(false);
-
   const onTouchMove = (e) => {
     if (!isDragging) return;
     const x = e.touches[0].pageX - carouselRef.current.offsetLeft;
     const walk = (x - startX) * 1;
     carouselRef.current.scrollLeft = scrollLeftStart - walk;
-  };
-
-  const handleSearch = () => {
-    setSearchTerm(searchQuery.trim());
-    setShowAll(true);
   };
 
   return (
@@ -235,14 +161,26 @@ useEffect(() => {
               className="outline-none w-full bg-transparent"
             />
             <button onClick={handleSearch}>
-              <SearchIcon className="text-black w-5 h-5 ml-2 cursor-pointer" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-search"
+              >
+                <path d="m21 21-4.34-4.34" />
+                <circle cx="11" cy="11" r="8" />
+              </svg>
             </button>
           </div>
         </div>
       </div>
 
       <div className="w-full flex flex-col lg:flex-row gap-8 px-0 lg:pl-4">
-        {/* Filtros */}
         <div className="w-full lg:w-1/3">
           <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
           {isOpen && (
@@ -274,7 +212,6 @@ useEffect(() => {
                 itemsPerRow={2}
                 className="mb-6"
               />
-
               <div className="flex justify-center">
                 <Button
                   className="mb-3 w-40 px-1"
@@ -292,7 +229,6 @@ useEffect(() => {
           )}
         </div>
 
-        {/* Cards */}
         <div className="w-full lg:w-2/3">
           <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
             <h4 className="text-xl font-bold text-black">Recetas populares</h4>
