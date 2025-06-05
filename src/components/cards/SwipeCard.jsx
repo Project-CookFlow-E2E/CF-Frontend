@@ -13,7 +13,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full px-4" style={{ backgroundColor: '#FDF3E8' }}>
+    <div className="flex flex-col items-center w-full px-4 pb-6" style={{ backgroundColor: '#FDF3E8' }}>
       {/* Recipe Image */}
       <div className="relative w-full mb-4 aspect-[4/3] max-h-80">
         <div className="bg-gray-100 rounded-xl w-full h-full flex items-center justify-center overflow-hidden shadow-sm">
@@ -33,7 +33,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
       </div>
 
       {/* Content Section */}
-      <div className="w-full mb-4 px-2">
+      <div className="w-full mb-6 px-2">
         {/* Desktop Layout: Title and Timer on same line */}
         <div className="hidden sm:flex justify-between items-start mb-1">
           <h2 className="text-xl font-semibold text-gray-900 flex-1 mr-4">
@@ -87,7 +87,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
       </div>
 
       {/* Action Buttons - Favorite and Skip */}
-      <div className="flex justify-center w-full mb-3 gap-20">
+      <div className="flex justify-center w-full mb-8 gap-20">
         {/* Skip */}
         <SkipButton onClick={handleSkip} />
 
@@ -97,12 +97,10 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
           onToggle={handleFavoriteToggle}
           withCircle={true}
         />
-
-
       </div>
 
       {/* Open Recipe Button */}
-      <div className="w-full sm:max-w-[140px] mx-auto">
+      <div className="w-full sm:max-w-[140px] mx-auto mb-2"> {/* Added mb-2 for extra spacing */}
         <OpenRecipeButton
           onClick={() => window.location.href = `/recipe/${recipe.id}`}
         />
