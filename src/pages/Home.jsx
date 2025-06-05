@@ -10,10 +10,11 @@ const recipeIds = [1, 2, 3];
 
 const categoryMap = {
   Desayuno: "desayuno",
-  Brunch: "desayuno",
+  Brunch: "brunch",
   Comida: "comida",
   Cena: "cena",
-  Postre: "merienda",
+  Postre: "postre",
+  Merienda: "merienda",
   Snack: "snack",
 };
 
