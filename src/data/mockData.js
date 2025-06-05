@@ -15,11 +15,13 @@ export const ingredientesMock = [
   "Chocolate",
 ];
 
-export const  shoppingListItemsMock = [
-  "Sal ",
-  "Pimienta",
-  "Harina",
-]
+
+export const shoppingListItemsMock = [
+  { id: 1, name: "Sal", checked: false },
+  { id: 2, name: "Pimienta", checked: false },
+  { id: 3, name: "Harina", checked: false },
+];
+
 
 export const mockRecipes = [
   {
