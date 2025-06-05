@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+// /src/pages/Search.jsx
+import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import CategoryFilter from "../components/CategoryFilter";
 import { Plus, Minus } from "lucide-react";
@@ -6,90 +7,98 @@ import Card from "../components/Card";
 import Button from "../components/Button";
 import useRecipe from "../hooks/useRecipe";
 
+// Import mock data
 import {
-  popularRecipes,
   mockCategories,
   mockOrigin,
   mockTypeCooking,
+  mockRecipes
 } from "../data/mockData";
 
 const Search = () => {
-  // Filter State
+  // === Filter state ===
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [selectedOrigin, setSelectedOrigin] = useState([]);
   const [selectedCookingType, setSelectedCookingType] = useState([]);
 
-  // Temporary state while user is picking filters
+  // Temporary state while user is picking filters:
   const [tempSelectedCategory, setTempSelectedCategory] = useState([]);
   const [tempSelectedOrigin, setTempSelectedOrigin] = useState([]);
   const [tempSelectedCookingType, setTempSelectedCookingType] = useState([]);
 
-  // Toggle “Filtros” panel
+  // Toggle "Filtros" panel
   const [isOpen, setIsOpen] = useState(false);
+
+  // Whether to show the full grid (true) or the horizontal carousel (false)
   const [showAll, setShowAll] = useState(false);
 
-  // For the horizontal carousel
+  // Carousel refs / drag-state
   const carouselRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeftStart, setScrollLeftStart] = useState(0);
 
-  // Search input
+  // Search-bar state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Favorites state
+  // "Favorites" state
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Grab URL params if “category” is passed via query string
+  // Read "category" from URL query string (if present)
   const location = useLocation();
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const categoryParam = params.get("category");
-
     if (categoryParam) {
       const categories = categoryParam.split(",").map((c) => c.trim());
       setSelectedCategory(categories);
+      setTempSelectedCategory(categories);
       setIsOpen(true);
       setShowAll(true);
     }
   }, [location.search]);
 
-  // Filter logic: returns an array of IDs that match all filters + search
-  const getFilteredRecipeIds = () => {
-    return popularRecipes
-      .filter((recipe) => {
-        const matchCategory =
-          selectedCategory.length === 0 ||
-          selectedCategory.includes(recipe.category);
-        const matchOrigin =
-          selectedOrigin.length === 0 ||
-          selectedOrigin.includes(recipe.origin);
-        const matchType =
-          selectedCookingType.length === 0 ||
-          selectedCookingType.includes(recipe.type);
+  // ——————————————————————————————————————————————
+  // 1) UPDATED getFilteredRecipes to use mockRecipes
+  // ——————————————————————————————————————————————
+  const getFilteredRecipes = () => {
+    return mockRecipes.filter((recipe) => {
+      const matchCategory =
+        selectedCategory.length === 0 ||
+        selectedCategory.includes(recipe.category.toLowerCase());
 
-        const matchSearch = recipe.name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+      const matchOrigin =
+        selectedOrigin.length === 0 ||
+        selectedOrigin.includes(recipe.origin?.toLowerCase());
 
-        return matchCategory && matchOrigin && matchType && matchSearch;
-      })
-      .map((recipe) => recipe.id);
+      const matchType =
+        selectedCookingType.length === 0 ||
+        selectedCookingType.includes(recipe.type?.toLowerCase());
+
+      const matchSearch = recipe.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      return matchCategory && matchOrigin && matchType && matchSearch;
+    });
   };
 
-  const filteredRecipeIds = getFilteredRecipeIds();
+  // Always re-compute filteredRecipes before rendering:
+  const filteredRecipes = getFilteredRecipes();
 
-  // Handler for pressing “Enter” or clicking the search icon
+  // When user presses "Enter" in the input or clicks the search icon:
   const handleSearch = () => {
     setSearchTerm(searchQuery.trim());
     setShowAll(true);
   };
 
-  // Mouse + Touch handlers for horizontal scroll
+  // ——————————————————————————————————————————————
+  // 2) Carousel drag / touch handlers (unchanged)
+  // ——————————————————————————————————————————————
   const onMouseDown = (e) => {
     setIsDragging(true);
     setStartX(e.pageX - carouselRef.current.offsetLeft);
@@ -117,33 +126,31 @@ const Search = () => {
     carouselRef.current.scrollLeft = scrollLeftStart - walk;
   };
 
-  // fetch recipe by ID & render <Card /> when done
-  function RecipeCardWithHook({ id }) {
+  // ——————————————————————————————————————————————
+  // 3) UPDATED RecipeCard to use useRecipe hook
+  // ——————————————————————————————————————————————
+  function RecipeCard({ id }) {
     const { recipe, loading } = useRecipe(id);
-
-    if (loading)
-      return (
-        <div className="animate-pulse bg-gray-200 h-64 w-48 rounded-lg"></div>
-      );
-    if (!recipe) return null;
-
     const isFavorite = favorites.includes(String(id));
 
+    // Toggle favorite logic
     const handleToggleFavorite = () => {
       const idStr = String(id);
-      let updated;
+      let updatedList;
       if (isFavorite) {
-        updated = favorites.filter((fav) => fav !== idStr);
+        updatedList = favorites.filter((fav) => fav !== idStr);
       } else {
-        updated = [...favorites, idStr];
+        updatedList = [...favorites, idStr];
       }
-      setFavorites(updated);
-      localStorage.setItem("favorites", JSON.stringify(updated));
+      setFavorites(updatedList);
+      localStorage.setItem("favorites", JSON.stringify(updatedList));
     };
+
+    if (loading) return <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>;
+    if (!recipe) return null;
 
     return (
       <Card
-        key={recipe.id}
         id={recipe.id}
         image={recipe.image_url}
         name={recipe.name}
@@ -155,7 +162,9 @@ const Search = () => {
     );
   }
 
-  // Toggle arrow + label for “Filtros”
+  // ——————————————————————————————————————————————
+  // 4) "Filtros" toggle header
+  // ——————————————————————————————————————————————
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
       <div
@@ -168,9 +177,12 @@ const Search = () => {
     );
   }
 
+  // ——————————————————————————————————————————————
+  // 5) Main Render
+  // ——————————————————————————————————————————————
   return (
     <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-26 lg:px-10">
-      {/* Search Input */}
+      {/* ——————————— Search Input ——————————— */}
       <div className="w-full max-w-screen-lg px-0 lg:pl-4">
         <h4 className="text-xl font-bold text-black mb-2">
           ¿Qué quieres cocinar?
@@ -208,12 +220,9 @@ const Search = () => {
       </div>
 
       <div className="w-full flex flex-col lg:flex-row gap-8 px-0 lg:pl-4">
-        {/* Filters column */}
+        {/* ——————————— Filters column ——————————— */}
         <div className="w-full lg:w-1/3">
-          <FiltroToggle
-            isOpen={isOpen}
-            toggleOpen={() => setIsOpen(!isOpen)}
-          />
+          <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
           {isOpen && (
             <>
               <CategoryFilter
@@ -243,10 +252,12 @@ const Search = () => {
                 itemsPerRow={2}
                 className="mb-6"
               />
+
               <div className="flex justify-center">
                 <Button
                   className="mb-3 w-40 px-1"
                   onClick={() => {
+                    // Apply the "temp" filters into the main filter state:
                     setSelectedCategory(tempSelectedCategory);
                     setSelectedOrigin(tempSelectedOrigin);
                     setSelectedCookingType(tempSelectedCookingType);
@@ -260,12 +271,10 @@ const Search = () => {
           )}
         </div>
 
-        {/* Results column */}
+        {/* ——————————— Results column ——————————— */}
         <div className="w-full lg:w-2/3">
           <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
-            <h4 className="text-xl font-bold text-black">
-              Recetas populares
-            </h4>
+            <h4 className="text-xl font-bold text-black">Recetas populares</h4>
             <h4
               className="text-l text-gray-500 cursor-pointer"
               onClick={() => setShowAll(!showAll)}
@@ -275,10 +284,10 @@ const Search = () => {
           </div>
 
           {showAll ? (
-            filteredRecipeIds.length > 0 ? (
+            filteredRecipes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30">
-                {filteredRecipeIds.map((id) => (
-                  <RecipeCardWithHook key={id} id={id} />
+                {filteredRecipes.map((recipe) => (
+                  <RecipeCard key={recipe.id} id={recipe.id} />
                 ))}
               </div>
             ) : (
@@ -300,9 +309,9 @@ const Search = () => {
                 onTouchEnd={onTouchEnd}
                 onTouchMove={onTouchMove}
               >
-                {filteredRecipeIds.map((id) => (
-                  <div key={id} style={{ scrollSnapAlign: "start" }}>
-                    <RecipeCardWithHook id={id} />
+                {filteredRecipes.map((recipe) => (
+                  <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
+                    <RecipeCard id={recipe.id} />
                   </div>
                 ))}
               </div>

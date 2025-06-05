@@ -63,11 +63,16 @@ export const shoppingListItemsMock = [
   { id: 3, name: "Harina", checked: false },
 ];
 
+// /src/data/mockData.js
+
+// … (other exports above stay the same) …
+
 export const mockRecipes = [
   {
     id: 1,
     name: "Mediterranean Quinoa Bowl",
-    description: "A healthy and colorful bowl packed with fresh vegetables, quinoa, and Mediterranean flavors",
+    description:
+      "A healthy and colorful bowl packed with fresh vegetables, quinoa, and Mediterranean flavors",
     user_id: 1,
     category_id: 1,
     duration_minutes: 25,
@@ -75,8 +80,12 @@ export const mockRecipes = [
     created_at: "2024-01-15T10:30:00Z",
     updated_at: "2024-01-15T10:30:00Z",
     // Additional fields for frontend
-    image_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
-    category: "LUNCH",
+    image_url:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
+    // category is uppercase, but getFilteredRecipes does `.toLowerCase()`
+    category: "COMIDA",
+    origin: "italia",        // <— added
+    type: "cocido",          // <— added
     is_favorite: false,
     isCreatedByUser: true,
     ingredients: [
@@ -89,15 +98,19 @@ export const mockRecipes = [
   {
     id: 2,
     name: "Spicy Thai Basil Stir-fry",
-    description: "Quick and flavorful stir-fry with fresh basil and a perfect balance of heat",
+    description:
+      "Quick and flavorful stir-fry with fresh basil and a perfect balance of heat",
     user_id: 2,
     category_id: 2,
     duration_minutes: 15,
     commensals: 3,
     created_at: "2024-01-16T14:20:00Z",
     updated_at: "2024-01-16T14:20:00Z",
-    image_url: "https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&h=300&fit=crop",
-    category: "DINNER",
+    image_url:
+      "https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&h=300&fit=crop",
+    category: "CENA",
+    origin: "asiatica",      // <— added (for example, you might add “asiatica” to your mockOrigin array if you want)
+    type: "plancha",         // <— added
     is_favorite: true,
     isCreatedByUser: false,
     ingredients: [
@@ -110,15 +123,19 @@ export const mockRecipes = [
   {
     id: 3,
     name: "Classic Margherita Pizza",
-    description: "Traditional Italian pizza with fresh mozzarella, tomatoes, and basil",
+    description:
+      "Traditional Italian pizza with fresh mozzarella, tomatoes, and basil",
     user_id: 1,
     category_id: 2,
     duration_minutes: 45,
     commensals: 4,
     created_at: "2024-01-17T18:00:00Z",
     updated_at: "2024-01-17T18:00:00Z",
-    image_url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop",
-    category: "DINNER",
+    image_url:
+      "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop",
+    category: "CENA",
+    origin: "italia",        // <— added
+    type: "asado",           // <— added
     is_favorite: false,
     isCreatedByUser: true,
     ingredients: [
@@ -131,15 +148,19 @@ export const mockRecipes = [
   {
     id: 4,
     name: "Creamy Mushroom Risotto",
-    description: "Rich and creamy Italian risotto with mixed mushrooms and parmesan",
+    description:
+      "Rich and creamy Italian risotto with mixed mushrooms and parmesan",
     user_id: 3,
     category_id: 2,
     duration_minutes: 35,
     commensals: 2,
     created_at: "2024-01-18T19:30:00Z",
     updated_at: "2024-01-18T19:30:00Z",
-    image_url: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=300&fit=crop",
-    category: "DINNER",
+    image_url:
+      "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=300&fit=crop",
+    category: "CENA",
+    origin: "italia",        // <— added
+    type: "hervido",         // <— added
     is_favorite: false,
     isCreatedByUser: false,
     ingredients: [
@@ -152,15 +173,19 @@ export const mockRecipes = [
   {
     id: 5,
     name: "Chocolate Chip Cookies",
-    description: "Soft and chewy homemade cookies with plenty of chocolate chips",
+    description:
+      "Soft and chewy homemade cookies with plenty of chocolate chips",
     user_id: 2,
     category_id: 3,
     duration_minutes: 30,
     commensals: 6,
     created_at: "2024-01-19T16:45:00Z",
     updated_at: "2024-01-19T16:45:00Z",
-    image_url: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop",
-    category: "DESSERT",
+    image_url:
+      "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop",
+    category: "POSTRE",
+    origin: "americana",     // <— added
+    type: "horno",           // <— added (assuming “horno” exists in your mockTypeCooking)
     is_favorite: true,
     isCreatedByUser: true,
     ingredients: [
@@ -173,15 +198,19 @@ export const mockRecipes = [
   {
     id: 6,
     name: "Green Smoothie Bowl",
-    description: "Nutritious breakfast bowl with spinach, banana, and fresh toppings",
+    description:
+      "Nutritious breakfast bowl with spinach, banana, and fresh toppings",
     user_id: 1,
     category_id: 4,
     duration_minutes: 10,
     commensals: 1,
     created_at: "2024-01-20T08:15:00Z",
     updated_at: "2024-01-20T08:15:00Z",
-    image_url: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
-    category: "BREAKFAST",
+    image_url:
+      "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
+    category: "DESAYUNO",
+    origin: "españa",        // <— added
+    type: "crudo",           // <— added
     is_favorite: false,
     isCreatedByUser: false,
     ingredients: [
@@ -201,8 +230,11 @@ export const mockRecipes = [
     commensals: 4,
     created_at: "2024-01-21T12:30:00Z",
     updated_at: "2024-01-21T12:30:00Z",
-    image_url: "https://images.unsplash.com/photo-1565299585323-38174c4a6706?w=400&h=300&fit=crop",
-    category: "LUNCH",
+    image_url:
+      "https://images.unsplash.com/photo-1565299585323-38174c4a6706?w=400&h=300&fit=crop",
+    category: "COMIDA",
+    origin: "americana",     // <— added
+    type: "frito",           // <— added
     is_favorite: true,
     isCreatedByUser: true,
     ingredients: [
@@ -215,7 +247,8 @@ export const mockRecipes = [
   {
     id: 8,
     name: "Swamp Soup",
-    description: "A mysterious and hearty soup with green vegetables and herbs",
+    description:
+      "A mysterious and hearty soup with green vegetables and herbs",
     user_id: 2,
     category_id: 1,
     duration_minutes: 40,
@@ -223,7 +256,9 @@ export const mockRecipes = [
     created_at: "2024-01-22T17:00:00Z",
     updated_at: "2024-01-22T17:00:00Z",
     image_url: null,
-    category: "LUNCH",
+    category: "COMIDA",
+    origin: "españa",        // <— added
+    type: "sopa",            // <— added
     is_favorite: false,
     isCreatedByUser: false,
     ingredients: [
