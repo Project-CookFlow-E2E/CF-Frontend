@@ -1,32 +1,67 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { RecipeIngredientsChecklist } from '../components';
+import { Button } from '../components'; // Asegúrate de que esté bien importado
 
 const recetasSimuladas = [
   {
     titulo: 'Pan de plátano',
     tiempo: 20,
-    imagen: '/pasta.jpg',
+    imagen: '/panplatano.jpeg',
     ingredientes: [
       { id: 1, name: 'Plátano', quantity: 3, unit: 'ud' },
       { id: 2, name: 'Huevos', quantity: 2, unit: 'ud' },
       { id: 3, name: 'Harina', quantity: 200, unit: 'g' },
       { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
-      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' },
+      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
     ],
-    pasos: ['Precalentar horno', 'Machacar plátanos', 'Mezclar todo', 'Hornear 40 min']
+     pasos: [
+      {
+        descripcion: 'Precalentar horno',
+        imagen: '/huevos.jpeg'
+      },
+      {
+        descripcion: 'Machacar plátanos',
+        imagen: '/harina.jpeg'
+      },
+      {
+        descripcion: 'Mezclar todo',
+        imagen: '/mezclar-queso.jpeg'
+      },
+      {
+        descripcion: 'Hornear 40 min',
+        imagen: '/hornear.jpeg'
+      }
+    ]
   },
   {
     titulo: 'Tarta de queso',
     tiempo: 35,
-    imagen: '/soup.jpg',
+    imagen: '/tarta-queso.jpeg',
     ingredientes: [
       { id: 1, name: 'Queso crema', quantity: 300, unit: 'g' },
       { id: 2, name: 'Galletas', quantity: 150, unit: 'g' },
       { id: 3, name: 'Mantequilla', quantity: 100, unit: 'g' },
       { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
-      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' },
+      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
     ],
-    pasos: ['Preparar base', 'Mezclar queso', 'Hornear', 'Enfriar']
+     pasos: [
+      {
+        descripcion: 'Precalentar horno',
+        imagen: '/huevos.jpeg'
+      },
+      {
+        descripcion: 'Machacar plátanos',
+        imagen: '/harina.jpeg'
+      },
+      {
+        descripcion: 'Mezclar todo',
+        imagen: '/mezclar-queso.jpeg'
+      },
+      {
+        descripcion: 'Hornear 40 min',
+        imagen: '/hornear.jpeg'
+      }
+    ]
   }
 ];
 
@@ -35,17 +70,36 @@ const Recipe = () => {
   const receta = recetasSimuladas[indiceActual];
   const pasosRef = useRef(null);
 
+  const [checkedItems, setCheckedItems] = useState({});
+
+  const handleToggleCheck = (id) => {
+    setCheckedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const areAllChecked = receta.ingredientes.every(item => checkedItems[item.id]);
+  const isAnyChecked = Object.values(checkedItems).some(Boolean);
+
   const handleStartCooking = () => {
     if (pasosRef.current) {
       pasosRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
+  const handleAddToShoppingList = () => {
+    const seleccionados = receta.ingredientes.filter(item => checkedItems[item.id]);
+    alert(`${seleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
+  };
+
   const handleAnterior = () => {
+    setCheckedItems({}); // reset al cambiar de receta
     if (indiceActual > 0) setIndiceActual(indiceActual - 1);
   };
 
   const handleSiguiente = () => {
+    setCheckedItems({}); // reset al cambiar de receta
     if (indiceActual < recetasSimuladas.length - 1) {
       setIndiceActual(indiceActual + 1);
     }
@@ -83,8 +137,35 @@ const Recipe = () => {
         {/* Ingredientes */}
         <RecipeIngredientsChecklist
           ingredients={receta.ingredientes}
-          onStartCooking={handleStartCooking}
+          checkedItems={checkedItems}
+          onToggleCheck={handleToggleCheck}
         />
+
+        {/* Botones */}
+        <div className="grid grid-cols-2 gap-3 mt-6 max-w-md mx-auto">
+          <Button
+            onClick={handleAddToShoppingList}
+            disabled={!isAnyChecked}
+            className={`py-3 rounded-lg font-medium transition duration-300 ${
+              isAnyChecked
+                ? 'bg-accent text-white hover:bg-accent/90'
+                : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
+            }`}
+          >
+            ¡A comprar!
+          </Button>
+          <Button
+            onClick={handleStartCooking}
+            disabled={!areAllChecked}
+            className={`py-3 rounded-lg font-medium transition duration-300 ${
+              areAllChecked
+                ? 'bg-accent text-white hover:bg-accent/90'
+                : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
+            }`}
+          >
+            ¡A cocinar!
+          </Button>
+        </div>
 
         {/* Pasos */}
         <div ref={pasosRef} className="mt-16">
@@ -95,14 +176,15 @@ const Recipe = () => {
                 key={index}
                 className="flex flex-col items-center bg-background rounded-xl shadow-md p-6 max-w-2xl mx-auto"
               >
-                <span className="text-xl font-bold text-accent mb-4">Paso {index + 1}</span>
+                <span className="text-xl font-bold text-black mb-4">Paso {index + 1}</span>
+                
                 <img
-                  src="/salad.jpg"
-                  alt={`Paso ${index + 1}`}
-                  className="w-full max-w-md h-auto object-cover rounded-lg shadow-lg mb-4"
-                />
+  src={paso.imagen}
+  alt={`Paso ${index + 1}`}
+  className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
+/>
                 <p className="text-gray-700 text-center text-base sm:text-lg font-medium">
-                  {paso}
+                  {paso.descripcion}
                 </p>
               </li>
             ))}
