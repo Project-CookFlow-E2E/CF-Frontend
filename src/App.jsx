@@ -2,13 +2,11 @@ import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Sea
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
-import { FavoritesProvider } from './contexts/FavoritesProvider';
 
 
 function App() {
 
   return (
-    <FavoritesProvider>
       <BrowserRouter>
         <Header />
         <Routes>
@@ -26,7 +24,6 @@ function App() {
         </Routes>
         <Footer />
       </BrowserRouter>
-    </FavoritesProvider>
   )
 }
 

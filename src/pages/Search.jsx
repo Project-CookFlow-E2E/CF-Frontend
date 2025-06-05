@@ -62,9 +62,6 @@ const Search = () => {
     }
   }, [location.search]);
 
-  // ——————————————————————————————————————————————
-  // 1) UPDATED getFilteredRecipes to use mockRecipes
-  // ——————————————————————————————————————————————
   const getFilteredRecipes = () => {
     return mockRecipes.filter((recipe) => {
       const matchCategory =
@@ -87,7 +84,6 @@ const Search = () => {
     });
   };
 
-  // Always re-compute filteredRecipes before rendering:
   const filteredRecipes = getFilteredRecipes();
 
   // When user presses "Enter" in the input or clicks the search icon:
@@ -96,9 +92,7 @@ const Search = () => {
     setShowAll(true);
   };
 
-  // ——————————————————————————————————————————————
-  // 2) Carousel drag / touch handlers (unchanged)
-  // ——————————————————————————————————————————————
+  // Carousel drag / touch handlers (unchanged)
   const onMouseDown = (e) => {
     setIsDragging(true);
     setStartX(e.pageX - carouselRef.current.offsetLeft);
@@ -126,9 +120,6 @@ const Search = () => {
     carouselRef.current.scrollLeft = scrollLeftStart - walk;
   };
 
-  // ——————————————————————————————————————————————
-  // 3) UPDATED RecipeCard to use useRecipe hook
-  // ——————————————————————————————————————————————
   function RecipeCard({ id }) {
     const { recipe, loading } = useRecipe(id);
     const isFavorite = favorites.includes(String(id));
@@ -162,9 +153,6 @@ const Search = () => {
     );
   }
 
-  // ——————————————————————————————————————————————
-  // 4) "Filtros" toggle header
-  // ——————————————————————————————————————————————
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
       <div
@@ -177,9 +165,6 @@ const Search = () => {
     );
   }
 
-  // ——————————————————————————————————————————————
-  // 5) Main Render
-  // ——————————————————————————————————————————————
   return (
     <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-26 lg:px-10">
       {/* ——————————— Search Input ——————————— */}
