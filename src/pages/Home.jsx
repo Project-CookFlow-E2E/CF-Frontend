@@ -129,12 +129,12 @@ const Home = () => {
           <h2 className="text-3xl font-bold text-gray-900 mb-12">
             ¿Aún no sabes que hacer?
           </h2>
-          <button
-            onClick={handleInspireClick}
-            className="w-40 h-40 md:w-48 md:h-48 bg-accent rounded-full text-white font-semibold text-lg hover:opacity-90 flex items-center justify-center mx-auto"
-          >
-            Inspire me
-          </button>
+          <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition">
+  <Button onClick={handleInspireClick} className="text-white font-semibold text-lg bg-transparent hover:bg-transparent shadow-none">
+    Inspire me
+  </Button>
+</div>
+
         </div>
       </div>
       <Footer />
