@@ -1,4 +1,6 @@
 import React from 'react';
+import { Button } from '../components';
+import { Link } from "react-router-dom";
 
 const Landing = () => {
   return (
@@ -10,9 +12,9 @@ const Landing = () => {
       >
         <h1 className="text-5xl font-serif font-bold text-black mb-4">CookFlow</h1>
         <p className="text-lg text-black mb-6">Rediscover the pleasure of cooking</p>
-        <button className="bg-accent text-white px-6 py-2 rounded-full text-sm hover:bg-rose-600 transition">
-          Star Free →
-        </button>
+        <Link to="/signup">
+  <Button>Empezar →</Button>
+</Link>
       </div>
 
       {/* Problem Section */}
@@ -46,9 +48,9 @@ const Landing = () => {
           et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
           tempor incididunt ut labore et dolore magna aliqua.
         </p>
-        <button className="bg-accent text-white px-6 py-2 rounded-full text-sm hover:bg-rose-500 transition">
-          Ready To Cook?
-        </button>
+        <Link to="/signup">
+  <Button>A cocinar</Button>
+</Link>
       </div>
     </div>
   );
