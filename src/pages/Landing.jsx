@@ -1,9 +1,10 @@
+import React from 'react';
 import { Button } from '../components';
 import { Link, useNavigate } from "react-router-dom";
 import useRecipe from "../hooks/useRecipe";
 import Card from '../components/Card';
-import { mockRecipes } from '../data/mockData';
 
+const recipeIds = [1, 2, 3];
 
 const RecipeCard = ({ id }) => {
   const { recipe, loading } = useRecipe(id);
@@ -20,9 +21,6 @@ const RecipeCard = ({ id }) => {
 };
 
 const Landing = () => {
-
-  const recipeIds = mockRecipes.slice(0, 3).map((r) => r.id);
-
   return (
     <div className="flex flex-col items-center justify-center w-full font-sans">
       {/* Hero Section */}
