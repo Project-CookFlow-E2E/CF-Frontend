@@ -1,11 +1,24 @@
+// components/buttons/FavoriteButton.js
 import React from 'react';
 
-const FavoriteButton = ({ isFavorite, onToggle, className = "", ...props }) => {
+const FavoriteButton = ({ 
+  isFavorite, 
+  onToggle, 
+  className = "", 
+  withCircle = false,
+  ...props 
+}) => {
   return (
     <button
       onClick={onToggle}
-      className={`p-1 -mt-1 -mr-1 ${className}`}
-      aria-label="Toggle favorite"
+      className={`
+        ${withCircle 
+          ? 'p-3 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200' 
+          : 'p-1 -mt-1 -mr-1'
+        } 
+        ${className}
+      `}
+      aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
       {...props}
     >
       <svg

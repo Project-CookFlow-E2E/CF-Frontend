@@ -1,8 +1,9 @@
 import TimerBadge from '../buttons/TimerBadge';
 import OpenRecipeButton from '../buttons/OpenRecipeButton';
 import FavoriteButton from '../buttons/FavoriteButton';
+import SkipButton from '../buttons/SkipButton';
 
-const RecipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
+const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
   const handleFavoriteToggle = () => {
     onToggleFavorite(recipe.id);
   };
@@ -59,19 +60,19 @@ const RecipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
 
         {/* Mobile Layout: Title and Description centered, Category and Timer on edges */}
         <div className="sm:hidden">
-          {/* Title centered */}
+          {/* Title */}
           <h2 className="text-lg font-semibold text-gray-900 mb-2 text-center">
             {recipe.name}
           </h2>
-          
-          {/* Description centered */}
+
+          {/* Description */}
           {recipe.description && (
             <p className="text-gray-600 text-sm mb-3 text-center">
               {recipe.description}
             </p>
           )}
-          
-          {/* Category and Timer on edges */}
+
+          {/* Category and Timer */}
           <div className="flex justify-between items-center">
             {recipe.category ? (
               <p className="text-[#F37A7E] text-xs font-medium whitespace-nowrap">
@@ -87,35 +88,17 @@ const RecipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
 
       {/* Action Buttons - Favorite and Skip */}
       <div className="flex justify-center w-full mb-3 gap-20">
-        {/* Skip Button */}
-        <button
-          onClick={handleSkip}
-          className="p-3 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200"
-          aria-label="Skip recipe"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#6B7280"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
+        {/* Skip */}
+        <SkipButton onClick={handleSkip} />
 
-        {/* Favorite Button */}
-        <div className="p-3 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
-          <FavoriteButton 
-            isFavorite={recipe.is_favorite}
-            onToggle={handleFavoriteToggle}
-            className="p-0 m-0"
-          />
-        </div>
+        {/* Favorite */}
+        <FavoriteButton
+          isFavorite={recipe.is_favorite}
+          onToggle={handleFavoriteToggle}
+          withCircle={true}
+        />
+
+
       </div>
 
       {/* Open Recipe Button */}
@@ -128,4 +111,4 @@ const RecipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
   );
 };
 
-export default RecipeCard;
+export default SwipeCard;

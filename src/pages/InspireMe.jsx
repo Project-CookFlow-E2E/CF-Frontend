@@ -1,17 +1,15 @@
 import { useState } from 'react';
-import RecipeCard from '../components/cards/RecipeCard';
+import SwipeCard from '../components/cards/SwipeCard';
 import { mockRecipes } from '../data/mockData';
 import { useFavorites } from '../contexts/FavoritesProvider.jsx';
 
 const InspireMe = () => {
   const [currentRecipeIndex, setCurrentRecipeIndex] = useState(0);
   const { toggleFavorite, isFavorite } = useFavorites();
-
   const currentRecipe = mockRecipes[currentRecipeIndex];
 
   const handleToggleFavorite = (recipeId) => {
     toggleFavorite(recipeId);
-    // Move to next recipe after favoriting
     goToNextRecipe();
   };
 
@@ -29,7 +27,7 @@ const InspireMe = () => {
         <h1 className="text-2xl sm:text-3xl md:text-4xl text-center mb-6 sm:mb-8 text-gray-900">
           Swipe the Dish
         </h1>
-        <RecipeCard
+        <SwipeCard
           recipe={{
             ...currentRecipe,
             is_favorite: isFavorite(currentRecipe.id)
