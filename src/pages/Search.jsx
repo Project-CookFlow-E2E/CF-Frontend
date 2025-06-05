@@ -292,7 +292,7 @@ const Search = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center text-gray-600 text-lg mt-10">
+            <div className="text-center text-gray-600 text-lg mt-10 mb-40">
               Lo siento, no tenemos resultados para esa receta.
             </div>
           )
