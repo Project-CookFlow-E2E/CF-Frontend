@@ -1,4 +1,4 @@
-import IngredientItem from './IngredientItem'; // el componente que ya extrajimos
+import CheckedLineItem from './CheckedLineItem'; // el componente que ya extrajimos
 
 export default function RecipeIngredientsChecklist({ ingredients = [], checkedItems, onToggleCheck }) {
   return (
@@ -7,7 +7,7 @@ export default function RecipeIngredientsChecklist({ ingredients = [], checkedIt
 
       <ul className="space-y-3">
         {ingredients.map((ingredient) => (
-          <IngredientItem
+          <CheckedLineItem
             key={ingredient.id}
             name={ingredient.name}
             quantity={ingredient.quantity}

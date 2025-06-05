@@ -1,5 +1,5 @@
 // components/IngredientItem.jsx
-export default function IngredientItem({ name, quantity, unit, checked, onChange }) {
+export default function CheckedLineItem({ name, quantity, unit, checked, onChange }) {
   return (
     <li className="flex items-center justify-between py-2 border-b border-gray-100">
       <label className="flex items-center cursor-pointer w-full">
