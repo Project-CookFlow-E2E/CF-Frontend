@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
 import { FavoritesProvider } from './contexts/FavoritesProvider';
+import { Landing } from './pages/Landing';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/add-recipe" element={<AddRecipe />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
+          <Route path="/main" element={<Landing/>} />
         </Routes>
         <Footer />
       </BrowserRouter>
