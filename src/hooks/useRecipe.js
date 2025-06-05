@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { mockRecipes } from '../data/mockData';
 
 export default function useRecipe(id) {
   const [recipe, setRecipe] = useState(null);
@@ -7,12 +8,10 @@ export default function useRecipe(id) {
   useEffect(() => {
     let isMounted = true;
 
-    async function load() {
+    function load() {
       try {
-        // Para API HAY QUE CAMBUAR '/recipes.json' a `/api/recipes/${id}`
-        const res = await fetch('/recipes.json');
-        const data = await res.json();
-        const found = data.find(r => r.id === Number(id));
+        // Using mock data instead of API call
+        const found = mockRecipes.find(r => r.id === Number(id));
         if (isMounted) setRecipe(found || null);
       } catch (err) {
         console.error(err);
