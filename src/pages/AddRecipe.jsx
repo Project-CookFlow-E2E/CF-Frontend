@@ -9,9 +9,8 @@
  */
 import { useState } from "react";
 import { Image, Plus } from "lucide-react";
-import { Input } from "../components/";
 import { categoriasMock, ingredientesMock } from "../data/mockData";
-import { AutocompleteInput, Button } from "../components/";
+import { AutocompleteInput, Button, Input } from "../components/";
 
 const AddRecipe = () => {
   const [ingredients, setIngredients] = useState([""]);
