@@ -1,8 +1,13 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RecipeIngredientsChecklist, Button } from '../components';
 
-// ✅ Simulación de recetas ordenadas (esto más adelante vendrá de tu backend)
+// ========================================================================
+// ✅ SECCIÓN TEMPORAL DE MOCK:
+// Estas recetas son datos simulados para desarrollo sin backend.
+// ❌ IMPORTANTE: Cuando se conecte con backend, esta constante debe eliminarse.
+// Será reemplazada por un useEffect que obtenga datos desde una API.
+// ========================================================================
 const recetasOrdenadas = [
   {
     id: 1,
@@ -44,12 +49,27 @@ const recetasOrdenadas = [
   }
 ];
 
+/**
+ * Componente de pantalla de receta.
+ * Muestra la información de una receta según el ID en la URL.
+ *
+ * 🔄 En el futuro:
+ * - Esta pantalla debe hacer `fetch` de una receta específica desde el backend.
+ * - El orden visual de navegación puede mantenerse con un array global o con IDs previos/siguientes.
+ */
 const Recipe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const pasosRef = useRef(null);
 
   const currentId = parseInt(id, 10);
+
+  // ==================================================================================
+  // ✅ Esta lógica usa los mocks. Más adelante, esta búsqueda se eliminará.
+  // 🔁 Será sustituida por:
+  // - useEffect(() => { fetch(`/api/recipes/${id}`)... }, [id])
+  // - Y estados tipo: const [receta, setReceta] = useState(null);
+  // ==================================================================================
   const currentIndex = recetasOrdenadas.findIndex(r => r.id === currentId);
   const receta = recetasOrdenadas[currentIndex];
 
@@ -59,6 +79,10 @@ const Recipe = () => {
     return <div className="text-center p-6">Receta no encontrada</div>;
   }
 
+  /**
+   * Marca o desmarca un ingrediente en la lista.
+   * @param {number} id - ID del ingrediente.
+   */
   const handleToggleCheck = (id) => {
     setCheckedItems(prev => ({
       ...prev,
@@ -69,17 +93,26 @@ const Recipe = () => {
   const areAllChecked = receta.ingredientes.every(item => checkedItems[item.id]);
   const isAnyChecked = Object.values(checkedItems).some(Boolean);
 
+  /**
+   * Desplaza la vista hacia la sección de pasos.
+   */
   const handleStartCooking = () => {
     if (pasosRef.current) {
       pasosRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
+  /**
+   * Simula añadir a la lista de la compra los ingredientes seleccionados.
+   */
   const handleAddToShoppingList = () => {
     const seleccionados = receta.ingredientes.filter(item => checkedItems[item.id]);
     alert(`${seleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
   };
 
+  /**
+   * Navega a la receta anterior según orden visual (no ID numérico).
+   */
   const handleAnterior = () => {
     setCheckedItems({});
     if (currentIndex > 0) {
@@ -88,6 +121,9 @@ const Recipe = () => {
     }
   };
 
+  /**
+   * Navega a la receta siguiente según orden visual (no ID numérico).
+   */
   const handleSiguiente = () => {
     setCheckedItems({});
     if (currentIndex < recetasOrdenadas.length - 1) {
@@ -99,7 +135,7 @@ const Recipe = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background text-center">
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
-        {/* Navegación */}
+        {/* Navegación entre recetas */}
         <div className="flex items-center justify-between mb-4">
           <button onClick={handleAnterior} disabled={currentIndex === 0} className="text-3xl">
             &lt;
@@ -117,14 +153,14 @@ const Recipe = () => {
           </button>
         </div>
 
-        {/* Imagen */}
+        {/* Imagen de la receta */}
         <img
           src={receta.imagen}
           alt={receta.titulo}
           className="rounded-xl drop-shadow-xl w-full max-w-md mx-auto"
         />
 
-        {/* Ingredientes */}
+        {/* Lista de ingredientes con checklist */}
         <RecipeIngredientsChecklist
           ingredients={receta.ingredientes}
           checkedItems={checkedItems}
@@ -157,7 +193,7 @@ const Recipe = () => {
           </Button>
         </div>
 
-        {/* Pasos */}
+        {/* Pasos de la receta */}
         <div ref={pasosRef} className="mt-16">
           <h2 className="text-2xl font-semibold mb-6 text-center">Pasos de la receta</h2>
           <ol className="space-y-12">
@@ -185,3 +221,4 @@ const Recipe = () => {
 };
 
 export default Recipe;
+
