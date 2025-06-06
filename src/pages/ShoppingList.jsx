@@ -19,7 +19,7 @@
  */
 
 import React, { useState } from "react";
-import { shoppingListItemsMock } from "../data/mockData";
+
 
 /**
  * Componente principal de la página de Lista de la Compra.
@@ -27,7 +27,10 @@ import { shoppingListItemsMock } from "../data/mockData";
  * @returns {JSX.Element} La interfaz completa para visualizar y gestionar la lista de la compra.
  */
 const ShoppingList = () => {
-  const [items, setItems] = useState(shoppingListItemsMock);
+  const [items, setItems] = useState(() => {
+  const saved = localStorage.getItem("shoppingList");
+  return saved ? JSON.parse(saved) : [];
+});
 
   /**
    * Alterna el estado de "checked" de un ítem (completado o no).
@@ -54,9 +57,10 @@ const ShoppingList = () => {
   /**
    * Elimina todos los ítems de la lista.
    */
-  const handleClearAll = () => {
-    setItems([]);
-  };
+ const handleClearAll = () => {
+  setItems([]);
+  localStorage.removeItem("shoppingList");
+};
 
   return (
     <div className="relative bg-background flex flex-col items-center min-h-screen">

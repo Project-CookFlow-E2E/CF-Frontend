@@ -102,13 +102,19 @@ const Recipe = () => {
     }
   };
 
-  /**
-   * Simula añadir a la lista de la compra los ingredientes seleccionados.
-   */
-  const handleAddToShoppingList = () => {
-    const seleccionados = receta.ingredientes.filter(item => checkedItems[item.id]);
-    alert(`${seleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
-  };
+ /**
+ * Reemplaza completamente la lista de la compra en localStorage
+ * con los ingredientes no seleccionados (no checkeados).
+ */
+const handleAddToShoppingList = () => {
+  const noSeleccionados = receta.ingredientes.filter(
+    (item) => !checkedItems[item.id]
+  );
+
+  localStorage.setItem("shoppingList", JSON.stringify(noSeleccionados));
+
+  alert(`${noSeleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
+};
 
   /**
    * Navega a la receta anterior según orden visual (no ID numérico).
