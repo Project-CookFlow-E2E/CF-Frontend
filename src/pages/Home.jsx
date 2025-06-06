@@ -1,10 +1,27 @@
+/**
+ * Home Page Component
+ *
+ * Página principal que permite al usuario:
+ * - Seleccionar categorías para buscar recetas.
+ * - Ver las últimas recetas destacadas.
+ * - Marcar recetas como favoritas (persistidas en localStorage).
+ * - Recibir inspiración aleatoria con un botón.
+ *
+ * Usa `useRecipe` para cargar datos individuales de recetas por ID.
+ * Navega a otras páginas con `useNavigate` de react-router-dom.
+ *
+ * @module Home
+ */
+
 import React from "react";
 import useRecipe from "../hooks/useRecipe";
 import { useNavigate } from "react-router-dom";
 import { Badge, Button, Card } from "../components";
 
+// IDs de recetas que se muestran en la sección "Últimas recetas"
 const recipeIds = [1, 2, 3];
 
+// Mapeo de categorías legibles a slugs de URL
 const categoryMap = {
   Desayuno: "desayuno",
   Brunch: "brunch",
@@ -15,8 +32,21 @@ const categoryMap = {
   Snack: "snack",
 };
 
+// Lista visible de categorías (labels legibles)
 const categories = Object.keys(categoryMap);
 
+/**
+ * RecipeCard Component
+ *
+ * Representa una tarjeta de receta individual.
+ * Carga los datos desde el hook `useRecipe` en base al ID recibido.
+ * Muestra un `Card` con información básica y permite marcar como favorita.
+ *
+ * @param {Object} props
+ * @param {number} props.id - ID de la receta a cargar
+ * @param {string[]} props.favorites - Lista de IDs favoritas
+ * @param {Function} props.setFavorites - Función para actualizar favoritos
+ */
 const RecipeCard = ({ id, favorites, setFavorites }) => {
   const { recipe, loading } = useRecipe(id);
   const isFavorite = favorites.includes(String(id));
@@ -47,9 +77,14 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
   );
 };
 
+/**
+ * Página principal de la app.
+ * Presenta un buscador por categorías, últimas recetas y un botón de inspiración.
+ */
 const Home = () => {
   const navigate = useNavigate();
 
+  // Estado de favoritos persistido en localStorage
   const [favorites, setFavorites] = React.useState(() => {
     const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
@@ -57,14 +92,16 @@ const Home = () => {
 
   const [selectedCategories, setSelectedCategories] = React.useState([]);
 
+  // Alterna una categoría seleccionada
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
-        : [...prev, category],
+        : [...prev, category]
     );
   };
 
+  // Redirige a la página de búsqueda con categorías seleccionadas
   const handleSearchClick = () => {
     if (selectedCategories.length === 0) return;
 
@@ -74,12 +111,14 @@ const Home = () => {
     navigate(`/search?category=${uniqueMapped.join(",")}`);
   };
 
+  // Redirige a la ruta de inspiración aleatoria
   const handleInspireClick = () => {
     navigate("/inspire-me");
   };
 
   return (
     <div className="min-h-screen bg-background w-full">
+      {/* Sección Hero */}
       <div className="w-full bg-background pt-16 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
@@ -87,6 +126,8 @@ const Home = () => {
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
               ¿Qué te apetece?
             </h1>
+
+            {/* Filtros por categoría */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start mb-4">
               {categories.map((category) => {
                 const isSelected = selectedCategories.includes(category);
@@ -108,6 +149,7 @@ const Home = () => {
             <Button onClick={handleSearchClick}>Buscar</Button>
           </div>
 
+          {/* Imagen destacada */}
           <div className="flex justify-center lg:justify-end">
             <img
               src="/home-page.jpeg"
@@ -118,6 +160,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Últimas recetas */}
       <div className="w-full bg-primary py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
@@ -136,6 +179,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Botón "Inspírame" */}
       <div className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-12">

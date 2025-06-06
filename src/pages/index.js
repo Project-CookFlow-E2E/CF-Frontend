@@ -1,3 +1,16 @@
+/**
+ * Página principal de exportaciones de vistas (pages).
+ *
+ * Este archivo actúa como un _índice centralizado_ para que las vistas
+ * puedan ser importadas fácilmente desde un único lugar.
+ *
+ * Ejemplo de uso:
+ *   import { Home, Login } from '../pages';
+ *
+ * @module pages/index
+ */
+
+
 export { default as AddRecipe } from './AddRecipe';
 export { default as AdminDashboard } from './AdminDashboard';
 export { default as Home } from './Home';

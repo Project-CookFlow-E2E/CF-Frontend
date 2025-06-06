@@ -1,11 +1,39 @@
 // src/pages/ShoppingList.jsx
+/**
+ * @file ShoppingList.jsx
+ * @description Página de Lista de la Compra. Permite visualizar, marcar, eliminar y limpiar productos de una lista.
+ * Utiliza datos mock para simular los elementos de compra.
+ *
+ * Funcionalidades:
+ * - Marcar elementos como completados (checkbox).
+ * - Eliminar elementos individualmente.
+ * - Vaciar completamente la lista.
+ * - Renderizado condicional según si la lista está vacía o no.
+ *
+ * Componentes utilizados:
+ * - HTML nativo + clases utilitarias de TailwindCSS.
+ * - Icono SVG para el botón de eliminación.
+ *
+ * Datos usados:
+ * - shoppingListItemsMock: datos simulados importados desde `../data/mockData`.
+ */
 
 import React, { useState } from "react";
 import { shoppingListItemsMock } from "../data/mockData";
 
+/**
+ * Componente principal de la página de Lista de la Compra.
+ *
+ * @returns {JSX.Element} La interfaz completa para visualizar y gestionar la lista de la compra.
+ */
 const ShoppingList = () => {
   const [items, setItems] = useState(shoppingListItemsMock);
 
+  /**
+   * Alterna el estado de "checked" de un ítem (completado o no).
+   *
+   * @param {number} id - ID del ítem a actualizar.
+   */
   const handleToggleCheck = (id) => {
     setItems((prevItems) =>
       prevItems.map((item) =>
@@ -14,10 +42,18 @@ const ShoppingList = () => {
     );
   };
 
+  /**
+   * Elimina un ítem de la lista por su ID.
+   *
+   * @param {number} id - ID del ítem a eliminar.
+   */
   const handleDeleteItem = (id) => {
     setItems(items.filter((item) => item.id !== id));
   };
 
+  /**
+   * Elimina todos los ítems de la lista.
+   */
   const handleClearAll = () => {
     setItems([]);
   };
@@ -26,12 +62,14 @@ const ShoppingList = () => {
     <div className="relative bg-background flex flex-col items-center min-h-screen">
       <header className="w-full flex justify-between items-center p-4 relative z-20 px-6"></header>
 
+      {/* Título */}
       <div className="w-full max-w-md text-center mb-6">
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
           Lista de la Compra
         </h1>
       </div>
 
+      {/* Lista de ítems */}
       <div className="flex-grow w-full max-w-md px-4 py-2 flex flex-col justify-between pb-8">
         <main className="w-full">
           {items.length > 0 ? (
@@ -83,6 +121,8 @@ const ShoppingList = () => {
                   </button>
                 </div>
               ))}
+
+              {/* Botón para eliminar todo */}
               <button
                 className="block mx-auto mt-6 py-2 px-6 border-2 border-gray-400 text-gray-700 font-semibold rounded-full hover:bg-gray-100 transition duration-200"
                 onClick={handleClearAll}
@@ -91,6 +131,7 @@ const ShoppingList = () => {
               </button>
             </div>
           ) : (
+            // Mensaje si la lista está vacía
             <p className="text-center text-gray-500 text-lg py-8">
               Tu lista de la compra está vacía.
             </p>

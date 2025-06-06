@@ -1,7 +1,39 @@
+/**
+ * @file SignUp.jsx
+ * @description Página de registro de nuevos usuarios en la aplicación CookFlow.
+ *
+ * Esta vista permite al usuario crear una cuenta proporcionando los siguientes datos:
+ * - Nombre
+ * - Primer y segundo apellido
+ * - Correo electrónico
+ * - Contraseña y confirmación
+ *
+ * Funcionalidades:
+ * - Campos con íconos para mejor experiencia visual.
+ * - Navegación hacia la página de login si el usuario ya tiene cuenta.
+ * - Diseño responsivo con imagen lateral en pantallas grandes.
+ *
+ * Componentes utilizados:
+ * - Input: campo reutilizable con ícono.
+ * - Button: botón estilizado para envío de formulario.
+ *
+ * Navegación:
+ * - Redirecciona a la página principal ("/") al hacer clic en "Crear cuenta".
+ * - Enlace hacia la página de inicio de sesión ("/login").
+ */
+
+
+
+
+
+
 import { Button, Input } from "../components";
 import { Mail, Lock, PersonStanding } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+
+
+
 
 const SignUp = () => {
   const navigate = useNavigate();
