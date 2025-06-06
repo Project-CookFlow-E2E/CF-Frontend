@@ -1,42 +1,86 @@
-import React from 'react'
-import Input from "../components/Input"
-import Boton from "../components/Boton"
-import { Mail, Lock} from "lucide-react";
+import React from "react";
+import Input from "../components/Input";
+import Button from "../components/Button";
+import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate("/");
-  };
+    const handleLogin = () => {
+        navigate("/");
+    };
 
-  return (
-    <div className="min-h-screen flex flex-col justify-start items-center bg-[#FDF3E8] px-4 pt-50">
-      <h2 className="text-3xl font-bold mb-2 text-black">Hello again!</h2>
-      <h4 className=" text-sm mb-12 text-black" >Enter your details to continue</h4>
-      <div className="flex flex-col mb-4" >
-        <label className="text-xs mb-2 font-bold text-black">Correo electrónico</label>
-        <div className="peer border border-black rounded-md">
-          <Mail className="absolute left-21.5 top-1/2 -translate-y-[1px] text-black" size={15} />
-          <Input placeholder="Correo electrónico" type="email" />
+    return (
+        <div className="min-h-screen flex bg-[#FDF3E8]">
+            {/* Image */}
+            <div className="hidden md:block w-1/2">
+                <img
+                    src="/login.png"
+                    alt="Login Illustration"
+                    className="h-full w-full object-cover"
+                />
+            </div>
+
+            {/* Form */}
+            <div className="w-full md:w-1/2 flex justify-center items-start pt-20">
+                <div className="w-[320px] flex flex-col items-center px-4">
+                    <h2 className="text-3xl font-bold mb-2 text-black whitespace-nowrap">
+                        ¡Bienvenido de nuevo!
+                    </h2>
+                    <h4 className="text-sm mb-12 text-black">
+                        Introduce tu información
+                    </h4>
+
+                    <div className="flex flex-col mb-4 w-full">
+                        <label className="text-xs mb-2 font-bold text-black">
+                            Correo electrónico
+                        </label>
+                        <div className="peer border border-black rounded-md">
+                            <Input
+                                placeholder="Correo electrónico"
+                                type="email"
+                                icon={Mail}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col mb-12 w-full">
+                        <label className="text-xs mb-2 font-bold text-black">
+                            Contraseña
+                        </label>
+                        <div className="peer border border-black rounded-md">
+                            <Input
+                                placeholder="Contraseña"
+                                type="password"
+                                icon={Lock}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <Button
+                            onClick={handleLogin}
+                            className="mb-3 w-40 px-1"
+                        >
+                            Iniciar sesión
+                        </Button>
+                    </div>
+
+                    <h4 className="text-xs mb-12 text-black">
+                        ¿No tienes cuenta? Regístrate aquí:{" "}
+                        <Link
+                            to="/signup"
+                            className="text-blue-600 hover:underline"
+                        >
+                            Sign Up
+                        </Link>
+                    </h4>
+                </div>
+            </div>
         </div>
-      </div>
-      <div className="flex flex-col mb-12">
-        <label className="text-xs mb-2 font-bold text-black">Contraseña</label>
-        <div className="peer border border-black rounded-md">
-          <Lock className="absolute left-[5.375rem] top-[60.5%] -translate-y-[1px] text-black" size={15} />
-          <Input placeholder = "Contraseña" type="email"/>
-        </div>
-        
-      </div>
-      <div>
-        <Boton onClick={handleLogin} className="mb-3 w-40 px-1">Iniciar sesión</Boton>
-      </div>
-      <h4 className="text-xs mb-12 text-black" >Don't have an account? Sign up here</h4>
-    </div>
-  )
-}
+    );
+};
 
 export default Login;

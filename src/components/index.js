@@ -1,8 +1,10 @@
-export { default as Boton } from './Boton';
+export { default as Button } from './Button';
 export { default as Card } from './Card';
 export { default as CategoryCheckbox } from './CategoryCheckbox';
 export { default as CategoryFilter } from './CategoryFilter';
 export { default as Footer } from './Footer';
 export { default as Header } from './Header';
-export { default as Imagen } from './Imagen';
+export { default as Image } from './Image';
 export { default as Input } from './Input';
+export { default as RecipeIngredientsChecklist } from './RecipeIngredientsChecklist';
+export { default as Badge } from './Badge';

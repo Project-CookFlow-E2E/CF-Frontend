@@ -1,120 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/Card';
-
-// Component of pagination
-// It displays the current page, total pages, and allows navigation between pages
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  const getVisiblePages = () => {
-    const pages = [];
-    const maxVisible = 5;
-    
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, '...', totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-      }
-    }
-    
-    return pages;
-  };
-
-  return (
-    <div className="flex justify-center items-center space-x-2 mt-8">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        ‹
-      </button>
-      
-      {getVisiblePages().map((page, index) => (
-        <button
-          key={index}
-          onClick={() => typeof page === 'number' && onPageChange(page)}
-          className={`px-3 py-1 rounded ${
-            page === currentPage
-              ? 'bg-accent text-white'
-              : typeof page === 'number'
-              ? 'text-gray-600 hover:text-gray-900'
-              : 'text-gray-400 cursor-default'
-          }`}
-          disabled={typeof page !== 'number'}
-        >
-          {page}
-        </button>
-      ))}
-      
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        ›
-      </button>
-    </div>
-  );
-};
+import { mockRecipes } from '../data/mockData';
+import { useFavorites } from '../contexts/FavoritesProvider.jsx';
+import Pagination from '../components/ui/Pagination.jsx';
 
 // Main Profile component
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('saved'); 
   const [currentPage, setCurrentPage] = useState(1);
-  const [favorites, setFavorites] = useState(new Set());
-  const [recipes, setRecipes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const recipesPerPage = 8;
+  
+  const { toggleFavorite, isFavorite, getFavoriteCount, isLoading } = useFavorites();
 
-  // Recipes from recipes.json
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const response = await fetch('/recipes.json');
-        const data = await response.json();
-        setRecipes(data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error loading recipes:', error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchRecipes();
-  }, []);
-// Define the initial favorites from localStorage
-useEffect(() => {
-  const savedFavorites = localStorage.getItem('favorites');
-  if (savedFavorites) {
-    try {
-      const parsed = JSON.parse(savedFavorites);
-      setFavorites(new Set(parsed));
-    } catch {
-      setFavorites(new Set());
+  // Filter recipes based on the active tab
+  const filteredRecipes = mockRecipes.filter(recipe => {
+    if (activeTab === 'saved') {
+      return isFavorite(recipe.id);
+    } else {
+      // For "created" recipes, you can add a field like isCreatedByUser to mockData
+      // For now, we'll use user_id === 1 (assuming current user has ID 1)
+      return recipe.user_id === 1;
     }
-  }
-}, []);
-
-// Save favorites to localStorage whenever they change
-useEffect(() => {
-  localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
-}, [favorites]);
-
-// Filter recipes based on the active tab
-const filteredRecipes = recipes.filter(recipe => {
-  if (activeTab === 'saved') {
-    return favorites.has(recipe.id);
-  } else {
-    return recipe.isCreatedByUser;
-  }
-});
-
+  });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
@@ -126,18 +33,6 @@ const filteredRecipes = recipes.filter(recipe => {
     setCurrentPage(1);
   }, [activeTab]);
 
-  const handleToggleFavorite = (recipeId) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(recipeId)) {
-        newFavorites.delete(recipeId);
-      } else {
-        newFavorites.add(recipeId);
-      }
-      return newFavorites;
-    });
-  };
-
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
@@ -145,6 +40,9 @@ const filteredRecipes = recipes.filter(recipe => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  // Get count of user's created recipes
+  const createdRecipesCount = mockRecipes.filter(r => r.user_id === 1).length;
 
   if (isLoading) {
     return (
@@ -159,9 +57,9 @@ const filteredRecipes = recipes.filter(recipe => {
 
   return (
     <div className="min-h-screen bg-background">
-    <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
-      {/* Profile Section */}
-      <div className="mb-8">
+      <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
+        {/* Profile Section */}
+        <div className="mb-8">
           <div className="flex items-center space-x-6 mb-4">
             <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
               <span className="text-3xl text-gray-500">👤</span>
@@ -190,7 +88,7 @@ const filteredRecipes = recipes.filter(recipe => {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Recetas guardadas ({recipes.filter(r => favorites.has(r.id)).length})
+            Recetas guardadas ({getFavoriteCount()})
           </button>
           <button
             onClick={() => handleTabChange('created')}
@@ -200,31 +98,32 @@ const filteredRecipes = recipes.filter(recipe => {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Mis Recetas ({recipes.filter(r => r.isCreatedByUser).length})
+            Mis Recetas ({createdRecipesCount})
           </button>
         </div>
 
-    {/* Recipes Grid */}
-<div className="flex justify-center">
-  <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
-    <div className="flex justify-center">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
-        {currentRecipes.map(recipe => (
-          <Card
-            key={recipe.id}
-            id={recipe.id}
-            image={recipe.image}
-            name={recipe.name}
-            category={recipe.category}
-            time={recipe.time}
-            isFavorite={favorites.has(recipe.id)}
-            onToggleFavorite={handleToggleFavorite}
-          />
-        ))}
-      </div>
-    </div>
-  </div>
-</div>
+        {/* Recipes Grid */}
+        <div className="flex justify-center">
+          <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
+                {currentRecipes.map(recipe => (
+                  <Card
+                    key={recipe.id}
+                    id={recipe.id}
+                    image={recipe.image_url}
+                    name={recipe.name}
+                    category={recipe.category}
+                    time={`${recipe.duration_minutes} m`}
+                    isFavorite={isFavorite(recipe.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Empty State */}
         {filteredRecipes.length === 0 && (
           <div className="text-center py-12">
