@@ -93,11 +93,10 @@ const Home = () => {
                 return (
                   <Badge
                     key={category}
-                    className={`cursor-pointer ${
-                      isSelected
-                        ? "bg-pink-500 text-white"
-                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                    }`}
+                    className={`cursor-pointer ${isSelected
+                      ? "bg-pink-500 text-white"
+                      : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                      }`}
                     onClick={() => toggleCategory(category)}
                   >
                     {category}
@@ -141,13 +140,11 @@ const Home = () => {
           <h2 className="text-3xl font-bold text-gray-900 mb-12">
             ¿Aún no sabes que hacer?
           </h2>
-          <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition">
-            <Button
-              onClick={handleInspireClick}
-              className="text-white font-semibold text-lg bg-transparent hover:bg-transparent shadow-none"
-            >
-              Inspire me
-            </Button>
+          <div
+            onClick={handleInspireClick}
+            className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition cursor-pointer"
+          >
+            <span className="text-white font-semibold text-lg">Inspire me</span>
           </div>
         </div>
       </div>
