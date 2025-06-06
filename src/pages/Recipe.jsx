@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { RecipeIngredientsChecklist } from '../components';
-import { Button } from '../components'; // Asegúrate de que esté bien importado
+import { useParams, useNavigate } from 'react-router-dom';
+import { RecipeIngredientsChecklist, Button } from '../components';
 
 const recetasSimuladas = [
   {
@@ -14,23 +14,11 @@ const recetasSimuladas = [
       { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
       { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
     ],
-     pasos: [
-      {
-        descripcion: 'Precalentar horno',
-        imagen: '/huevos.jpeg'
-      },
-      {
-        descripcion: 'Machacar plátanos',
-        imagen: '/harina.jpeg'
-      },
-      {
-        descripcion: 'Mezclar todo',
-        imagen: '/mezclar-queso.jpeg'
-      },
-      {
-        descripcion: 'Hornear 40 min',
-        imagen: '/hornear.jpeg'
-      }
+    pasos: [
+      { descripcion: 'Precalentar horno', imagen: '/huevos.jpeg' },
+      { descripcion: 'Machacar plátanos', imagen: '/harina.jpeg' },
+      { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
+      { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
     ]
   },
   {
@@ -44,42 +32,37 @@ const recetasSimuladas = [
       { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
       { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
     ],
-     pasos: [
-      {
-        descripcion: 'Precalentar horno',
-        imagen: '/huevos.jpeg'
-      },
-      {
-        descripcion: 'Machacar plátanos',
-        imagen: '/harina.jpeg'
-      },
-      {
-        descripcion: 'Mezclar todo',
-        imagen: '/mezclar-queso.jpeg'
-      },
-      {
-        descripcion: 'Hornear 40 min',
-        imagen: '/hornear.jpeg'
-      }
+    pasos: [
+      { descripcion: 'Precalentar horno', imagen: '/huevos.jpeg' },
+      { descripcion: 'Machacar plátanos', imagen: '/harina.jpeg' },
+      { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
+      { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
     ]
   }
 ];
 
 const Recipe = () => {
-  const [indiceActual, setIndiceActual] = useState(0);
-  const receta = recetasSimuladas[indiceActual];
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const index = parseInt(id, 10) - 1;
+
+  const receta = recetasSimuladas[index];
   const pasosRef = useRef(null);
 
   const [checkedItems, setCheckedItems] = useState({});
 
+  if (!receta) {
+    return <div className="text-center p-6">Receta no encontrada</div>;
+  }
+
   const handleToggleCheck = (id) => {
-    setCheckedItems(prev => ({
+    setCheckedItems((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
-  const areAllChecked = receta.ingredientes.every(item => checkedItems[item.id]);
+  const areAllChecked = receta.ingredientes.every((item) => checkedItems[item.id]);
   const isAnyChecked = Object.values(checkedItems).some(Boolean);
 
   const handleStartCooking = () => {
@@ -89,29 +72,26 @@ const Recipe = () => {
   };
 
   const handleAddToShoppingList = () => {
-    const seleccionados = receta.ingredientes.filter(item => checkedItems[item.id]);
+    const seleccionados = receta.ingredientes.filter((item) => checkedItems[item.id]);
     alert(`${seleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
   };
 
   const handleAnterior = () => {
-    setCheckedItems({}); // reset al cambiar de receta
-    if (indiceActual > 0) setIndiceActual(indiceActual - 1);
+    setCheckedItems({});
+    if (index > 0) navigate(`/recipe/${index}`);
   };
 
   const handleSiguiente = () => {
-    setCheckedItems({}); // reset al cambiar de receta
-    if (indiceActual < recetasSimuladas.length - 1) {
-      setIndiceActual(indiceActual + 1);
-    }
+    setCheckedItems({});
+    if (index < recetasSimuladas.length - 1) navigate(`/recipe/${index + 2}`);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-center">
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
-
-        {/* Navegación con botones */}
+        {/* Navegación */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={handleAnterior} disabled={indiceActual === 0} className="text-3xl">
+          <button onClick={handleAnterior} disabled={index === 0} className="text-3xl">
             &lt;
           </button>
           <div className="text-center flex-1">
@@ -120,7 +100,7 @@ const Recipe = () => {
           </div>
           <button
             onClick={handleSiguiente}
-            disabled={indiceActual === recetasSimuladas.length - 1}
+            disabled={index === recetasSimuladas.length - 1}
             className="text-3xl"
           >
             &gt;
@@ -141,7 +121,7 @@ const Recipe = () => {
           onToggleCheck={handleToggleCheck}
         />
 
-        {/* Botones */}
+        {/* Botones de acción */}
         <div className="grid grid-cols-2 gap-3 mt-6 max-w-md mx-auto">
           <Button
             onClick={handleAddToShoppingList}
@@ -171,18 +151,17 @@ const Recipe = () => {
         <div ref={pasosRef} className="mt-16">
           <h2 className="text-2xl font-semibold mb-6 text-center">Pasos de la receta</h2>
           <ol className="space-y-12">
-            {receta.pasos.map((paso, index) => (
+            {receta.pasos.map((paso, idx) => (
               <li
-                key={index}
+                key={idx}
                 className="flex flex-col items-center bg-background rounded-xl shadow-md p-6 max-w-2xl mx-auto"
               >
-                <span className="text-xl font-bold text-black mb-4">Paso {index + 1}</span>
-                
+                <span className="text-xl font-bold text-black mb-4">Paso {idx + 1}</span>
                 <img
-  src={paso.imagen}
-  alt={`Paso ${index + 1}`}
-  className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
-/>
+                  src={paso.imagen}
+                  alt={`Paso ${idx + 1}`}
+                  className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
+                />
                 <p className="text-gray-700 text-center text-base sm:text-lg font-medium">
                   {paso.descripcion}
                 </p>
@@ -190,7 +169,6 @@ const Recipe = () => {
             ))}
           </ol>
         </div>
-
       </main>
     </div>
   );
