@@ -1,4 +1,17 @@
-// components/IngredientItem.jsx
+/**
+ * CheckedLineItem muestra un ingrediente con su nombre, cantidad y unidad, junto a un checkbox.
+ *
+ * Es ideal para listas de ingredientes donde el usuario puede marcar lo que ya tiene o ha usado.
+ *
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {string} props.name - Nombre del ingrediente (por ejemplo: "Azúcar").
+ * @param {number|string} props.quantity - Cantidad necesaria del ingrediente.
+ * @param {string} props.unit - Unidad de medida (por ejemplo: "g", "ml", "ud").
+ * @param {boolean} props.checked - Estado del checkbox (si está marcado).
+ * @param {Function} props.onChange - Función que se ejecuta al marcar o desmarcar el checkbox.
+ * @returns {JSX.Element} Elemento visual con checkbox e información del ingrediente.
+ */
 export default function CheckedLineItem({ name, quantity, unit, checked, onChange }) {
   return (
     <li className="flex items-center justify-between py-2 border-b border-gray-100">

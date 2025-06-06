@@ -1,5 +1,21 @@
 import FavoriteButton from './buttons/FavoriteButton';
 
+/**
+ * Card muestra una tarjeta visual con imagen, título, categoría, tiempo y botón de favorito.
+ *
+ * Ideal para listas de recetas u otros elementos seleccionables.
+ *
+ * @component
+ * @param {object} props - Props del componente.
+ * @param {number|string} props.id - ID único del ítem (usado para manejar favoritos).
+ * @param {string} props.image - URL de la imagen a mostrar.
+ * @param {string} props.name - Nombre o título del ítem.
+ * @param {string} props.category - Categoría del ítem (por ejemplo: desayuno, almuerzo...).
+ * @param {string} props.time - Tiempo estimado asociado (ej: "20 m").
+ * @param {boolean} props.isFavorite - Indica si el ítem está marcado como favorito.
+ * @param {Function} props.onToggleFavorite - Función para manejar el cambio de estado de favorito.
+ * @returns {JSX.Element} Tarjeta visual con contenido y acción de favorito.
+ */
 const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite }) => {
   return (
     <div className="w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">

@@ -1,5 +1,23 @@
 import { useState, useMemo, startTransition } from 'react';
 
+/**
+ * CategoryFilter es un componente visual e interactivo que permite al usuario seleccionar
+ * una o varias categorías de una lista, ideal para sistemas de filtros (por ejemplo: recetas, productos).
+ *
+ * Muestra un listado de categorías disponibles, permite marcar/desmarcar, y expande el listado si hay muchas.
+ *
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {Array<{ id: string|number, label: string, available: boolean }>} props.categories - Lista de categorías disponibles para seleccionar.
+ * @param {Array<string|number>} [props.initialSelected=[]] - Lista de IDs de categorías preseleccionadas al cargar.
+ * @param {Function} props.onSelectionChange - Callback que se ejecuta cada vez que cambia la selección. Recibe un array de IDs seleccionados.
+ * @param {string} [props.className] - Clases CSS adicionales para aplicar al contenedor.
+ * @param {boolean} [props.loading=false] - Si está activado, muestra un estado de carga (skeleton).
+ * @param {string} [props.title="Categories"] - Título que se muestra arriba del filtro.
+ * @param {number} [props.maxRowsWhenCollapsed=4] - Máximo de filas visibles cuando el filtro está colapsado.
+ * @param {number} [props.itemsPerRow=2] - Cantidad de items por fila (para calcular cuántos mostrar cuando está colapsado).
+ * @returns {JSX.Element} Filtro visual por categorías con opción de expandir y seleccionar múltiples.
+ */
 export default function CategoryFilter({
   categories = [],
   initialSelected = [],
