@@ -1,9 +1,30 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RecipeIngredientsChecklist, Button } from '../components';
 
-const recetasSimuladas = [
+// ✅ Simulación de recetas ordenadas (esto más adelante vendrá de tu backend)
+const recetasOrdenadas = [
   {
+    id: 1,
+    titulo: 'Tarta de queso',
+    tiempo: 35,
+    imagen: '/tarta-queso.jpeg',
+    ingredientes: [
+      { id: 1, name: 'Queso crema', quantity: 300, unit: 'g' },
+      { id: 2, name: 'Galletas', quantity: 150, unit: 'g' },
+      { id: 3, name: 'Mantequilla', quantity: 100, unit: 'g' },
+      { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
+      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
+    ],
+    pasos: [
+      { descripcion: 'Precalentar horno', imagen: '/huevos.jpeg' },
+      { descripcion: 'Machacar galletas', imagen: '/harina.jpeg' },
+      { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
+      { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
+    ]
+  },
+  {
+    id: 2,
     titulo: 'Pan de plátano',
     tiempo: 20,
     imagen: '/panplatano.jpeg',
@@ -20,34 +41,17 @@ const recetasSimuladas = [
       { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
       { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
     ]
-  },
-  {
-    titulo: 'Tarta de queso',
-    tiempo: 35,
-    imagen: '/tarta-queso.jpeg',
-    ingredientes: [
-      { id: 1, name: 'Queso crema', quantity: 300, unit: 'g' },
-      { id: 2, name: 'Galletas', quantity: 150, unit: 'g' },
-      { id: 3, name: 'Mantequilla', quantity: 100, unit: 'g' },
-      { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
-      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
-    ],
-    pasos: [
-      { descripcion: 'Precalentar horno', imagen: '/huevos.jpeg' },
-      { descripcion: 'Machacar plátanos', imagen: '/harina.jpeg' },
-      { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
-      { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
-    ]
   }
 ];
 
 const Recipe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const index = parseInt(id, 10) - 1;
-
-  const receta = recetasSimuladas[index];
   const pasosRef = useRef(null);
+
+  const currentId = parseInt(id, 10);
+  const currentIndex = recetasOrdenadas.findIndex(r => r.id === currentId);
+  const receta = recetasOrdenadas[currentIndex];
 
   const [checkedItems, setCheckedItems] = useState({});
 
@@ -56,13 +60,13 @@ const Recipe = () => {
   }
 
   const handleToggleCheck = (id) => {
-    setCheckedItems((prev) => ({
+    setCheckedItems(prev => ({
       ...prev,
-      [id]: !prev[id],
+      [id]: !prev[id]
     }));
   };
 
-  const areAllChecked = receta.ingredientes.every((item) => checkedItems[item.id]);
+  const areAllChecked = receta.ingredientes.every(item => checkedItems[item.id]);
   const isAnyChecked = Object.values(checkedItems).some(Boolean);
 
   const handleStartCooking = () => {
@@ -72,18 +76,24 @@ const Recipe = () => {
   };
 
   const handleAddToShoppingList = () => {
-    const seleccionados = receta.ingredientes.filter((item) => checkedItems[item.id]);
+    const seleccionados = receta.ingredientes.filter(item => checkedItems[item.id]);
     alert(`${seleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
   };
 
   const handleAnterior = () => {
     setCheckedItems({});
-    if (index > 0) navigate(`/recipe/${index}`);
+    if (currentIndex > 0) {
+      const anteriorId = recetasOrdenadas[currentIndex - 1].id;
+      navigate(`/recipe/${anteriorId}`);
+    }
   };
 
   const handleSiguiente = () => {
     setCheckedItems({});
-    if (index < recetasSimuladas.length - 1) navigate(`/recipe/${index + 2}`);
+    if (currentIndex < recetasOrdenadas.length - 1) {
+      const siguienteId = recetasOrdenadas[currentIndex + 1].id;
+      navigate(`/recipe/${siguienteId}`);
+    }
   };
 
   return (
@@ -91,7 +101,7 @@ const Recipe = () => {
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
         {/* Navegación */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={handleAnterior} disabled={index === 0} className="text-3xl">
+          <button onClick={handleAnterior} disabled={currentIndex === 0} className="text-3xl">
             &lt;
           </button>
           <div className="text-center flex-1">
@@ -100,7 +110,7 @@ const Recipe = () => {
           </div>
           <button
             onClick={handleSiguiente}
-            disabled={index === recetasSimuladas.length - 1}
+            disabled={currentIndex === recetasOrdenadas.length - 1}
             className="text-3xl"
           >
             &gt;
@@ -151,15 +161,15 @@ const Recipe = () => {
         <div ref={pasosRef} className="mt-16">
           <h2 className="text-2xl font-semibold mb-6 text-center">Pasos de la receta</h2>
           <ol className="space-y-12">
-            {receta.pasos.map((paso, idx) => (
+            {receta.pasos.map((paso, index) => (
               <li
-                key={idx}
+                key={index}
                 className="flex flex-col items-center bg-background rounded-xl shadow-md p-6 max-w-2xl mx-auto"
               >
-                <span className="text-xl font-bold text-black mb-4">Paso {idx + 1}</span>
+                <span className="text-xl font-bold text-black mb-4">Paso {index + 1}</span>
                 <img
                   src={paso.imagen}
-                  alt={`Paso ${idx + 1}`}
+                  alt={`Paso ${index + 1}`}
                   className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
                 />
                 <p className="text-gray-700 text-center text-base sm:text-lg font-medium">
