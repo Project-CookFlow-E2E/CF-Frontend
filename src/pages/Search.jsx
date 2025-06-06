@@ -2,9 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Plus, Minus } from "lucide-react";
-import CategoryFilter from "../components/CategoryFilter";
-import Card from "../components/Card";
-import Button from "../components/Button";
+import { Button, Card, CategoryFilter } from "../components";
 import useRecipe from "../hooks/useRecipe";
 import {
   mockCategories,
@@ -28,8 +26,8 @@ const Search = () => {
   const [tempOrigin, setTempOrigin] = useState([]);
   const [tempType, setTempType] = useState([]);
 
-  const [favorites, setFavorites] = useState(() =>
-    JSON.parse(localStorage.getItem("favorites")) || []
+  const [favorites, setFavorites] = useState(
+    () => JSON.parse(localStorage.getItem("favorites")) || [],
   );
 
   const carouselRef = useRef(null);
@@ -87,7 +85,8 @@ const Search = () => {
 
   const RecipeCard = ({ id }) => {
     const { recipe, loading } = useRecipe(id);
-    if (loading) return <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />;
+    if (loading)
+      return <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />;
     if (!recipe) return null;
 
     return (
@@ -159,8 +158,19 @@ const Search = () => {
               className="outline-none w-full bg-transparent"
             />
             <button onClick={handleSearch}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="lucide lucide-search" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.34-4.34" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="lucide lucide-search"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.34-4.34" />
               </svg>
             </button>
           </div>
@@ -171,9 +181,16 @@ const Search = () => {
       <div className="flex flex-col lg:flex-row gap-8 lg:pl-4">
         {/* Filters */}
         <div className="w-full lg:w-1/3">
-          <div className="flex items-center justify-between px-4 mb-3 cursor-pointer" onClick={() => setFiltersOpen(!filtersOpen)}>
+          <div
+            className="flex items-center justify-between px-4 mb-3 cursor-pointer"
+            onClick={() => setFiltersOpen(!filtersOpen)}
+          >
             <h4 className="text-lg font-semibold">Filtros</h4>
-            {filtersOpen ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+            {filtersOpen ? (
+              <Minus className="w-5 h-5" />
+            ) : (
+              <Plus className="w-5 h-5" />
+            )}
           </div>
           <FiltersSection />
         </div>
@@ -182,7 +199,10 @@ const Search = () => {
         <div className="w-full lg:w-2/3">
           <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
             <h4 className="text-xl font-bold">Recetas populares</h4>
-            <h4 className="text-gray-500 cursor-pointer" onClick={() => setShowAll(!showAll)}>
+            <h4
+              className="text-gray-500 cursor-pointer"
+              onClick={() => setShowAll(!showAll)}
+            >
               {showAll ? "Ver menos" : "Ver todas"}
             </h4>
           </div>
@@ -190,7 +210,9 @@ const Search = () => {
           {showAll ? (
             filteredRecipes.length ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30">
-                {filteredRecipes.map((r) => <RecipeCard key={r.id} id={r.id} />)}
+                {filteredRecipes.map((r) => (
+                  <RecipeCard key={r.id} id={r.id} />
+                ))}
               </div>
             ) : (
               <div className="text-center text-gray-600 text-lg mt-10 mb-40">
