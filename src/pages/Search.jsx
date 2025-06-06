@@ -4,14 +4,63 @@ import { Plus, Minus } from "lucide-react";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import { useLocation } from "react-router-dom";
+import AutocompleteInput from "../components/AutocompleteInput";
 
 const popularRecipes = [
-  { id: 1, image: "/pasta.jpg", name: "Pasta Carbonara", category: "comida", origin: "italia", type: "cocido", time: "30 m" },
-  { id: 2, image: "/salad.jpg", name: "Ensalada rica", category: "cena", origin: "grecia", type: "frito", time: "15 m" },
-  { id: 3, image: "/soup.jpg", name: "Sopa de calabaza", category: "cena", origin: "españa", type: "sopa", time: "20 m" },
-  { id: 4, image: "/pancakes.jpg", name: "Tortitas", category: "desayuno", origin: "americana", type: "plancha", time: "25 m" },
-  { id: 5, image: "/tortilla.jpg", name: "Tortilla de patata", category: "comida", origin: "españa", type: "frito", time: "45 m" },
-  { id: 6, image: "/sushi.jpeg", name: "Sushi", category: "cena", origin: "japonesa", type: "crudo", time: "55 m" },
+  {
+    id: 1,
+    image: "/pasta.jpg",
+    name: "Pasta Carbonara",
+    category: "comida",
+    origin: "italia",
+    type: "cocido",
+    time: "30 m",
+  },
+  {
+    id: 2,
+    image: "/salad.jpg",
+    name: "Ensalada rica",
+    category: "cena",
+    origin: "grecia",
+    type: "frito",
+    time: "15 m",
+  },
+  {
+    id: 3,
+    image: "/soup.jpg",
+    name: "Sopa de calabaza",
+    category: "cena",
+    origin: "españa",
+    type: "sopa",
+    time: "20 m",
+  },
+  {
+    id: 4,
+    image: "/pancakes.jpg",
+    name: "Tortitas",
+    category: "desayuno",
+    origin: "americana",
+    type: "plancha",
+    time: "25 m",
+  },
+  {
+    id: 5,
+    image: "/tortilla.jpg",
+    name: "Tortilla de patata",
+    category: "comida",
+    origin: "españa",
+    type: "frito",
+    time: "45 m",
+  },
+  {
+    id: 6,
+    image: "/sushi.jpeg",
+    name: "Sushi",
+    category: "cena",
+    origin: "japonesa",
+    type: "crudo",
+    time: "55 m",
+  },
 ];
 
 const mockCategories = [
@@ -28,7 +77,7 @@ const mockOrigin = [
   { id: "italia", label: "Italiana", available: true },
   { id: "grecia", label: "Griega", available: true },
   { id: "españa", label: "Española", available: true },
-  { id: "japon", label: "Japonesa", available: true },
+  { id: "japonesa", label: "Japonesa", available: true },
   { id: "americana", label: "Americana", available: true },
 ];
 
@@ -71,7 +120,7 @@ const Search = () => {
     const categoryParam = params.get("category");
 
     if (categoryParam) {
-      const categories = categoryParam.split(",").map(c => c.trim());
+      const categories = categoryParam.split(",").map((c) => c.trim());
       setSelectedCategory(categories);
       setTempSelectedCategory(categories);
       setIsOpen(true);
@@ -85,8 +134,7 @@ const Search = () => {
         selectedCategory.length === 0 ||
         selectedCategory.includes(recipe.category);
       const matchOrigin =
-        selectedOrigin.length === 0 ||
-        selectedOrigin.includes(recipe.origin);
+        selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin);
       const matchType =
         selectedCookingType.length === 0 ||
         selectedCookingType.includes(recipe.type);
@@ -101,6 +149,9 @@ const Search = () => {
 
   const handleSearch = () => {
     setSearchTerm(searchQuery.trim());
+    setSelectedCategory(tempSelectedCategory);
+    setSelectedOrigin(tempSelectedOrigin);
+    setSelectedCookingType(tempSelectedCookingType);
     setShowAll(true);
   };
 
@@ -146,12 +197,12 @@ const Search = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-26 lg:px-10">
-      <div className="w-full max-w-screen-lg px-0 lg:pl-4">
+      <div className="w-full lg:w-1/2 pr-4">
         <h4 className="text-xl font-bold text-black mb-2">
           ¿Qué quieres cocinar?
         </h4>
         <div className="w-full max-w-xl lg:max-w-2xl border border-black rounded-lg mb-10 mt-0 lg:mt-4">
-          <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 w-full">
+          <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 lg:px-6 lg:py-4 w-full">
             <input
               type="text"
               placeholder="Buscar receta..."
@@ -160,7 +211,7 @@ const Search = () => {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSearch();
               }}
-              className="outline-none w-full bg-transparent"
+              className="outline-none w-full bg-transparent text-base lg:text-lg"
             />
             <button onClick={handleSearch}>
               <svg
@@ -217,12 +268,7 @@ const Search = () => {
               <div className="flex justify-center">
                 <Button
                   className="mb-3 w-40 px-1"
-                  onClick={() => {
-                    setSelectedCategory(tempSelectedCategory);
-                    setSelectedOrigin(tempSelectedOrigin);
-                    setSelectedCookingType(tempSelectedCookingType);
-                    setShowAll(true);
-                  }}
+                  onClick={handleSearch}
                 >
                   Buscar
                 </Button>
@@ -231,9 +277,9 @@ const Search = () => {
           )}
         </div>
 
-        <div className="w-full lg:w-2/3">
-          <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
-            <h4 className="text-xl font-bold text-black">Recetas populares</h4>
+        <div className="w-full lg:w-1/2 pl-4">
+          <div className="flex justify-between items-center px-1 sm:px-2 mb-4 mt-6">
+            <h4 className="text-xl font-bold text-black mb-1">Recetas populares</h4>
             <h4
               className="text-l text-gray-500 cursor-pointer"
               onClick={() => setShowAll(!showAll)}
