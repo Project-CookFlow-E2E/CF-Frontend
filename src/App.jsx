@@ -1,30 +1,55 @@
-import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing } from './pages'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Footer } from './components';
-import { Header } from './components';
+// import React from 'react';
+// import { BrowserRouter, Routes, Route } from 'react-router-dom';
+// import { 
+//   AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing 
+// } from './pages';
+// import { Header } from './components';
+// import { Footer } from './components';
 
+// function App() {
+//   return (
+//     <BrowserRouter>
+//       <Header />
+//       <Routes>
+//         <Route path="/" element={<Landing />} />
+//         <Route path="/home" element={<Home />} />
+//         <Route path="/profile" element={<Profile />} />
+//         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+//         {/* Otras rutas */}
+//       </Routes>
+//       <Footer />
+//     </BrowserRouter>
+//   );
+// }
+
+// export default App;
+
+
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { 
+  AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing 
+} from './pages';
+import { Header } from './components';
+import { Footer } from './components';
 
 function App() {
-
   return (
-      <BrowserRouter>
-        <Header />
+    <BrowserRouter>
+      <Header />
+      {/* Aplicamos la clase bg-background al contenedor principal del contenido */}
+      <div className="min-h-screen bg-background"> 
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/recipe/:id" element={<Recipe />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/inspire-me" element={<InspireMe />} />
-          <Route path="/add-recipe" element={<AddRecipe />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/shopping-list" element={<ShoppingList />} />
-          <Route path="/main" element={<Landing/>} />
+          {/* Otras rutas */}
         </Routes>
-        <Footer />
-      </BrowserRouter>
-  )
+      </div>
+      <Footer />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
