@@ -1,22 +1,40 @@
+/**
+ * @file InspireMe.jsx
+ * @description Página de inspiración culinaria tipo "Tinder de recetas".
+ * Permite a los usuarios ver recetas una por una y marcarlas como favoritas o saltarlas.
+ * Utiliza datos simulados (`mockRecipes`) y gestiona favoritos en `localStorage`.
+ * 
+ * El componente `SwipeCard` representa visualmente cada receta con acciones de swipe.
+ * 
+ * 👉 Este flujo puede adaptarse fácilmente a datos reales desde el backend.
+ * 
+ * @module pages/InspireMe
+ */
+
 import { useState } from 'react';
 import SwipeCard from '../components/cards/SwipeCard';
 import { mockRecipes } from '../data/mockData';
 import useRecipe from '../hooks/useRecipe';
 
 const InspireMe = () => {
-  // Local state for recipe index
+  // Estado para el índice actual de receta
   const [currentRecipeIndex, setCurrentRecipeIndex] = useState(0);
 
-  // Local state for favorites, initialized from localStorage
+  // Estado local para favoritos, cargado desde localStorage
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favorites');
     return saved ? JSON.parse(saved) : [];
   });
 
+  // ID de la receta actual según el índice
   const currentRecipeId = mockRecipes[currentRecipeIndex]?.id;
   const { recipe, loading } = useRecipe(currentRecipeId);
 
-  // Toggle favorite status and update localStorage
+  /**
+   * Añade o quita una receta de la lista de favoritos
+   * y pasa automáticamente a la siguiente receta.
+   * @param {number} recipeId - ID de la receta a marcar o desmarcar como favorita
+   */
   const handleToggleFavorite = (recipeId) => {
     const idStr = String(recipeId);
     const isFavorite = favorites.includes(idStr);
@@ -29,19 +47,24 @@ const InspireMe = () => {
     goToNextRecipe();
   };
 
-  // Skip to next recipe
+  /**
+   * Salta a la siguiente receta sin marcar como favorita.
+   */
   const handleSkip = () => {
     goToNextRecipe();
   };
 
-  // Go to next recipe (loop to start if at end)
+  /**
+   * Lógica para avanzar al siguiente índice de receta.
+   * Si se llega al final del array, vuelve al inicio (loop).
+   */
   const goToNextRecipe = () => {
     setCurrentRecipeIndex(prev =>
       prev >= mockRecipes.length - 1 ? 0 : prev + 1
     );
   };
 
-  // If there are no recipes, show a message
+  // Muestra si no hay recetas disponibles
   if (!mockRecipes.length) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -50,7 +73,7 @@ const InspireMe = () => {
     );
   }
 
-  // Loading state
+  // Estado de carga
   if (loading || !recipe) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -59,7 +82,7 @@ const InspireMe = () => {
     );
   }
 
-  // Render the swipe card
+  // Renderiza la receta actual con SwipeCard
   return (
     <div className="min-h-screen py-8 px-4" style={{ backgroundColor: '#FDF3E8' }}>
       <div className="max-w-md mx-auto">

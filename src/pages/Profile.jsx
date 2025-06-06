@@ -1,9 +1,36 @@
+/**
+ * @file Profile.jsx
+ * @description Página de perfil de usuario que muestra recetas guardadas (favoritos) y recetas creadas por el usuario.
+ * Incluye paginación, tabs de navegación y control de favoritos almacenados en localStorage.
+ *
+ * Funcionalidades:
+ * - Alternancia entre recetas guardadas y creadas por el usuario.
+ * - Visualización paginada de recetas (8 por página).
+ * - Posibilidad de marcar/desmarcar recetas como favoritas.
+ *
+ * Componentes usados:
+ * - Card: para mostrar cada receta.
+ * - Pagination: control de cambio de página.
+ * - useRecipe: hook que obtiene los detalles de una receta por ID.
+ * - mockRecipes: datos simulados de recetas.
+ *
+ * @module pages/Profile
+ */
+
 import { useState, useEffect } from "react";
 import useRecipe from "../hooks/useRecipe";
 import { mockRecipes } from "../data/mockData";
 import { Card, Pagination } from "../components";
 
-// Component to render individual recipe cards
+/**
+ * Componente para renderizar una tarjeta de receta individual con funcionalidad de favoritos.
+ *
+ * @param {Object} props
+ * @param {number} props.id - ID de la receta a mostrar.
+ * @param {string[]} props.favorites - Lista de IDs marcados como favoritos.
+ * @param {Function} props.setFavorites - Función para actualizar favoritos.
+ * @returns {JSX.Element}
+ */
 const RecipeCard = ({ id, favorites, setFavorites }) => {
   const { recipe, loading } = useRecipe(id);
   const isFavorite = favorites.includes(String(id));
@@ -35,7 +62,12 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
   );
 };
 
-// Main Profile component
+/**
+ * Página de perfil del usuario.
+ * Permite al usuario ver sus recetas guardadas y las creadas, con navegación por pestañas y paginación.
+ *
+ * @returns {JSX.Element}
+ */
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("saved");
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +78,6 @@ const Profile = () => {
 
   const recipesPerPage = 8;
 
-  // Filter recipes based on the active tab
   const filteredRecipes = mockRecipes.filter((recipe) => {
     if (activeTab === "saved") {
       return favorites.includes(String(recipe.id));
@@ -55,18 +86,14 @@ const Profile = () => {
     }
   });
 
-  // Get recipe IDs for pagination
   const filteredRecipeIds = filteredRecipes.map((recipe) => recipe.id);
-
-  // Pagination logic
   const totalPages = Math.ceil(filteredRecipeIds.length / recipesPerPage);
   const startIndex = (currentPage - 1) * recipesPerPage;
   const currentRecipeIds = filteredRecipeIds.slice(
     startIndex,
-    startIndex + recipesPerPage,
+    startIndex + recipesPerPage
   );
 
-  // Reset current page when the active tab changes
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab]);
@@ -79,15 +106,15 @@ const Profile = () => {
     setCurrentPage(page);
   };
 
-  // Get count of user's created recipes
   const createdRecipesCount = mockRecipes.filter(
-    (recipe) => recipe.isCreatedByUser,
+    (recipe) => recipe.isCreatedByUser
   ).length;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
-        {/* Profile Section */}
+
+        {/* Perfil de usuario */}
         <div className="mb-8">
           <div className="flex items-center space-x-6 mb-4">
             <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
@@ -95,19 +122,14 @@ const Profile = () => {
             </div>
             <h2 className="text-3xl font-bold">Emma González</h2>
           </div>
-          <div className="max-w-3xl">
-            <p className="text-gray-600">
-              Emma González es editora adjunta en Cheffly, y aporta su
-              experiencia como expeditora de cocina en The Los Angeles Times.
-              También es una autora reconocida, con contribuciones a numerosos
-              libros de cocina y publicaciones gastronómicas. Originaria del
-              Este de Los Angeles, Emma reside ahora en la ciudad de Nueva York,
-              donde explora una amplia variedad de delicias culinarias.
-            </p>
-          </div>
+          <p className="max-w-3xl text-gray-600">
+            Emma González es editora adjunta en Cheffly, y aporta su experiencia
+            como expeditora de cocina en The Los Angeles Times. También es una
+            autora reconocida, con contribuciones a numerosos libros de cocina.
+          </p>
         </div>
 
-        {/* Tabs */}
+        {/* Pestañas para cambiar entre guardadas y creadas */}
         <div className="flex space-x-4 mb-6">
           <button
             onClick={() => handleTabChange("saved")}
@@ -131,25 +153,19 @@ const Profile = () => {
           </button>
         </div>
 
-        {/* Recipes Grid */}
-        <div className="flex justify-center">
-          <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
-                {currentRecipeIds.map((id) => (
-                  <RecipeCard
-                    key={id}
-                    id={id}
-                    favorites={favorites}
-                    setFavorites={setFavorites}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* Recetas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
+          {currentRecipeIds.map((id) => (
+            <RecipeCard
+              key={id}
+              id={id}
+              favorites={favorites}
+              setFavorites={setFavorites}
+            />
+          ))}
         </div>
 
-        {/* Empty State */}
+        {/* Estado vacío si no hay recetas */}
         {filteredRecipeIds.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">
@@ -168,7 +184,7 @@ const Profile = () => {
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Paginación */}
         {totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
@@ -182,4 +198,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

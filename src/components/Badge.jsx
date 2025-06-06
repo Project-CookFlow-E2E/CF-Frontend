@@ -1,5 +1,17 @@
 import React from "react";
 
+/**
+ * Badge es un componente visual tipo etiqueta (pill) que funciona como un checkbox oculto.
+ *
+ * Permite seleccionar o deseleccionar su estado visualmente, útil para filtros, categorías, etc.
+ *
+ * @component
+ * @param {object} props - Props del componente.
+ * @param {React.ReactNode} props.children - Contenido del badge (texto o icono).
+ * @param {string} [props.className] - Clases adicionales para personalizar el estilo.
+ * @param {any} [props.rest] - Cualquier otra prop válida para el input (como onChange, name, checked...).
+ * @returns {JSX.Element} Elemento visual interactivo.
+ */
 const Badge = ({ children, className = "", ...props }) => {
     return (
         <label className="inline-flex items-center cursor-pointer">
@@ -14,3 +26,4 @@ const Badge = ({ children, className = "", ...props }) => {
 };
 
 export default Badge;
+

@@ -1,10 +1,38 @@
+/**
+ * @file Landing.jsx
+ * @description Página de bienvenida (Landing Page) para usuarios no registrados.
+ * Presenta la propuesta de valor de CookFlow con una introducción visual, problemas comunes
+ * relacionados con la cocina y una sección de recetas destacadas.
+ *
+ * Esta página actúa como punto de entrada para que los usuarios nuevos entiendan el objetivo
+ * de la plataforma y se registren para empezar a usarla.
+ *
+ * Componentes utilizados:
+ * - Button: Botón reutilizable
+ * - Card: Vista individual de receta
+ * - useRecipe: Hook personalizado para obtener datos de receta (mock en este caso)
+ *
+ * Navegación:
+ * - Los botones redirigen a la ruta `/signup` para incentivar el registro.
+ *
+ * @module pages/Landing
+ */
+
 import React from "react";
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
 import useRecipe from "../hooks/useRecipe";
 
+// IDs simulados de recetas destacadas (vendrán del backend en futuro)
 const recipeIds = [1, 2, 3];
 
+/**
+ * Renderiza una receta individual dentro del carrusel de recetas destacadas.
+ * Si el usuario hace clic en el icono de favorito, se le redirige al registro.
+ *
+ * @param {Object} props
+ * @param {number} props.id - ID de la receta
+ */
 const RecipeCard = ({ id }) => {
   const { recipe, loading } = useRecipe(id);
   const navigate = useNavigate();
@@ -25,10 +53,19 @@ const RecipeCard = ({ id }) => {
   );
 };
 
+/**
+ * Página principal de entrada para nuevos usuarios.
+ * Contiene:
+ * - Sección Hero con llamada a la acción
+ * - Descripción de problemas comunes al cocinar
+ * - Propuesta de solución con recetas destacadas
+ *
+ * @returns {JSX.Element}
+ */
 const Landing = () => {
   return (
     <div className="flex flex-col items-center justify-center w-full font-sans">
-      {/* Hero Section */}
+      {/* Sección Hero con fondo visual */}
       <div
         className="w-full h-[500px] bg-cover bg-center flex flex-col items-center justify-center text-center px-4"
         style={{ backgroundImage: "url('/landing.png')" }}
@@ -44,7 +81,7 @@ const Landing = () => {
         </Link>
       </div>
 
-      {/* Problem Section */}
+      {/* Sección Problemas comunes al cocinar */}
       <div className="bg-[#e9e6d7] w-full py-16 text-center">
         <h2 className="text-2xl font-semibold mb-12">
           From frustration to enjoyment
@@ -71,7 +108,7 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Solution Section */}
+      {/* Sección Propuesta de solución + Recetas destacadas */}
       <div className="bg-[#fdf2f2] w-full py-16 px-4 text-center">
         <h2 className="text-2xl font-semibold mb-4">The CookFlow solution</h2>
         <p className="max-w-2xl mx-auto text-gray-700 mb-8 text-sm">
