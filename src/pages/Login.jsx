@@ -35,7 +35,7 @@ const Login = () => {
 
                     <div className="flex flex-col mb-4 w-full">
                         <label className="text-xs mb-2 font-bold text-black">
-                            Correo electrónico
+                            Correo electrónico o nombre de usuario
                         </label>
                         <div className="peer border border-black rounded-md">
                             <Input
