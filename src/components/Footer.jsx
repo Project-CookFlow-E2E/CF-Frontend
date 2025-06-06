@@ -1,4 +1,4 @@
-import { Utensils, PlusCircle, ShoppingBasket, Search } from 'lucide-react'
+import { PlusCircle, ShoppingBasket, Search } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
 const Footer = () => {
