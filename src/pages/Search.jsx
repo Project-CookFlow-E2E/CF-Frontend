@@ -196,7 +196,7 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-26 lg:px-10">
+    <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-15 lg:px-10">
       <div className="w-full lg:w-1/2 pr-4">
         <h4 className="text-xl font-bold text-black mb-2">
           ¿Qué quieres cocinar?
@@ -233,8 +233,8 @@ const Search = () => {
         </div>
       </div>
 
-      <div className="w-full flex flex-col lg:flex-row gap-8 px-0 lg:pl-4">
-        <div className="w-full lg:w-1/3">
+      <div className="w-full flex flex-col md:flex-row items-start gap-8 px-0 md:px-4">
+        <div className="w-full md:w-1/2">
           <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
           {isOpen && (
             <>
@@ -277,8 +277,8 @@ const Search = () => {
           )}
         </div>
 
-        <div className="w-full lg:w-1/2 pl-4">
-          <div className="flex justify-between items-center px-1 sm:px-2 mb-4 mt-6">
+        <div className="w-full md:w-1/2 md:pl-4 md:mt-0">
+          <div className="flex justify-between items-center px-1 sm:px-2">
             <h4 className="text-xl font-bold text-black mb-1">Recetas populares</h4>
             <h4
               className="text-l text-gray-500 cursor-pointer"
@@ -290,7 +290,7 @@ const Search = () => {
 
           {showAll ? (
             filteredRecipes.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30 justify-items-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30 ">
                 {filteredRecipes.map((recipe) => (
                   <Card key={recipe.id} {...recipe} />
                 ))}
@@ -304,7 +304,7 @@ const Search = () => {
             <div className="relative">
               <div
                 ref={carouselRef}
-                className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab sm:justify-start justify-center"
+                 className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab sm:justify-start justify-center md:hidden"
                 style={{ scrollSnapType: "x mandatory" }}
                 onMouseDown={onMouseDown}
                 onMouseLeave={onMouseLeave}
