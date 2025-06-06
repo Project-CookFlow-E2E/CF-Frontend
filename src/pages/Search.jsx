@@ -1,5 +1,8 @@
-// /src/pages/Search.jsx
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import CategoryFilter from "../components/CategoryFilter";
+import { Plus, Minus } from "lucide-react";
+import Card from "../components/Card";
+import Button from "../components/Button";
 import { useLocation } from "react-router-dom";
 import AutocompleteInput from "../components/AutocompleteInput";
 
@@ -91,28 +94,26 @@ const mockTypeCooking = [
 ];
 
 const Search = () => {
-  const location = useLocation();
-
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [showAll, setShowAll] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [selectedOrigin, setSelectedOrigin] = useState([]);
-  const [selectedType, setSelectedType] = useState([]);
+  const [selectedCookingType, setSelectedCookingType] = useState([]);
 
-  const [tempCategory, setTempCategory] = useState([]);
-  const [tempOrigin, setTempOrigin] = useState([]);
-  const [tempType, setTempType] = useState([]);
-
-  const [favorites, setFavorites] = useState(
-    () => JSON.parse(localStorage.getItem("favorites")) || [],
-  );
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const carouselRef = useRef(null);
+
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeftStart, setScrollLeftStart] = useState(0);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [tempSelectedCategory, setTempSelectedCategory] = useState([]);
+  const [tempSelectedOrigin, setTempSelectedOrigin] = useState([]);
+  const [tempSelectedCookingType, setTempSelectedCookingType] = useState([]);
+
+  const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -156,96 +157,43 @@ const Search = () => {
 
   function FiltroToggle({ isOpen, toggleOpen }) {
     return (
-      match(selectedCategory, recipe.category) &&
-      match(selectedOrigin, recipe.origin) &&
-      match(selectedType, recipe.type) &&
-      recipe.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      <div
+        className="flex items-center justify-between w-full px-4 cursor-pointer mb-3"
+        onClick={toggleOpen}
+      >
+        <h4 className="text-lg sm:text-xl font-semibold m-0">Filtros</h4>
+        {isOpen ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+      </div>
     );
-  };
+  }
 
-  const filteredRecipes = mockRecipes.filter(matchesFilter);
-
-  const handleSearch = () => setShowAll(true);
-
-  const handleToggleFavorite = (id) => {
-    const idStr = String(id);
-    const updated = favorites.includes(idStr)
-      ? favorites.filter((f) => f !== idStr)
-      : [...favorites, idStr];
-    setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-  };
-
-  const handleDragStart = (x) => {
+  const onMouseDown = (e) => {
     setIsDragging(true);
-    setStartX(x - carouselRef.current.offsetLeft);
+    setStartX(e.pageX - carouselRef.current.offsetLeft);
     setScrollLeftStart(carouselRef.current.scrollLeft);
   };
-
-  const handleDragMove = (x) => {
+  const onMouseLeave = () => setIsDragging(false);
+  const onMouseUp = () => setIsDragging(false);
+  const onMouseMove = (e) => {
     if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - carouselRef.current.offsetLeft;
     const walk = (x - startX) * 1;
     carouselRef.current.scrollLeft = scrollLeftStart - walk;
   };
 
-  const RecipeCard = ({ id }) => {
-    const { recipe, loading } = useRecipe(id);
-    if (loading)
-      return <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />;
-    if (!recipe) return null;
-
-    return (
-      <Card
-        id={recipe.id}
-        image={recipe.image_url}
-        name={recipe.name}
-        category={recipe.category}
-        time={`${recipe.duration_minutes} m`}
-        isFavorite={favorites.includes(String(id))}
-        onToggleFavorite={() => handleToggleFavorite(id)}
-      />
-    );
+  const onTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - carouselRef.current.offsetLeft);
+    setScrollLeftStart(carouselRef.current.scrollLeft);
   };
-
-  const FiltersSection = () =>
-    filtersOpen && (
-      <>
-        <CategoryFilter
-          categories={mockCategories}
-          initialSelected={tempCategory}
-          onSelectionChange={setTempCategory}
-          title="Categorías"
-          className="mb-6"
-        />
-        <CategoryFilter
-          categories={mockTypeCooking}
-          initialSelected={tempType}
-          onSelectionChange={setTempType}
-          title="Tipo de cocina"
-          className="mb-6"
-        />
-        <CategoryFilter
-          categories={mockOrigin}
-          initialSelected={tempOrigin}
-          onSelectionChange={setTempOrigin}
-          title="Origen"
-          className="mb-6"
-        />
-        <div className="flex justify-center">
-          <Button
-            className="mb-3 w-40"
-            onClick={() => {
-              setSelectedCategory(tempCategory);
-              setSelectedOrigin(tempOrigin);
-              setSelectedType(tempType);
-              setShowAll(true);
-            }}
-          >
-            Buscar
-          </Button>
-        </div>
-      </>
-    );
+  const onTouchEnd = () => setIsDragging(false);
+  const onTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - carouselRef.current.offsetLeft;
+    const walk = (x - startX) * 1;
+    carouselRef.current.scrollLeft = scrollLeftStart - walk;
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-15 lg:px-10">
@@ -268,7 +216,6 @@ const Search = () => {
             <button onClick={handleSearch}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="lucide lucide-search"
                 width="24"
                 height="24"
                 fill="none"
@@ -276,9 +223,10 @@ const Search = () => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="lucide lucide-search"
               >
-                <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.34-4.34" />
+                <circle cx="11" cy="11" r="8" />
               </svg>
             </button>
           </div>
@@ -333,7 +281,7 @@ const Search = () => {
           <div className="flex justify-between items-center px-1 sm:px-2">
             <h4 className="text-xl font-bold text-black mb-1">Recetas populares</h4>
             <h4
-              className="text-gray-500 cursor-pointer"
+              className="text-l text-gray-500 cursor-pointer"
               onClick={() => setShowAll(!showAll)}
             >
               {showAll ? "Ver menos" : "Ver todas"}
@@ -358,17 +306,17 @@ const Search = () => {
                 ref={carouselRef}
                  className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab sm:justify-start justify-center md:hidden"
                 style={{ scrollSnapType: "x mandatory" }}
-                onMouseDown={(e) => handleDragStart(e.pageX)}
-                onMouseMove={(e) => handleDragMove(e.pageX)}
-                onMouseUp={() => setIsDragging(false)}
-                onMouseLeave={() => setIsDragging(false)}
-                onTouchStart={(e) => handleDragStart(e.touches[0].pageX)}
-                onTouchMove={(e) => handleDragMove(e.touches[0].pageX)}
-                onTouchEnd={() => setIsDragging(false)}
+                onMouseDown={onMouseDown}
+                onMouseLeave={onMouseLeave}
+                onMouseUp={onMouseUp}
+                onMouseMove={onMouseMove}
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
+                onTouchMove={onTouchMove}
               >
-                {filteredRecipes.map((r) => (
-                  <div key={r.id} style={{ scrollSnapAlign: "start" }}>
-                    <RecipeCard id={r.id} />
+                {filteredRecipes.map((recipe) => (
+                  <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
+                    <Card {...recipe} />
                   </div>
                 ))}
               </div>
