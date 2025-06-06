@@ -1,10 +1,7 @@
 import React from "react";
-import Card from "../components/Card";
 import useRecipe from "../hooks/useRecipe";
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer";
-import { Badge } from "../components";
-import Button from "../components/Button";
+import { Badge, Button, Card } from "../components";
 
 const recipeIds = [1, 2, 3];
 
@@ -27,17 +24,18 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
   const handleToggleFavorite = () => {
     const idStr = String(id);
     const updated = isFavorite
-      ? favorites.filter(fav => fav !== idStr)
+      ? favorites.filter((fav) => fav !== idStr)
       : [...favorites, idStr];
 
     setFavorites(updated);
-    localStorage.setItem('favorites', JSON.stringify(updated));
+    localStorage.setItem("favorites", JSON.stringify(updated));
   };
 
   if (loading) return <p className="text-center">Loading recipe {id}…</p>;
   if (!recipe) return <p className="text-center">Recipe {id} not found 😢</p>;
 
-  return <Card 
+  return (
+    <Card
       id={recipe.id}
       image={recipe.image_url}
       name={recipe.name}
@@ -46,30 +44,31 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
       isFavorite={isFavorite}
       onToggleFavorite={handleToggleFavorite}
     />
+  );
 };
 
 const Home = () => {
   const navigate = useNavigate();
 
   const [favorites, setFavorites] = React.useState(() => {
-    const saved = localStorage.getItem('favorites');
+    const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
   });
 
   const [selectedCategories, setSelectedCategories] = React.useState([]);
 
   const toggleCategory = (category) => {
-    setSelectedCategories(prev =>
+    setSelectedCategories((prev) =>
       prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+        ? prev.filter((c) => c !== category)
+        : [...prev, category],
     );
   };
 
   const handleSearchClick = () => {
     if (selectedCategories.length === 0) return;
 
-    const mapped = selectedCategories.map(c => categoryMap[c]);
+    const mapped = selectedCategories.map((c) => categoryMap[c]);
     const uniqueMapped = Array.from(new Set(mapped));
 
     navigate(`/search?category=${uniqueMapped.join(",")}`);
@@ -126,7 +125,12 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {recipeIds.map((id) => (
-              <RecipeCard key={id} id={id} favorites={favorites} setFavorites={setFavorites} />
+              <RecipeCard
+                key={id}
+                id={id}
+                favorites={favorites}
+                setFavorites={setFavorites}
+              />
             ))}
           </div>
         </div>
@@ -138,14 +142,15 @@ const Home = () => {
             ¿Aún no sabes que hacer?
           </h2>
           <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition">
-  <Button onClick={handleInspireClick} className="text-white font-semibold text-lg bg-transparent hover:bg-transparent shadow-none">
-    Inspire me
-  </Button>
-</div>
-
+            <Button
+              onClick={handleInspireClick}
+              className="text-white font-semibold text-lg bg-transparent hover:bg-transparent shadow-none"
+            >
+              Inspire me
+            </Button>
+          </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

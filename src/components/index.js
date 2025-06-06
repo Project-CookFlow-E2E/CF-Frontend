@@ -9,4 +9,4 @@ export { default as Image } from "./Image";
 export { default as Input } from "./Input";
 export { default as RecipeIngredientsChecklist } from "./RecipeIngredientsChecklist";
 export { default as Badge } from "./Badge";
-
+export { default as Pagination } from "./ui/Pagination";
