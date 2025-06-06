@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import Card from '../components/Card';
-import useRecipe from '../hooks/useRecipe';
-import { mockRecipes } from '../data/mockData';
-import Pagination from '../components/ui/Pagination.jsx';
+import { useState, useEffect } from "react";
+import useRecipe from "../hooks/useRecipe";
+import { mockRecipes } from "../data/mockData";
+import { Card, Pagination } from "../components";
 
 // Component to render individual recipe cards
 const RecipeCard = ({ id, favorites, setFavorites }) => {
@@ -12,18 +11,19 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
   const handleToggleFavorite = () => {
     const idStr = String(id);
     const updated = isFavorite
-      ? favorites.filter(fav => fav !== idStr)
+      ? favorites.filter((fav) => fav !== idStr)
       : [...favorites, idStr];
 
     setFavorites(updated);
-    localStorage.setItem('favorites', JSON.stringify(updated));
+    localStorage.setItem("favorites", JSON.stringify(updated));
   };
 
-  if (loading) return <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>;
+  if (loading)
+    return <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>;
   if (!recipe) return null;
 
   return (
-    <Card 
+    <Card
       id={recipe.id}
       image={recipe.image_url}
       name={recipe.name}
@@ -37,31 +37,34 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
 
 // Main Profile component
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState('saved'); 
+  const [activeTab, setActiveTab] = useState("saved");
   const [currentPage, setCurrentPage] = useState(1);
   const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('favorites');
+    const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
   });
-  
+
   const recipesPerPage = 8;
 
   // Filter recipes based on the active tab
-  const filteredRecipes = mockRecipes.filter(recipe => {
-    if (activeTab === 'saved') {
+  const filteredRecipes = mockRecipes.filter((recipe) => {
+    if (activeTab === "saved") {
       return favorites.includes(String(recipe.id));
     } else {
       return recipe.isCreatedByUser;
     }
   });
-  
+
   // Get recipe IDs for pagination
-  const filteredRecipeIds = filteredRecipes.map(recipe => recipe.id);
+  const filteredRecipeIds = filteredRecipes.map((recipe) => recipe.id);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredRecipeIds.length / recipesPerPage);
   const startIndex = (currentPage - 1) * recipesPerPage;
-  const currentRecipeIds = filteredRecipeIds.slice(startIndex, startIndex + recipesPerPage);
+  const currentRecipeIds = filteredRecipeIds.slice(
+    startIndex,
+    startIndex + recipesPerPage,
+  );
 
   // Reset current page when the active tab changes
   useEffect(() => {
@@ -77,7 +80,9 @@ const Profile = () => {
   };
 
   // Get count of user's created recipes
-  const createdRecipesCount = mockRecipes.filter(recipe => recipe.isCreatedByUser).length;
+  const createdRecipesCount = mockRecipes.filter(
+    (recipe) => recipe.isCreatedByUser,
+  ).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,12 +97,12 @@ const Profile = () => {
           </div>
           <div className="max-w-3xl">
             <p className="text-gray-600">
-              Emma González es editora adjunta en Cheffly, y aporta su experiencia
-              como expeditora de cocina en The Los Angeles Times. También es una
-              autora reconocida, con contribuciones a numerosos libros de cocina y
-              publicaciones gastronómicas. Originaria del Este de Los Angeles, Emma
-              reside ahora en la ciudad de Nueva York, donde explora una amplia
-              variedad de delicias culinarias.
+              Emma González es editora adjunta en Cheffly, y aporta su
+              experiencia como expeditora de cocina en The Los Angeles Times.
+              También es una autora reconocida, con contribuciones a numerosos
+              libros de cocina y publicaciones gastronómicas. Originaria del
+              Este de Los Angeles, Emma reside ahora en la ciudad de Nueva York,
+              donde explora una amplia variedad de delicias culinarias.
             </p>
           </div>
         </div>
@@ -105,21 +110,21 @@ const Profile = () => {
         {/* Tabs */}
         <div className="flex space-x-4 mb-6">
           <button
-            onClick={() => handleTabChange('saved')}
+            onClick={() => handleTabChange("saved")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'saved'
-                ? 'bg-gray-800 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              activeTab === "saved"
+                ? "bg-gray-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             Recetas guardadas ({favorites.length})
           </button>
           <button
-            onClick={() => handleTabChange('created')}
+            onClick={() => handleTabChange("created")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'created'
-                ? 'bg-gray-800 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              activeTab === "created"
+                ? "bg-gray-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             Mis Recetas ({createdRecipesCount})
@@ -131,12 +136,12 @@ const Profile = () => {
           <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
-                {currentRecipeIds.map(id => (
-                  <RecipeCard 
-                    key={id} 
-                    id={id} 
-                    favorites={favorites} 
-                    setFavorites={setFavorites} 
+                {currentRecipeIds.map((id) => (
+                  <RecipeCard
+                    key={id}
+                    id={id}
+                    favorites={favorites}
+                    setFavorites={setFavorites}
                   />
                 ))}
               </div>
@@ -148,19 +153,17 @@ const Profile = () => {
         {filteredRecipeIds.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">
-              {activeTab === 'saved' ? '🔖' : '👨‍🍳'}
+              {activeTab === "saved" ? "🔖" : "👨‍🍳"}
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              {activeTab === 'saved' 
-                ? 'No tienes recetas guardadas' 
-                : 'No has creado recetas aún'
-              }
+              {activeTab === "saved"
+                ? "No tienes recetas guardadas"
+                : "No has creado recetas aún"}
             </h3>
             <p className="text-gray-500">
-              {activeTab === 'saved'
-                ? 'Guarda tus recetas favoritas haciendo clic en el marcador'
-                : 'Comienza a crear tus propias recetas deliciosas'
-              }
+              {activeTab === "saved"
+                ? "Guarda tus recetas favoritas haciendo clic en el marcador"
+                : "Comienza a crear tus propias recetas deliciosas"}
             </p>
           </div>
         )}
@@ -179,3 +182,4 @@ const Profile = () => {
 };
 
 export default Profile;
+
