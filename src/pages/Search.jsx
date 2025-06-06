@@ -290,7 +290,7 @@ const Search = () => {
 
           {showAll ? (
             filteredRecipes.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30 justify-items-center">
                 {filteredRecipes.map((recipe) => (
                   <Card key={recipe.id} {...recipe} />
                 ))}
@@ -304,7 +304,7 @@ const Search = () => {
             <div className="relative">
               <div
                 ref={carouselRef}
-                className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab"
+                className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab sm:justify-start justify-center"
                 style={{ scrollSnapType: "x mandatory" }}
                 onMouseDown={onMouseDown}
                 onMouseLeave={onMouseLeave}
