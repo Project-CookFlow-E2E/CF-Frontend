@@ -1,8 +1,9 @@
 import React from "react";
 import logo from "../assets/logo.svg";
 import { Link } from 'react-router-dom'; 
+import Button from "./Button";
 
-const Header = ({ isLoggedIn = true, onLogOut }) => {
+const Header = ({ isLoggedIn = true }) => {
     return (
         <header className="bg-background px-4 py-3">
         {isLoggedIn ? (
@@ -17,9 +18,10 @@ const Header = ({ isLoggedIn = true, onLogOut }) => {
       
             <Link
               to="/profile"
-              className="px-4 py-2 rounded-lg text-white bg-accent hover:opacity-90 transition"
             >
-              Mi Perfil
+              <Button>
+                Mi Perfil
+                </Button>
             </Link>
           </div>
         ) : (

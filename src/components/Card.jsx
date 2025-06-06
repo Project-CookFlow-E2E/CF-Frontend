@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import FavoriteButton from './buttons/FavoriteButton';
 
 const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite }) => {
   return (
@@ -19,25 +19,10 @@ const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite })
           <h3 className="text-lg font-bold text-gray-900">
             {name || 'Swamp Soup'}
           </h3>
-          <button
-            onClick={() => onToggleFavorite(id)}
-            className="p-1 -mt-1 -mr-1"
-            aria-label="Toggle favorite"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill={isFavorite ? "#F37A7E" : "none"}
-              stroke="#F37A7E"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-            </svg>
-          </button>
+          <FavoriteButton 
+            isFavorite={isFavorite}
+            onToggle={() => onToggleFavorite(id)}
+          />
         </div>
 
         {/* Category and time */}
