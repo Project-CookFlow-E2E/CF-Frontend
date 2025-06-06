@@ -16,7 +16,13 @@ const SignUp = () => {
       <h4 className=" text-sm mb-8 text-black" >Únete a CookFlow y empieza tu viaje culinario</h4>
 
        <div className="flex flex-col mb-4" >
-        <label className="text-xs mb-2 font-bold text-black">Apellidos</label>
+        <label className="text-xs mb-2 font-bold text-black">Primer apellido</label>
+        <div className="peer border border-black rounded-md">
+          <Input placeholder="Correo electrónico" type="email"  icon={PersonStanding}/>
+        </div>
+      </div>
+      <div className="flex flex-col mb-4" >
+        <label className="text-xs mb-2 font-bold text-black">Segundo apellido</label>
         <div className="peer border border-black rounded-md">
           <Input placeholder="Correo electrónico" type="email"  icon={PersonStanding}/>
         </div>
