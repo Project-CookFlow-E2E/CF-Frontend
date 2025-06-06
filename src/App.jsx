@@ -2,6 +2,7 @@ import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Sea
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
+import {useAuthStore} from './store/useAuthStore';
 
 
 function App() {

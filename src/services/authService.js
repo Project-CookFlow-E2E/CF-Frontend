@@ -1,3 +1,25 @@
+/**
+ * authService.js
+ *
+ * Provides authentication utility functions for login, logout, token storage,
+ * and JWT validation (expiration check) for client-side auth flows.
+ *
+ * Features:
+ * - Stores JWT tokens in localStorage under a fixed key.
+ * - Decodes and validates token expiration using `jwt-decode`.
+ * - Interfaces with an Axios instance (`api`) to perform login requests.
+ *
+ * Example usage:
+ * import * as authService from './authService';
+ * const data = await authService.login('user', 'pass');
+ * const token = authService.getToken();
+ * const isValid = authService.isTokenValid();
+ *
+ * @module authService
+ * @requires ./api
+ * @requires jwt-decode
+ * @author Nico
+ */
 import api from "./api";
 import jwt_decode from "jwt-decode";
 
@@ -35,5 +57,3 @@ export const isTokenValid = () => {
 export const logout = async () => {
   localStorage.removeItem(TOKEN_KEY);
 };
-
-
