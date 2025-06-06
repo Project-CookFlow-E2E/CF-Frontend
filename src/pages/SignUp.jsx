@@ -31,38 +31,32 @@ const SignUp = () => {
             Únete a CookFlow y empieza tu viaje culinario
           </h4>
 
-          <div className="flex flex-col mb-4 w-full">
-            <label className="text-xs mb-2 font-bold text-black">
-              Apellidos
-            </label>
-            <div className="peer border border-black rounded-md">
-              <Input
-                placeholder="Apellidos"
-                type="text"
-                icon={PersonStanding}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col mb-4 w-full">
-            <label className="text-xs mb-2 font-bold text-black">Nombre</label>
-            <div className="peer border border-black rounded-md">
-              <Input placeholder="Nombre" type="text" icon={PersonStanding} />
-            </div>
-          </div>
-
-          <div className="flex flex-col mb-4 w-full">
-            <label className="text-xs mb-2 font-bold text-black">
-              Correo electrónico
-            </label>
-            <div className="peer border border-black rounded-md">
-              <Input
-                placeholder="Correo electrónico"
-                type="email"
-                icon={Mail}
-              />
-            </div>
-          </div>
+       <div className="flex flex-col mb-4" >
+        <label className="text-xs mb-2 font-bold text-black">Primer apellido</label>
+        <div className="peer border border-black rounded-md">
+          <Input placeholder="Correo electrónico" type="email"  icon={PersonStanding}/>
+        </div>
+      </div>
+      <div className="flex flex-col mb-4" >
+        <label className="text-xs mb-2 font-bold text-black">Segundo apellido</label>
+        <div className="peer border border-black rounded-md">
+          <Input placeholder="Correo electrónico" type="email"  icon={PersonStanding}/>
+        </div>
+      </div>
+      
+      <div className="flex flex-col mb-4" >
+        <label className="text-xs mb-2 font-bold text-black">Nombre</label>
+        <div className="peer border border-black rounded-md">
+          <Input placeholder="Correo electrónico" type="email" icon={PersonStanding} />
+        </div>
+      </div>
+      
+      <div className="flex flex-col mb-4" >
+        <label className="text-xs mb-2 font-bold text-black">Correo electrónico</label>
+        <div className="peer border border-black rounded-md">
+          <Input placeholder="Correo electrónico" type="email" icon={Mail}/>
+        </div>
+      </div>
 
           <div className="flex flex-col mb-4 w-full">
             <label className="text-xs mb-2 font-bold text-black">
