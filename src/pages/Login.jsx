@@ -17,7 +17,7 @@ const Login = () => {
       <h2 className="text-3xl font-bold mb-2 text-black">¡Bienvenido de nuevo!</h2>
       <h4 className=" text-sm mb-12 text-black" >Introduce tu información</h4>
       <div className="flex flex-col mb-4" >
-        <label className="text-xs mb-2 font-bold text-black">Correo electrónico</label>
+        <label className="text-xs mb-2 font-bold text-black">Correo electrónico o nombre de usuario</label>
         <div className="peer border border-black rounded-md">
           <Input placeholder="Correo electrónico" type="email" icon={Mail}/>
         </div>
