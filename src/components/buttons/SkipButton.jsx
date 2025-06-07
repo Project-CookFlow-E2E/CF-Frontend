@@ -1,5 +1,4 @@
 // components/buttons/SkipButton.js
-import React from 'react';
 
 const SkipButton = ({ onClick }) => {
   return (
@@ -7,6 +6,7 @@ const SkipButton = ({ onClick }) => {
       onClick={onClick}
       className="p-3 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200"
       aria-label="Skip recipe"
+      data-testid="skip-button"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

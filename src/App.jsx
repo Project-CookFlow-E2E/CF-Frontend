@@ -5,26 +5,25 @@ import { Header } from './components';
 
 
 function App() {
-
   return (
-      <BrowserRouter>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/recipe/:id" element={<Recipe />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/inspire-me" element={<InspireMe />} />
-          <Route path="/add-recipe" element={<AddRecipe />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/shopping-list" element={<ShoppingList />} />
-          <Route path="/main" element={<Landing/>} />
-        </Routes>
-        <Footer />
-      </BrowserRouter>
-  )
+    <BrowserRouter data-testid="app-browser-router">
+      <Header data-testid="app-header" />
+      <Routes data-testid="app-routes">
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/recipe/:id" element={<Recipe />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/inspire-me" element={<InspireMe />} />
+        <Route path="/add-recipe" element={<AddRecipe />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/shopping-list" element={<ShoppingList />} />
+        <Route path="/main" element={<Landing />} />
+      </Routes>
+      <Footer data-testid="app-footer" />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

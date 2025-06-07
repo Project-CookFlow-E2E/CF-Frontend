@@ -53,9 +53,12 @@ export default function AutocompleteInput({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" data-testid="autocomplete-input-wrapper">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          data-testid="autocomplete-input-label"
+        >
           {label}
         </label>
       )}
@@ -65,14 +68,19 @@ export default function AutocompleteInput({
         onChange={handleChange}
         placeholder={placeholder}
         className="bg-white rounded-lg border border-gray-300 px-6 py-3 w-full"
+        data-testid="autocomplete-input"
       />
       {showDropdown && filtered.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md">
+        <ul
+          className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md"
+          data-testid="autocomplete-dropdown"
+        >
           {filtered.map((item) => (
             <li
               key={item}
               onClick={() => handleSelect(item)}
               className="px-6 py-3 hover:bg-gray-100 cursor-pointer"
+              data-testid={`autocomplete-option-${item}`}
             >
               {item}
             </li>
