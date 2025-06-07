@@ -1,5 +1,25 @@
 import { useState } from "react";
-
+/**
+ * Componente de input con autocompletado a partir de una lista de sugerencias.
+ * Muestra un desplegable con coincidencias conforme se escribe, y permite seleccionar una opción.
+ *
+ * @component
+ * @param {Object} props - Propiedades del componente.
+ * @param {string} props.label - Etiqueta que se muestra sobre el input.
+ * @param {string[]} props.suggestions - Lista de opciones disponibles para el autocompletado.
+ * @param {string} [props.placeholder] - Texto de ejemplo que se muestra dentro del input.
+ * @param {function} [props.onChange] - Función que se ejecuta al cambiar o seleccionar el valor.
+ *
+ * @example
+ * <AutocompleteInput
+ *   label="Ingrediente"
+ *   suggestions={['Leche', 'Huevos', 'Harina']}
+ *   placeholder="Añade un ingrediente"
+ *   onChange={(value) => console.log(value)}
+ * />
+ *
+ * @author Nico
+ */
 export default function AutocompleteInput({
   label,
   suggestions,
@@ -17,7 +37,7 @@ export default function AutocompleteInput({
 
     if (input.length > 0) {
       const results = suggestions.filter((s) =>
-        s.toLowerCase().includes(input.toLowerCase())
+        s.toLowerCase().includes(input.toLowerCase()),
       );
       setFiltered(results);
       setShowDropdown(true);
@@ -33,11 +53,11 @@ export default function AutocompleteInput({
   };
 
   return (
-    <div className="relative w-full" data-testid="autocomplete-wrapper">
+    <div className="relative w-full" data-testid="autocomplete-input-wrapper">
       {label && (
         <label
           className="block text-sm font-medium text-gray-700 mb-1"
-          data-testid="autocomplete-label"
+          data-testid="autocomplete-input-label"
         >
           {label}
         </label>
