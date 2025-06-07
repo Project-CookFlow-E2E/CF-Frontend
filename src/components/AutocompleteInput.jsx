@@ -1,25 +1,5 @@
 import { useState } from "react";
-/**
- * Componente de input con autocompletado a partir de una lista de sugerencias.
- * Muestra un desplegable con coincidencias conforme se escribe, y permite seleccionar una opción.
- *
- * @component
- * @param {Object} props - Propiedades del componente.
- * @param {string} props.label - Etiqueta que se muestra sobre el input.
- * @param {string[]} props.suggestions - Lista de opciones disponibles para el autocompletado.
- * @param {string} [props.placeholder] - Texto de ejemplo que se muestra dentro del input.
- * @param {function} [props.onChange] - Función que se ejecuta al cambiar o seleccionar el valor.
- *
- * @example
- * <AutocompleteInput
- *   label="Ingrediente"
- *   suggestions={['Leche', 'Huevos', 'Harina']}
- *   placeholder="Añade un ingrediente"
- *   onChange={(value) => console.log(value)}
- * />
- *
- * @author Nico
- */
+
 export default function AutocompleteInput({
   label,
   suggestions,
@@ -37,7 +17,7 @@ export default function AutocompleteInput({
 
     if (input.length > 0) {
       const results = suggestions.filter((s) =>
-        s.toLowerCase().includes(input.toLowerCase()),
+        s.toLowerCase().includes(input.toLowerCase())
       );
       setFiltered(results);
       setShowDropdown(true);
@@ -53,9 +33,12 @@ export default function AutocompleteInput({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" data-testid="autocomplete-wrapper">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          data-testid="autocomplete-label"
+        >
           {label}
         </label>
       )}
@@ -65,14 +48,19 @@ export default function AutocompleteInput({
         onChange={handleChange}
         placeholder={placeholder}
         className="bg-white rounded-lg border border-gray-300 px-6 py-3 w-full"
+        data-testid="autocomplete-input"
       />
       {showDropdown && filtered.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md">
+        <ul
+          className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md"
+          data-testid="autocomplete-dropdown"
+        >
           {filtered.map((item) => (
             <li
               key={item}
               onClick={() => handleSelect(item)}
               className="px-6 py-3 hover:bg-gray-100 cursor-pointer"
+              data-testid={`autocomplete-option-${item}`}
             >
               {item}
             </li>
