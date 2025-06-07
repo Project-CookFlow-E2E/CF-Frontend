@@ -20,11 +20,7 @@ def driver():
     options.add_argument("--disable-extensions")
     
     driver = webdriver.Chrome(options=options)
+    driver.maximize_window()
     driver.implicitly_wait(5)
     yield driver
     driver.quit()
-
-@pytest.fixture()
-def home_page(driver):
-    """HomePage instance fixture"""
-    return HomePage(driver)
