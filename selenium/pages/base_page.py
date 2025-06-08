@@ -39,6 +39,11 @@ class BasePage:
     def get_element(self, locator):
         """Get element by locator"""
         return self.driver.find_element(*locator)
+
+    def get_elements(self, locator):
+        """Get multiple elements by locator"""
+        return self.driver.find_elements(*locator)
+
     
     def get_text(self, locator):
         """Get text from element"""

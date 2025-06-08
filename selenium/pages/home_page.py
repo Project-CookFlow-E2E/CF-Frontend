@@ -5,7 +5,7 @@ class HomePage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
         
-    MAIN_TITLE = (By.CSS_SELECTOR, "[data-testid='main-title']")
+    PAGE_HEADING = (By.CSS_SELECTOR, "[data-testid='main-title']")
     CATEGORY_BADGE = (By.ID, "category-badge")
     CATEGORY_BADGE_LABEL = (By.CSS_SELECTOR, "[data-testid='badge-label']")
     SEARCH_BUTTON = (By.XPATH, "//button[normalize-space()='Buscar']")
@@ -14,13 +14,13 @@ class HomePage(BasePage):
 
     def load_page(self, url):
         self.go_to(url)
-        return self.wait_for_element(self.MAIN_TITLE)
+        return self.wait_for_element(self.PAGE_HEADING)
         
     def get_page_title(self):
         return self.driver.title
         
-    def get_main_title(self):
-        return self.get_text(self.MAIN_TITLE)
+    def get_page_heading(self):
+        return self.get_text(self.PAGE_HEADING)
 
     def click_category_badge(self):
         self.click_element(self.CATEGORY_BADGE)

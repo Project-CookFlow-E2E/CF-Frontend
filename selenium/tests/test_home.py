@@ -13,10 +13,10 @@ def test_page_has_title(page, base_url):
     assert "Home" in title, f"Expected title to contain 'Home', but got '{title}'"
 
 @pytest.mark.home  
-def test_page_loads_with_correct_heading(page, base_url):
+def test_page_heading(page, base_url):
     page.load_page(base_url)
-    main_title = page.get_main_title()
-    assert main_title == "¿Qué te apetece?", f"Expected '¿Qué te apetece?' but got '{main_title}'"
+    heading = page.get_page_heading()
+    assert heading == "¿Qué te apetece?", f"Expected '¿Qué te apetece?' but got '{heading}'"
 
 @pytest.mark.home
 def test_click_category_badge(page, base_url):
