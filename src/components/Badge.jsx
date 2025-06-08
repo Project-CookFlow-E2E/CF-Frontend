@@ -7,6 +7,7 @@ const Badge = ({ children, className = "", ...props }) => {
                 type="checkbox" 
                 className="sr-only peer" 
                 data-testid="badge-checkbox" 
+                id="category-badge"
                 {...props} 
             />
             <span
