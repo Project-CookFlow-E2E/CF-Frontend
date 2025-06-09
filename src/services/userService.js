@@ -1,6 +1,18 @@
 import api from '../api';
 
 /**
+ * src/services/userService.js
+ *
+ * Provides service methods for interacting with user-related API endpoints.
+ * This includes fetching user profiles (current and by ID), updating profiles,
+ * and administrative operations (listing, creating, updating, deleting users).
+ *
+ * @module userService
+ * @requires ./api - The configured Axios instance for making API requests.
+ * @author Saturnino Mendez
+ */
+
+/**
  * Base URL for regular user-related API endpoints.
  * Corresponds to `/api/users/` in the backend.
  * 
