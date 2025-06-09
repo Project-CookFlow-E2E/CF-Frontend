@@ -1,166 +1,287 @@
-// /src/pages/Search.jsx
-import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+/**
+ * @file Search.jsx
+ * @description Componente de búsqueda de recetas con filtros por categoría, origen y tipo de cocina.
+ * Permite búsqueda por nombre y visualización de recetas populares. Incluye control de scroll horizontal
+ * en vista móvil y persistencia de parámetros por URL.
+ * @author Saray
+ */
+
+import { useState, useRef, useEffect } from "react";
+import CategoryFilter from "../components/CategoryFilter";
 import { Plus, Minus } from "lucide-react";
-import { Button, Card, CategoryFilter } from "../components";
-import useRecipe from "../hooks/useRecipe";
-import {
-  mockCategories,
-  mockOrigin,
-  mockTypeCooking,
-  mockRecipes,
-} from "../data/mockData";
+import Card from "../components/Card";
+import Button from "../components/Button";
+import { useLocation } from "react-router-dom";
+import AutocompleteInput from "../components/AutocompleteInput";
 
+/**
+ * Arreglo de recetas populares utilizadas como fuente principal para los filtros y resultados.
+ * @constant
+ * @type {Array<Object>}
+ */
+const popularRecipes = [
+  {
+    id: 1,
+    image: "/pasta.jpg",
+    name: "Pasta Carbonara",
+    category: "comida",
+    origin: "italia",
+    type: "cocido",
+    time: "30 m",
+  },
+  {
+    id: 2,
+    image: "/salad.jpg",
+    name: "Ensalada rica",
+    category: "cena",
+    origin: "grecia",
+    type: "frito",
+    time: "15 m",
+  },
+  {
+    id: 3,
+    image: "/soup.jpg",
+    name: "Sopa de calabaza",
+    category: "cena",
+    origin: "españa",
+    type: "sopa",
+    time: "20 m",
+  },
+  {
+    id: 4,
+    image: "/pancakes.jpg",
+    name: "Tortitas",
+    category: "desayuno",
+    origin: "americana",
+    type: "plancha",
+    time: "25 m",
+  },
+  {
+    id: 5,
+    image: "/tortilla.jpg",
+    name: "Tortilla de patata",
+    category: "comida",
+    origin: "españa",
+    type: "frito",
+    time: "45 m",
+  },
+  {
+    id: 6,
+    image: "/sushi.jpeg",
+    name: "Sushi",
+    category: "cena",
+    origin: "japonesa",
+    type: "crudo",
+    time: "55 m",
+  },
+];
+
+/**
+ * Categorías de recetas disponibles para filtrar.
+ * @constant
+ * @type {Array<Object>}
+ */
+const mockCategories = [
+  { id: "comida", label: "Comida", available: true },
+  { id: "desayuno", label: "Desayuno", available: true },
+  { id: "brunch", label: "Brunch", available: true },
+  { id: "cena", label: "Cena", available: true },
+  { id: "postre", label: "Postre", available: true },
+  { id: "merienda", label: "Merienda", available: true },
+  { id: "snack", label: "Snack", available: true },
+];
+
+/**
+ * Orígenes de las recetas disponibles para filtrar.
+ * @constant
+ * @type {Array<Object>}
+ */
+const mockOrigin = [
+  { id: "italia", label: "Italiana", available: true },
+  { id: "grecia", label: "Griega", available: true },
+  { id: "españa", label: "Española", available: true },
+  { id: "japonesa", label: "Japonesa", available: true },
+  { id: "americana", label: "Americana", available: true },
+];
+
+/**
+ * Tipos de cocina disponibles para filtrar.
+ * @constant
+ * @type {Array<Object>}
+ */
+const mockTypeCooking = [
+  { id: "cocido", label: "Cocido", available: true },
+  { id: "vapor", label: "Al vapor", available: true },
+  { id: "hervido", label: "Hervido", available: true },
+  { id: "guiso", label: "Guiso", available: true },
+  { id: "frito", label: "Frito", available: true },
+  { id: "plancha", label: "A la plancha", available: true },
+  { id: "asado", label: "Asado", available: true },
+  { id: "sopa", label: "Sopas", available: true },
+  { id: "crudo", label: "Crudo", available: true },
+];
+
+/**
+ * Componente principal de búsqueda de recetas.
+ * @component
+ * @returns {JSX.Element}
+ */
 const Search = () => {
-  const location = useLocation();
-
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [showAll, setShowAll] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [selectedOrigin, setSelectedOrigin] = useState([]);
-  const [selectedType, setSelectedType] = useState([]);
+  const [selectedCookingType, setSelectedCookingType] = useState([]);
 
-  const [tempCategory, setTempCategory] = useState([]);
-  const [tempOrigin, setTempOrigin] = useState([]);
-  const [tempType, setTempType] = useState([]);
-
-  const [favorites, setFavorites] = useState(
-    () => JSON.parse(localStorage.getItem("favorites")) || [],
-  );
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const carouselRef = useRef(null);
+
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeftStart, setScrollLeftStart] = useState(0);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [tempSelectedCategory, setTempSelectedCategory] = useState([]);
+  const [tempSelectedOrigin, setTempSelectedOrigin] = useState([]);
+  const [tempSelectedCookingType, setTempSelectedCookingType] = useState([]);
+
+  const location = useLocation();
+
+  /**
+   * Efecto que sincroniza la URL con filtros iniciales.
+   */
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const cat = params.get("category");
-    if (cat) {
-      const catList = cat.split(",").map((c) => c.trim());
-      setSelectedCategory(catList);
-      setTempCategory(catList);
-      setFiltersOpen(true);
+    const categoryParam = params.get("category");
+
+    if (categoryParam) {
+      const categories = categoryParam.split(",").map((c) => c.trim());
+      setSelectedCategory(categories);
+      setTempSelectedCategory(categories);
+      setIsOpen(true);
       setShowAll(true);
     }
   }, [location.search]);
 
-  const matchesFilter = (recipe) => {
-    const match = (sel, val) =>
-      sel.length === 0 || sel.includes(val?.toLowerCase());
+  /**
+   * Filtra recetas según los filtros y la búsqueda.
+   * @returns {Array<Object>}
+   */
+  const getFilteredRecipes = () => {
+    return popularRecipes.filter((recipe) => {
+      const matchCategory =
+        selectedCategory.length === 0 || selectedCategory.includes(recipe.category);
+      const matchOrigin =
+        selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin);
+      const matchType =
+        selectedCookingType.length === 0 || selectedCookingType.includes(recipe.type);
+      const matchSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchCategory && matchOrigin && matchType && matchSearch;
+    });
+  };
+
+  const filteredRecipes = getFilteredRecipes();
+
+  /**
+   * Ejecuta la búsqueda con los filtros seleccionados.
+   */
+  const handleSearch = () => {
+    setSearchTerm(searchQuery.trim());
+    setSelectedCategory(tempSelectedCategory);
+    setSelectedOrigin(tempSelectedOrigin);
+    setSelectedCookingType(tempSelectedCookingType);
+    setShowAll(true);
+  };
+
+  /**
+   * Componente de cabecera para mostrar/ocultar filtros.
+   * @param {Object} props
+   * @param {boolean} props.isOpen - Estado del panel de filtros.
+   * @param {Function} props.toggleOpen - Función para alternar visibilidad.
+   * @returns {JSX.Element}
+   */
+  function FiltroToggle({ isOpen, toggleOpen }) {
     return (
-      match(selectedCategory, recipe.category) &&
-      match(selectedOrigin, recipe.origin) &&
-      match(selectedType, recipe.type) &&
-      recipe.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      <div
+        className="flex items-center justify-between w-full px-4 cursor-pointer mb-3"
+        onClick={toggleOpen}
+      >
+        <h4 className="text-lg sm:text-xl font-semibold m-0">Filtros</h4>
+        {isOpen ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+      </div>
     );
-  };
+  }
 
-  const filteredRecipes = mockRecipes.filter(matchesFilter);
-
-  const handleSearch = () => setShowAll(true);
-
-  const handleToggleFavorite = (id) => {
-    const idStr = String(id);
-    const updated = favorites.includes(idStr)
-      ? favorites.filter((f) => f !== idStr)
-      : [...favorites, idStr];
-    setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-  };
-
-  const handleDragStart = (x) => {
+  /**
+   * Inicia el arrastre del carrusel (mouse).
+   * @param {MouseEvent} e
+   */
+  const onMouseDown = (e) => {
     setIsDragging(true);
-    setStartX(x - carouselRef.current.offsetLeft);
+    setStartX(e.pageX - carouselRef.current.offsetLeft);
     setScrollLeftStart(carouselRef.current.scrollLeft);
   };
 
-  const handleDragMove = (x) => {
+  /** Finaliza el arrastre del carrusel al salir del área. */
+  const onMouseLeave = () => setIsDragging(false);
+  /** Finaliza el arrastre al soltar el mouse. */
+  const onMouseUp = () => setIsDragging(false);
+
+  /**
+   * Mueve el carrusel mientras se arrastra con el mouse.
+   * @param {MouseEvent} e
+   */
+  const onMouseMove = (e) => {
     if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - carouselRef.current.offsetLeft;
     const walk = (x - startX) * 1;
     carouselRef.current.scrollLeft = scrollLeftStart - walk;
   };
 
-  const RecipeCard = ({ id }) => {
-    const { recipe, loading } = useRecipe(id);
-    if (loading)
-      return <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />;
-    if (!recipe) return null;
+  /**
+   * Inicia el arrastre del carrusel en pantallas táctiles.
+   * @param {TouchEvent} e
+   */
+  const onTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - carouselRef.current.offsetLeft);
+    setScrollLeftStart(carouselRef.current.scrollLeft);
+  };
+  /** Finaliza el arrastre táctil. */
+  const onTouchEnd = () => setIsDragging(false);
 
-    return (
-      <Card
-        id={recipe.id}
-        image={recipe.image_url}
-        name={recipe.name}
-        category={recipe.category}
-        time={`${recipe.duration_minutes} m`}
-        isFavorite={favorites.includes(String(id))}
-        onToggleFavorite={() => handleToggleFavorite(id)}
-      />
-    );
+  /**
+   * Mueve el carrusel mientras se arrastra con el dedo.
+   * @param {TouchEvent} e
+   */
+  const onTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - carouselRef.current.offsetLeft;
+    const walk = (x - startX) * 1;
+    carouselRef.current.scrollLeft = scrollLeftStart - walk;
   };
 
-  const FiltersSection = () =>
-    filtersOpen && (
-      <>
-        <CategoryFilter
-          categories={mockCategories}
-          initialSelected={tempCategory}
-          onSelectionChange={setTempCategory}
-          title="Categorías"
-          className="mb-6"
-        />
-        <CategoryFilter
-          categories={mockTypeCooking}
-          initialSelected={tempType}
-          onSelectionChange={setTempType}
-          title="Tipo de cocina"
-          className="mb-6"
-        />
-        <CategoryFilter
-          categories={mockOrigin}
-          initialSelected={tempOrigin}
-          onSelectionChange={setTempOrigin}
-          title="Origen"
-          className="mb-6"
-        />
-        <div className="flex justify-center">
-          <Button
-            className="mb-3 w-40"
-            onClick={() => {
-              setSelectedCategory(tempCategory);
-              setSelectedOrigin(tempOrigin);
-              setSelectedType(tempType);
-              setShowAll(true);
-            }}
-          >
-            Buscar
-          </Button>
-        </div>
-      </>
-    );
-
   return (
-    <div className="min-h-screen bg-background px-4 pt-26 lg:px-10">
-      {/* Search Input */}
-      <div className="max-w-screen-lg lg:pl-4">
-        <h4 className="text-xl font-bold mb-2">¿Qué quieres cocinar?</h4>
-        <div className="max-w-2xl border border-black rounded-lg mb-10">
-          <div className="flex items-center bg-white border border-gray-300 px-4 py-3 rounded-lg">
+    <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-15 lg:px-10">
+      <div className="w-full lg:w-1/2 pr-4">
+        <h4 className="text-xl font-bold text-black mb-2">¿Qué quieres cocinar?</h4>
+        <div className="w-full max-w-xl lg:max-w-2xl border border-black rounded-lg mb-10 mt-0 lg:mt-4">
+          <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 lg:px-6 lg:py-4 w-full">
             <input
               type="text"
               placeholder="Buscar receta..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="outline-none w-full bg-transparent"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              className="outline-none w-full bg-transparent text-base lg:text-lg"
             />
             <button onClick={handleSearch}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="lucide lucide-search"
                 width="24"
                 height="24"
                 fill="none"
@@ -168,39 +289,62 @@ const Search = () => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="lucide lucide-search"
               >
-                <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.34-4.34" />
+                <circle cx="11" cy="11" r="8" />
               </svg>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Filters + Results */}
-      <div className="flex flex-col lg:flex-row gap-8 lg:pl-4">
-        {/* Filters */}
-        <div className="w-full lg:w-1/3">
-          <div
-            className="flex items-center justify-between px-4 mb-3 cursor-pointer"
-            onClick={() => setFiltersOpen(!filtersOpen)}
-          >
-            <h4 className="text-lg font-semibold">Filtros</h4>
-            {filtersOpen ? (
-              <Minus className="w-5 h-5" />
-            ) : (
-              <Plus className="w-5 h-5" />
-            )}
-          </div>
-          <FiltersSection />
+      <div className="w-full flex flex-col md:flex-row items-start gap-8 px-0 md:px-4">
+        <div className="w-full md:w-1/2">
+          <FiltroToggle isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
+          {isOpen && (
+            <>
+              <CategoryFilter
+                categories={mockCategories}
+                initialSelected={tempSelectedCategory}
+                onSelectionChange={setTempSelectedCategory}
+                title="Categorías"
+                maxRowsWhenCollapsed={4}
+                itemsPerRow={2}
+                className="mb-6"
+              />
+              <CategoryFilter
+                categories={mockTypeCooking}
+                initialSelected={tempSelectedCookingType}
+                onSelectionChange={setTempSelectedCookingType}
+                title="Tipo de cocina"
+                maxRowsWhenCollapsed={4}
+                itemsPerRow={2}
+                className="mb-6"
+              />
+              <CategoryFilter
+                categories={mockOrigin}
+                initialSelected={tempSelectedOrigin}
+                onSelectionChange={setTempSelectedOrigin}
+                title="Origen"
+                maxRowsWhenCollapsed={4}
+                itemsPerRow={2}
+                className="mb-6"
+              />
+              <div className="flex justify-center">
+                <Button className="mb-3 w-40 px-1" onClick={handleSearch}>
+                  Buscar
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Results */}
-        <div className="w-full lg:w-2/3">
-          <div className="flex justify-between items-center px-1 sm:px-2 mb-5">
-            <h4 className="text-xl font-bold">Recetas populares</h4>
+        <div className="w-full md:w-1/2 md:pl-4 md:mt-0">
+          <div className="flex justify-between items-center px-1 sm:px-2">
+            <h4 className="text-xl font-bold text-black mb-1">Recetas populares</h4>
             <h4
-              className="text-gray-500 cursor-pointer"
+              className="text-l text-gray-500 cursor-pointer"
               onClick={() => setShowAll(!showAll)}
             >
               {showAll ? "Ver menos" : "Ver todas"}
@@ -208,10 +352,10 @@ const Search = () => {
           </div>
 
           {showAll ? (
-            filteredRecipes.length ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-30">
-                {filteredRecipes.map((r) => (
-                  <RecipeCard key={r.id} id={r.id} />
+            filteredRecipes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30">
+                {filteredRecipes.map((recipe) => (
+                  <Card key={recipe.id} {...recipe} />
                 ))}
               </div>
             ) : (
@@ -223,19 +367,19 @@ const Search = () => {
             <div className="relative">
               <div
                 ref={carouselRef}
-                className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab"
+                className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 cursor-grab sm:justify-start justify-center md:hidden"
                 style={{ scrollSnapType: "x mandatory" }}
-                onMouseDown={(e) => handleDragStart(e.pageX)}
-                onMouseMove={(e) => handleDragMove(e.pageX)}
-                onMouseUp={() => setIsDragging(false)}
-                onMouseLeave={() => setIsDragging(false)}
-                onTouchStart={(e) => handleDragStart(e.touches[0].pageX)}
-                onTouchMove={(e) => handleDragMove(e.touches[0].pageX)}
-                onTouchEnd={() => setIsDragging(false)}
+                onMouseDown={onMouseDown}
+                onMouseLeave={onMouseLeave}
+                onMouseUp={onMouseUp}
+                onMouseMove={onMouseMove}
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
+                onTouchMove={onTouchMove}
               >
-                {filteredRecipes.map((r) => (
-                  <div key={r.id} style={{ scrollSnapAlign: "start" }}>
-                    <RecipeCard id={r.id} />
+                {filteredRecipes.map((recipe) => (
+                  <div key={recipe.id} style={{ scrollSnapAlign: "start" }}>
+                    <Card {...recipe} />
                   </div>
                 ))}
               </div>

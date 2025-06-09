@@ -1,10 +1,29 @@
 import FavoriteButton from './buttons/FavoriteButton';
 
+/**
+ * Card muestra una tarjeta visual con imagen, título, categoría, tiempo y botón de favorito.
+ *
+ * Ideal para listas de recetas u otros elementos seleccionables.
+ *
+ * @component
+ * @param {object} props - Props del componente.
+ * @param {number|string} props.id - ID único del ítem (usado para manejar favoritos).
+ * @param {string} props.image - URL de la imagen a mostrar.
+ * @param {string} props.name - Nombre o título del ítem.
+ * @param {string} props.category - Categoría del ítem (por ejemplo: desayuno, almuerzo...).
+ * @param {string} props.time - Tiempo estimado asociado (ej: "20 m").
+ * @param {boolean} props.isFavorite - Indica si el ítem está marcado como favorito.
+ * @param {Function} props.onToggleFavorite - Función para manejar el cambio de estado de favorito.
+ * @returns {JSX.Element} Tarjeta visual con contenido y acción de favorito.
+ */
 const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite }) => {
   return (
-    <div className="w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+    <div 
+      className="w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+      data-testid={`card-${id}`}
+    >
       {/* Image */}
-      <div className="h-40 bg-gray-200 flex items-center justify-center">
+      <div className="h-40 bg-gray-200 flex items-center justify-center" data-testid="card-image">
         {image ? (
           <img src={image} alt={name} className="w-full h-full object-cover" />
         ) : (
@@ -16,21 +35,25 @@ const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite })
       <div className="p-4 bg-secondary">
         {/* Title and bookmark in one line */}
         <div className="flex justify-between items-start mb-1">
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-lg font-bold text-gray-900" data-testid="card-title">
             {name || 'Swamp Soup'}
           </h3>
-          <FavoriteButton 
+          <FavoriteButton
             isFavorite={isFavorite}
             onToggle={() => onToggleFavorite(id)}
+            data-testid={`favorite-button-${id}`}
           />
         </div>
 
         {/* Category and time */}
         <div className="flex justify-between items-center">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <p
+            className="text-xs font-semibold text-gray-500 uppercase tracking-wider"
+            data-testid="card-category"
+          >
             {category || 'LUNCH'}
           </p>
-          <div className="flex items-center text-gray-600 text-sm">
+          <div className="flex items-center text-gray-600 text-sm" data-testid="card-time">
             <svg
               className="w-4 h-4 mr-1"
               fill="none"

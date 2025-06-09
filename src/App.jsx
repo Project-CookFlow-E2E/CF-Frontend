@@ -1,53 +1,28 @@
-// import React from 'react';
-// import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import { 
-//   AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing 
-// } from './pages';
-// import { Header } from './components';
-// import { Footer } from './components';
-
-// function App() {
-//   return (
-//     <BrowserRouter>
-//       <Header />
-//       <Routes>
-//         <Route path="/" element={<Landing />} />
-//         <Route path="/home" element={<Home />} />
-//         <Route path="/profile" element={<Profile />} />
-//         <Route path="/admin-dashboard" element={<AdminDashboard />} />
-//         {/* Otras rutas */}
-//       </Routes>
-//       <Footer />
-//     </BrowserRouter>
-//   );
-// }
-
-// export default App;
-
-
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { 
-  AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing 
-} from './pages';
-import { Header } from './components';
+import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing } from './pages'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
+import { Header } from './components';
+import {useAuthStore} from './store/useAuthStore';
+
 
 function App() {
   return (
-    <BrowserRouter>
-      <Header />
-      {/* Aplicamos la clase bg-background al contenedor principal del contenido */}
-      <div className="min-h-screen bg-background"> 
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          {/* Otras rutas */}
-        </Routes>
-      </div>
-      <Footer />
+    <BrowserRouter data-testid="app-browser-router">
+      <Header data-testid="app-header" />
+      <Routes data-testid="app-routes">
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/recipe/:id" element={<Recipe />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/inspire-me" element={<InspireMe />} />
+        <Route path="/add-recipe" element={<AddRecipe />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/shopping-list" element={<ShoppingList />} />
+        <Route path="/main" element={<Landing />} />
+      </Routes>
+      <Footer data-testid="app-footer" />
     </BrowserRouter>
   );
 }

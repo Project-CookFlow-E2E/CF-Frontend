@@ -1,5 +1,23 @@
 import { useState, useMemo, startTransition } from 'react';
 
+/**
+ * CategoryFilter es un componente visual e interactivo que permite al usuario seleccionar
+ * una o varias categorías de una lista, ideal para sistemas de filtros (por ejemplo: recetas, productos).
+ *
+ * Muestra un listado de categorías disponibles, permite marcar/desmarcar, y expande el listado si hay muchas.
+ *
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {Array<{ id: string|number, label: string, available: boolean }>} props.categories - Lista de categorías disponibles para seleccionar.
+ * @param {Array<string|number>} [props.initialSelected=[]] - Lista de IDs de categorías preseleccionadas al cargar.
+ * @param {Function} props.onSelectionChange - Callback que se ejecuta cada vez que cambia la selección. Recibe un array de IDs seleccionados.
+ * @param {string} [props.className] - Clases CSS adicionales para aplicar al contenedor.
+ * @param {boolean} [props.loading=false] - Si está activado, muestra un estado de carga (skeleton).
+ * @param {string} [props.title="Categories"] - Título que se muestra arriba del filtro.
+ * @param {number} [props.maxRowsWhenCollapsed=4] - Máximo de filas visibles cuando el filtro está colapsado.
+ * @param {number} [props.itemsPerRow=2] - Cantidad de items por fila (para calcular cuántos mostrar cuando está colapsado).
+ * @returns {JSX.Element} Filtro visual por categorías con opción de expandir y seleccionar múltiples.
+ */
 export default function CategoryFilter({
   categories = [],
   initialSelected = [],
@@ -46,7 +64,7 @@ export default function CategoryFilter({
 
   const renderLoading = () => (
     <div className="animate-pulse space-y-3">
-      {Array.from({ length: 4 }, (_, i) => (
+      {Array.from({ length: maxItemsWhenCollapsed }, (_, i) => (
         <div key={i} className="h-5 bg-gray-200 rounded w-3/4" />
       ))}
     </div>
@@ -67,6 +85,7 @@ export default function CategoryFilter({
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         {needsExpansion && (
           <button
+            type="button"
             onClick={handleToggleExpand}
             className="flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
             aria-label={isExpanded ? "Collapse categories" : "Expand categories"}
@@ -94,6 +113,7 @@ export default function CategoryFilter({
               return (
                 <button
                   key={cat.id}
+                  type="button"
                   onClick={() => handleChange(cat.id)}
                   className={`
                     px-3 py-1 rounded-full text-sm font-medium transition-colors
