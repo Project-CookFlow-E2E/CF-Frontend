@@ -18,8 +18,13 @@ import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_API_URL || "";
 
+const token = localStorage.getItem("TOKEN_KEY");
+
 const api = axios.create({
   baseURL: apiUrl,
+  headers: {
+    Authorization: token ? `Bearer ${token}` : undefined,
+  }
 });
 
 export default api;
