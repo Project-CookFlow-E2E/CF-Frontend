@@ -36,7 +36,7 @@ const Card = ({
         >
             {/* Image */}
             <div 
-                className={`h-40 bg-gray-200 flex items-center justify-center ${imageClassName}`}
+                className={`relative h-40 bg-gray-200 flex items-center justify-center ${imageClassName}`}
                 data-testid="card-image"
             >
                 {image ? (
@@ -50,15 +50,15 @@ const Card = ({
                 )}
             </div>
 
+            
+
             {/* Content */}
-            <div className="p-4 bg-secondary flex flex-col justify-between min-h-[130px]">
+            <div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px]">
                 {/* Title and bookmark in one line */}
-                <div className="flex justify-between items-center mb-1">
-
-
-                    <h3  className="text-lg font-bold text-gray-900 min-h-[3.5rem]" data-testid="card-title">
-                        {name || "Swamp Soup"}
-                    </h3>
+                <div className="flex justify-between items-start mb-1">                                                                
+                        <h3 className="text-lg font-bold text-gray-900 pr-2" data-testid="card-title">
+                            {name || "Swamp Soup"}
+                        </h3>
                     {onToggleFavorite && (
                         <FavoriteButton
                             isFavorite={isFavorite}
@@ -67,6 +67,7 @@ const Card = ({
                         />
                     )}
                 </div>
+                
 
                 {/* Category and time */}
                 <div className="flex justify-between items-center">
