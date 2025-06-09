@@ -21,7 +21,7 @@
  * @author Nico
  */
 import api from "./api";
-import jwt_decode from "jwt-decode";
+import * as jwt_decode from "jwt-decode"; // TODO: Esto puede ser que os de algun error, revisar la importación.
 
 const TOKEN_KEY = "TOKEN_KEY";
 
