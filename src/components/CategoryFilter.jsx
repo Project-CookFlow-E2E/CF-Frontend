@@ -46,7 +46,7 @@ export default function CategoryFilter({
 
   const renderLoading = () => (
     <div className="animate-pulse space-y-3">
-      {Array.from({ length: 4 }, (_, i) => (
+      {Array.from({ length: maxItemsWhenCollapsed }, (_, i) => (
         <div key={i} className="h-5 bg-gray-200 rounded w-3/4" />
       ))}
     </div>
@@ -67,6 +67,7 @@ export default function CategoryFilter({
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         {needsExpansion && (
           <button
+            type="button"
             onClick={handleToggleExpand}
             className="flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
             aria-label={isExpanded ? "Collapse categories" : "Expand categories"}
@@ -94,6 +95,7 @@ export default function CategoryFilter({
               return (
                 <button
                   key={cat.id}
+                  type="button"
                   onClick={() => handleChange(cat.id)}
                   className={`
                     px-3 py-1 rounded-full text-sm font-medium transition-colors

@@ -1,5 +1,4 @@
-// components/buttons/FavoriteButton.js
-import React from 'react';
+// components/buttons/FavoriteButton.jsx
 
 const FavoriteButton = ({ 
   isFavorite, 
@@ -19,6 +18,7 @@ const FavoriteButton = ({
         ${className}
       `}
       aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      data-testid="favorite-button"
       {...props}
     >
       <svg

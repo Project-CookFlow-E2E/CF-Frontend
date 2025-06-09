@@ -19,7 +19,12 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
   };
 
   if (loading)
-    return <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>;
+    return (
+      <div
+        className="animate-pulse bg-gray-200 h-64 rounded-lg"
+        data-testid={`recipe-loading-${id}`}
+      ></div>
+    );
   if (!recipe) return null;
 
   return (
@@ -31,6 +36,8 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
       time={`${recipe.duration_minutes} m`}
       isFavorite={isFavorite}
       onToggleFavorite={handleToggleFavorite}
+      data-testid={`recipe-card-${recipe.id}`}
+      favorite-testid={isFavorite ? "favorite-true" : "favorite-false"}
     />
   );
 };
@@ -85,17 +92,25 @@ const Profile = () => {
   ).length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background"
+      data-testid="profile-page"
+    >
       <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
         {/* Profile Section */}
-        <div className="mb-8">
+        <div className="mb-8" data-testid="profile-section">
           <div className="flex items-center space-x-6 mb-4">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+            <div
+              className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center"
+              data-testid="profile-avatar"
+            >
               <span className="text-3xl text-gray-500">👤</span>
             </div>
-            <h2 className="text-3xl font-bold">Emma González</h2>
+            <h2 className="text-3xl font-bold" data-testid="profile-name">
+              Emma González
+            </h2>
           </div>
-          <div className="max-w-3xl">
+          <div className="max-w-3xl" data-testid="profile-description">
             <p className="text-gray-600">
               Emma González es editora adjunta en Cheffly, y aporta su
               experiencia como expeditora de cocina en The Los Angeles Times.
@@ -108,7 +123,7 @@ const Profile = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-4 mb-6">
+        <div className="flex space-x-4 mb-6" data-testid="profile-tabs">
           <button
             onClick={() => handleTabChange("saved")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -116,6 +131,8 @@ const Profile = () => {
                 ? "bg-gray-800 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
+            data-testid="tab-saved"
+            aria-selected={activeTab === "saved"}
           >
             Recetas guardadas ({favorites.length})
           </button>
@@ -126,16 +143,21 @@ const Profile = () => {
                 ? "bg-gray-800 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
+            data-testid="tab-created"
+            aria-selected={activeTab === "created"}
           >
             Mis Recetas ({createdRecipesCount})
           </button>
         </div>
 
         {/* Recipes Grid */}
-        <div className="flex justify-center">
+        <div className="flex justify-center" data-testid="recipes-grid-container">
           <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10">
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10"
+                data-testid="recipes-grid"
+              >
                 {currentRecipeIds.map((id) => (
                   <RecipeCard
                     key={id}
@@ -151,16 +173,16 @@ const Profile = () => {
 
         {/* Empty State */}
         {filteredRecipeIds.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">
+          <div className="text-center py-12" data-testid="empty-state">
+            <div className="text-6xl mb-4" data-testid="empty-state-icon">
               {activeTab === "saved" ? "🔖" : "👨‍🍳"}
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <h3 className="text-xl font-semibold text-gray-700 mb-2" data-testid="empty-state-title">
               {activeTab === "saved"
                 ? "No tienes recetas guardadas"
                 : "No has creado recetas aún"}
             </h3>
-            <p className="text-gray-500">
+            <p className="text-gray-500" data-testid="empty-state-description">
               {activeTab === "saved"
                 ? "Guarda tus recetas favoritas haciendo clic en el marcador"
                 : "Comienza a crear tus propias recetas deliciosas"}
@@ -174,6 +196,7 @@ const Profile = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            data-testid="pagination"
           />
         )}
       </div>
@@ -182,4 +205,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
