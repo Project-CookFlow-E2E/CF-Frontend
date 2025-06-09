@@ -76,7 +76,7 @@ const Recipe = () => {
   const [checkedItems, setCheckedItems] = useState({});
 
   if (!receta) {
-    return <div className="text-center p-6">Receta no encontrada</div>;
+    return <div data-testid="no-recipe-found" className="text-center p-6">Receta no encontrada</div>;
   }
 
   /**
@@ -139,18 +139,24 @@ const handleAddToShoppingList = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-center">
+    <div data-testid="recipe-screen" className="flex flex-col min-h-screen bg-background text-center">
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
         {/* Navegación entre recetas */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={handleAnterior} disabled={currentIndex === 0} className="text-3xl">
+          <button
+            data-testid="btn-anterior"
+            onClick={handleAnterior}
+            disabled={currentIndex === 0}
+            className="text-3xl"
+          >
             &lt;
           </button>
-          <div className="text-center flex-1">
-            <h1 className="text-3xl font-bold">{receta.titulo}</h1>
-            <p className="text-gray-500">⏱️ {receta.tiempo} min</p>
+          <div data-testid="recipe-title-container" className="text-center flex-1">
+            <h1 data-testid="recipe-title" className="text-3xl font-bold">{receta.titulo}</h1>
+            <p data-testid="recipe-time" className="text-gray-500">⏱️ {receta.tiempo} min</p>
           </div>
           <button
+            data-testid="btn-siguiente"
             onClick={handleSiguiente}
             disabled={currentIndex === recetasOrdenadas.length - 1}
             className="text-3xl"
@@ -161,6 +167,7 @@ const handleAddToShoppingList = () => {
 
         {/* Imagen de la receta */}
         <img
+          data-testid="recipe-image"
           src={receta.imagen}
           alt={receta.titulo}
           className="rounded-xl drop-shadow-xl w-full max-w-md mx-auto"
@@ -168,6 +175,7 @@ const handleAddToShoppingList = () => {
 
         {/* Lista de ingredientes con checklist */}
         <RecipeIngredientsChecklist
+          data-testid="ingredients-checklist"
           ingredients={receta.ingredientes}
           checkedItems={checkedItems}
           onToggleCheck={handleToggleCheck}
@@ -176,6 +184,7 @@ const handleAddToShoppingList = () => {
         {/* Botones de acción */}
         <div className="grid grid-cols-2 gap-3 mt-6 max-w-md mx-auto">
           <Button
+            data-testid="btn-add-to-shopping-list"
             onClick={handleAddToShoppingList}
             disabled={!isAnyChecked}
             className={`py-3 rounded-lg font-medium transition duration-300 ${
@@ -187,6 +196,7 @@ const handleAddToShoppingList = () => {
             ¡A comprar!
           </Button>
           <Button
+            data-testid="btn-start-cooking"
             onClick={handleStartCooking}
             disabled={!areAllChecked}
             className={`py-3 rounded-lg font-medium transition duration-300 ${
@@ -200,21 +210,23 @@ const handleAddToShoppingList = () => {
         </div>
 
         {/* Pasos de la receta */}
-        <div ref={pasosRef} className="mt-16">
-          <h2 className="text-2xl font-semibold mb-6 text-center">Pasos de la receta</h2>
+        <div data-testid="steps-section" ref={pasosRef} className="mt-16">
+          <h2 data-testid="steps-title" className="text-2xl font-semibold mb-6 text-center">Pasos de la receta</h2>
           <ol className="space-y-12">
             {receta.pasos.map((paso, index) => (
               <li
                 key={index}
+                data-testid={`step-${index + 1}`}
                 className="flex flex-col items-center bg-background rounded-xl shadow-md p-6 max-w-2xl mx-auto"
               >
-                <span className="text-xl font-bold text-black mb-4">Paso {index + 1}</span>
+                <span data-testid={`step-number-${index + 1}`} className="text-xl font-bold text-black mb-4">Paso {index + 1}</span>
                 <img
+                  data-testid={`step-image-${index + 1}`}
                   src={paso.imagen}
                   alt={`Paso ${index + 1}`}
                   className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
                 />
-                <p className="text-gray-700 text-center text-base sm:text-lg font-medium">
+                <p data-testid={`step-desc-${index + 1}`} className="text-gray-700 text-center text-base sm:text-lg font-medium">
                   {paso.descripcion}
                 </p>
               </li>
@@ -227,4 +239,3 @@ const handleAddToShoppingList = () => {
 };
 
 export default Recipe;
-

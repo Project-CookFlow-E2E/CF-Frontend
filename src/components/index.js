@@ -11,7 +11,6 @@
 export { default as Button } from "./Button";
 export { default as AutocompleteInput } from "./AutocompleteInput";
 export { default as Card } from "./Card";
-export { default as CategoryCheckbox } from "./CategoryCheckbox";
 export { default as CategoryFilter } from "./CategoryFilter";
 export { default as Footer } from "./Footer";
 export { default as Header } from "./Header";

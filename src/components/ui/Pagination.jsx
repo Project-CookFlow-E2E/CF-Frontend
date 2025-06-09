@@ -1,4 +1,4 @@
-import React from 'react';
+// components/ui/pagination.jsx
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const getVisiblePages = () => {
@@ -19,16 +19,34 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   };
 
   return (
-    <div className="flex justify-center items-center space-x-2 mt-8">
-      <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50">
+    <div className="flex justify-center items-center space-x-2 mt-8" data-testid="pagination">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50"
+        data-testid="prev-page"
+      >
         ‹
       </button>
+
       {getVisiblePages().map((page, index) => (
-        <button key={index} onClick={() => typeof page === 'number' && onPageChange(page)} className={`px-3 py-1 rounded ${page === currentPage ? 'bg-accent text-white' : 'text-gray-600 hover:text-gray-900'}`} disabled={typeof page !== 'number'}>
+        <button
+          key={index}
+          onClick={() => typeof page === 'number' && onPageChange(page)}
+          className={`px-3 py-1 rounded ${page === currentPage ? 'bg-accent text-white' : 'text-gray-600 hover:text-gray-900'}`}
+          disabled={typeof page !== 'number'}
+          data-testid={typeof page === 'number' ? `page-${page}` : `ellipsis-${index}`}
+        >
           {page}
         </button>
       ))}
-      <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50">
+
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50"
+        data-testid="next-page"
+      >
         ›
       </button>
     </div>

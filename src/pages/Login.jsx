@@ -31,89 +31,133 @@ import { Link } from "react-router-dom";
  * @returns {JSX.Element} Vista de login
  */
 const Login = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    /**
-     * Simula inicio de sesión redirigiendo al home.
-     * En una app real, aquí se validaría el usuario con backend.
-     */
-    const handleLogin = () => {
-        navigate("/");
-    };
+  const handleLogin = () => {
+    navigate("/");
+  };
 
-    return (
-        <div className="min-h-screen flex bg-[#FDF3E8]">
-            {/* Imagen lateral solo en escritorio */}
-            <div className="hidden md:block w-1/2">
-                <img
-                    src="/login.png"
-                    alt="Login Illustration"
-                    className="h-full w-full object-cover"
-                />
+  return (
+    <div
+      className="min-h-screen flex bg-[#FDF3E8]"
+      data-testid="login-page"
+      id="login-page"
+    >
+      {/* Image */}
+      <div
+        className="hidden md:block w-1/2"
+        data-testid="login-image-container"
+        id="login-image-container"
+      >
+        <img
+          src="/login.png"
+          alt="Login Illustration"
+          className="h-full w-full object-cover"
+          data-testid="login-image"
+          id="login-image"
+        />
+      </div>
+
+      {/* Form */}
+      <div
+        className="w-full md:w-1/2 flex justify-center items-start pt-20"
+        data-testid="login-form-container"
+        id="login-form-container"
+      >
+        <div
+          className="w-[320px] flex flex-col items-center px-4"
+          data-testid="login-form"
+          id="login-form"
+        >
+          <h2
+            className="text-3xl font-bold mb-2 text-black whitespace-nowrap"
+            data-testid="login-title"
+            id="login-title"
+          >
+            ¡Bienvenido de nuevo!
+          </h2>
+          <h4
+            className="text-sm mb-12 text-black"
+            data-testid="login-subtitle"
+            id="login-subtitle"
+          >
+            Introduce tu información
+          </h4>
+
+          <div
+            className="flex flex-col mb-4 w-full"
+            data-testid="email-input-group"
+            id="email-input-group"
+          >
+            <label
+              className="text-xs mb-2 font-bold text-black"
+              htmlFor="email-input"
+            >
+              Correo electrónico o nombre de usuario
+            </label>
+            <div className="peer border border-black rounded-md">
+              <Input
+                placeholder="Correo electrónico"
+                type="email"
+                icon={Mail}
+                id="email-input"
+                data-testid="email-input"
+              />
             </div>
+          </div>
 
-            {/* Formulario de login */}
-            <div className="w-full md:w-1/2 flex justify-center items-start pt-20">
-                <div className="w-[320px] flex flex-col items-center px-4">
-                    <h2 className="text-3xl font-bold mb-2 text-black whitespace-nowrap">
-                        ¡Bienvenido de nuevo!
-                    </h2>
-                    <h4 className="text-sm mb-12 text-black">
-                        Introduce tu información
-                    </h4>
-
-                    {/* Campo: correo */}
-                    <div className="flex flex-col mb-4 w-full">
-                        <label className="text-xs mb-2 font-bold text-black">
-                            Correo electrónico o nombre de usuario
-                        </label>
-                        <div className="peer border border-black rounded-md">
-                            <Input
-                                placeholder="Correo electrónico"
-                                type="email"
-                                icon={Mail}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Campo: contraseña */}
-                    <div className="flex flex-col mb-12 w-full">
-                        <label className="text-xs mb-2 font-bold text-black">
-                            Contraseña
-                        </label>
-                        <div className="peer border border-black rounded-md">
-                            <Input
-                                placeholder="Contraseña"
-                                type="password"
-                                icon={Lock}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Botón de envío */}
-                    <div>
-                        <Button
-                            onClick={handleLogin}
-                            className="mb-3 w-40 px-1"
-                        >
-                            Iniciar sesión
-                        </Button>
-                    </div>
-
-                    {/* Enlace al registro */}
-                    <h4 className="text-xs mb-12 text-black">
-                        ¿No tienes cuenta? Regístrate aquí:{" "}
-                        <Link
-                            to="/signup"
-                            className="text-blue-600 hover:underline"
-                        >
-                            Sign Up
-                        </Link>
-                    </h4>
-                </div>
+          <div
+            className="flex flex-col mb-12 w-full"
+            data-testid="password-input-group"
+            id="password-input-group"
+          >
+            <label
+              className="text-xs mb-2 font-bold text-black"
+              htmlFor="password-input"
+            >
+              Contraseña
+            </label>
+            <div className="peer border border-black rounded-md">
+              <Input
+                placeholder="Contraseña"
+                type="password"
+                icon={Lock}
+                id="password-input"
+                data-testid="password-input"
+              />
             </div>
+          </div>
+
+          <div data-testid="login-button-container" id="login-button-container">
+            <Button
+              onClick={handleLogin}
+              className="mb-3 w-40 px-1"
+              data-testid="login-button"
+              id="login-button"
+            >
+              Iniciar sesión
+            </Button>
+          </div>
+
+          <h4
+            className="text-xs mb-12 text-black"
+            data-testid="signup-redirect-text"
+            id="signup-redirect-text"
+          >
+            ¿No tienes cuenta? Regístrate aquí:{" "}
+            <Link
+              to="/signup"
+              className="text-blue-600 hover:underline"
+              data-testid="signup-link"
+              id="signup-link"
+            >
+              Sign Up
+            </Link>
+          </h4>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Login;
