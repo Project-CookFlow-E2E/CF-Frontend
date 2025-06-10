@@ -21,9 +21,11 @@ import { categoriasMock, ingredientesMock } from "../data/mockData";
 import { AutocompleteInput, Button, Input } from "../components/";
 
 const AddRecipe = () => {
-  const [ingredients, setIngredients] = useState([""]);
+  // const [ingredients, setIngredients] = useState([""]);
   const [steps, setSteps] = useState([{ text: "", image: null, imagePreview: null, isDragOver: false }]);
   const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [ingredients, setIngredients] = useState([{ name: "", quantity: "", unit: "" }]);  
   const [categoria, setCategoria] = useState("");
   const [tiempo, setTiempo] = useState("");
   const [foto, setFoto] = useState(null);
@@ -32,11 +34,16 @@ const AddRecipe = () => {
 
   /**
    * Añade un nuevo campo de ingrediente a la lista.
+   * faltaban dos campos quantity y unit
+   * @author Rafael
    */
-  const addIngredient = () => setIngredients([...ingredients, ""]);
-
+  const addIngredient = () => {
+    setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
+  };
   /**
    * Añade un nuevo campo de paso a la lista.
+   * añadi una imagen a cada paso y Drop para subirla
+   * @author Rafael
    */
   const addStep = () => setSteps([...steps, { text: "", image: null, imagePreview: null, isDragOver: false }]);
 
@@ -232,6 +239,14 @@ const AddRecipe = () => {
     }
   };
 
+    // Modificación: Ahora maneja `name`, `quantity` y `unit`
+
+  const handleIngredientChange = (index, key, value) => {
+    const updatedIngredients = [...ingredients];
+    updatedIngredients[index][key] = value;
+    setIngredients(updatedIngredients);
+  };
+
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
@@ -304,6 +319,19 @@ const AddRecipe = () => {
             onChange={(e) => setNombre(e.target.value)}
             data-testid="recipe-name-input"
           />
+        {/* Descripción de la receta */}
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="descripcion-receta">
+            Descripción
+          </label>
+          <Input
+              id="descripcion-receta"
+              label="Descripción de la receta"
+              placeholder="Ej: Un platillo tradicional con un toque especial..."
+              value={descripcion} 
+              onChange={(e) => setDescripcion(e.target.value)} 
+              data-testid="recipe-description-input"
+            />
+
 
           <div className="flex gap-4">
             <div className="flex-1" data-testid="category-input-wrapper">
@@ -340,35 +368,46 @@ const AddRecipe = () => {
             </div>
           </div>
 
-          <div className="items-center">
-            <label className="block text-sm font-medium text-gray-700 mb-1" data-testid="ingredients-label">
-              Ingredientes
-            </label>
-            <div className="flex justify-center flex-wrap gap-3 items-center" data-testid="ingredients-list">
-              {ingredients.map((value, index) => (
-                <AutocompleteInput
-                  key={index}
-                  placeholder={`Ingrediente número ${index + 1}`}
-                  suggestions={ingredientesMock}
-                  value={value}
-                  onChange={(val) => {
-                    const nuevos = [...ingredients];
-                    nuevos[index] = val;
-                    setIngredients(nuevos);
-                  }}
-                  data-testid={`ingredient-input-${index}`}
-                />
-              ))}
-              <button
-                onClick={addIngredient}
-                className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
-                data-testid="add-ingredient-button"
-              >
-                Añadir ingrediente
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">Ingredientes</label>
+  <div className="flex flex-col gap-3 items-center">
+    {ingredients.map((ingredient, index) => (
+      <div key={index} className="flex flex-col w-full gap-2">
+        {/* 🔹 Ingrediente en una sola línea */}
+        <AutocompleteInput
+          placeholder={`Ingrediente ${index + 1}`}
+          suggestions={ingredientesMock}
+          value={ingredient.name}
+          onChange={(val) => handleIngredientChange(index, "name", val)}
+        />
+
+        {/* 🔹 Cantidad y unidad alineadas debajo del ingrediente */}
+        <div className="flex gap-4">
+          <Input
+            type="number"
+            placeholder="Cantidad"
+            value={ingredient.quantity}
+            onChange={(e) => handleIngredientChange(index, "quantity", e.target.value)}
+            className="w-24"
+          />
+
+          <Input
+            placeholder="Unidad (ej. g, ml, taza)"
+            value={ingredient.unit}
+            onChange={(e) => handleIngredientChange(index, "unit", e.target.value)}
+            className="w-28"
+          />
+        </div>
+      </div>
+    ))}
+    
+    <button onClick={addIngredient} className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center">
+      Añadir ingrediente <Plus className="w-5 h-5" />
+    </button>
+  </div>
+</div>
+
 
           {/* Pasos */}
           <div>
