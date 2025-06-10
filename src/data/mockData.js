@@ -2,12 +2,60 @@
 
 // ========= Search‐related mock data =========
 export const popularRecipes = [
-  { id: 1, image: "/pasta.jpg", name: "Pasta Carbonara", category: "comida", origin: "italia", type: "cocido", time: "30 m" },
-  { id: 2, image: "/salad.jpg", name: "Ensalada rica", category: "cena", origin: "grecia", type: "frito", time: "15 m" },
-  { id: 3, image: "/soup.jpg", name: "Sopa de calabaza", category: "cena", origin: "españa", type: "sopa", time: "20 m" },
-  { id: 4, image: "/pancakes.jpg", name: "Tortitas", category: "desayuno", origin: "americana", type: "plancha", time: "25 m" },
-  { id: 5, image: "/tortilla.jpg", name: "Tortilla de patata", category: "comida", origin: "españa", type: "frito", time: "45 m" },
-  { id: 6, image: "/sushi.jpeg", name: "Sushi", category: "cena", origin: "japonesa", type: "crudo", time: "55 m" },
+  {
+    id: 1,
+    image: "/pasta.jpg",
+    name: "Pasta Carbonara",
+    category: "comida",
+    origin: "italia",
+    type: "cocido",
+    time: "30",
+  },
+  {
+    id: 2,
+    image: "/salad.jpg",
+    name: "Ensalada rica",
+    category: "cena",
+    origin: "grecia",
+    type: "frito",
+    time: "15",
+  },
+  {
+    id: 3,
+    image: "/soup.jpg",
+    name: "Sopa de calabaza",
+    category: "cena",
+    origin: "españa",
+    type: "sopa",
+    time: "20",
+  },
+  {
+    id: 4,
+    image: "/pancakes.jpg",
+    name: "Tortitas",
+    category: "desayuno",
+    origin: "americana",
+    type: "plancha",
+    time: "25",
+  },
+  {
+    id: 5,
+    image: "/tortilla.jpg",
+    name: "Tortilla de patata",
+    category: "comida",
+    origin: "españa",
+    type: "frito",
+    time: "45",
+  },
+  {
+    id: 6,
+    image: "/sushi.jpeg",
+    name: "Sushi",
+    category: "cena",
+    origin: "japonesa",
+    type: "crudo",
+    time: "55",
+  },
 ];
 
 export const mockCategories = [
@@ -84,16 +132,16 @@ export const mockRecipes = [
       "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
     // category is uppercase, but getFilteredRecipes does `.toLowerCase()`
     category: "COMIDA",
-    origin: "italia",        // <— added
-    type: "cocido",          // <— added
+    origin: "italia", // <— added
+    type: "cocido", // <— added
     is_favorite: false,
     isCreatedByUser: true,
     ingredients: [
       { id: 1, name: "Quinoa", quantity: 1, unit: "cup" },
       { id: 2, name: "Cherry Tomatoes", quantity: 200, unit: "g" },
       { id: 3, name: "Cucumber", quantity: 1, unit: "piece" },
-      { id: 4, name: "Feta Cheese", quantity: 100, unit: "g" }
-    ]
+      { id: 4, name: "Feta Cheese", quantity: 100, unit: "g" },
+    ],
   },
   {
     id: 2,
@@ -109,16 +157,16 @@ export const mockRecipes = [
     image_url:
       "https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&h=300&fit=crop",
     category: "CENA",
-    origin: "asiatica",      // <— added (for example, you might add “asiatica” to your mockOrigin array if you want)
-    type: "plancha",         // <— added
+    origin: "asiatica", // <— added (for example, you might add “asiatica” to your mockOrigin array if you want)
+    type: "plancha", // <— added
     is_favorite: true,
     isCreatedByUser: false,
     ingredients: [
       { id: 5, name: "Chicken Breast", quantity: 300, unit: "g" },
       { id: 6, name: "Thai Basil", quantity: 1, unit: "bunch" },
       { id: 7, name: "Garlic", quantity: 3, unit: "cloves" },
-      { id: 8, name: "Soy Sauce", quantity: 2, unit: "tbsp" }
-    ]
+      { id: 8, name: "Soy Sauce", quantity: 2, unit: "tbsp" },
+    ],
   },
   {
     id: 3,
@@ -134,16 +182,16 @@ export const mockRecipes = [
     image_url:
       "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop",
     category: "CENA",
-    origin: "italia",        // <— added
-    type: "asado",           // <— added
+    origin: "italia", // <— added
+    type: "asado", // <— added
     is_favorite: false,
     isCreatedByUser: true,
     ingredients: [
       { id: 9, name: "Pizza Dough", quantity: 1, unit: "piece" },
       { id: 10, name: "Mozzarella", quantity: 200, unit: "g" },
       { id: 11, name: "Tomato Sauce", quantity: 150, unit: "ml" },
-      { id: 12, name: "Fresh Basil", quantity: 10, unit: "leaves" }
-    ]
+      { id: 12, name: "Fresh Basil", quantity: 10, unit: "leaves" },
+    ],
   },
   {
     id: 4,
@@ -159,16 +207,16 @@ export const mockRecipes = [
     image_url:
       "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=300&fit=crop",
     category: "CENA",
-    origin: "italia",        // <— added
-    type: "hervido",         // <— added
+    origin: "italia", // <— added
+    type: "hervido", // <— added
     is_favorite: false,
     isCreatedByUser: false,
     ingredients: [
       { id: 13, name: "Arborio Rice", quantity: 200, unit: "g" },
       { id: 14, name: "Mixed Mushrooms", quantity: 300, unit: "g" },
       { id: 15, name: "Vegetable Stock", quantity: 1, unit: "L" },
-      { id: 16, name: "Parmesan", quantity: 50, unit: "g" }
-    ]
+      { id: 16, name: "Parmesan", quantity: 50, unit: "g" },
+    ],
   },
   {
     id: 5,
@@ -184,16 +232,16 @@ export const mockRecipes = [
     image_url:
       "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop",
     category: "POSTRE",
-    origin: "americana",     // <— added
-    type: "horno",           // <— added (assuming “horno” exists in your mockTypeCooking)
+    origin: "americana", // <— added
+    type: "horno", // <— added (assuming “horno” exists in your mockTypeCooking)
     is_favorite: true,
     isCreatedByUser: true,
     ingredients: [
       { id: 17, name: "Flour", quantity: 250, unit: "g" },
       { id: 18, name: "Chocolate Chips", quantity: 150, unit: "g" },
       { id: 19, name: "Butter", quantity: 100, unit: "g" },
-      { id: 20, name: "Brown Sugar", quantity: 100, unit: "g" }
-    ]
+      { id: 20, name: "Brown Sugar", quantity: 100, unit: "g" },
+    ],
   },
   {
     id: 6,
@@ -209,16 +257,16 @@ export const mockRecipes = [
     image_url:
       "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
     category: "DESAYUNO",
-    origin: "españa",        // <— added
-    type: "crudo",           // <— added
+    origin: "españa", // <— added
+    type: "crudo", // <— added
     is_favorite: false,
     isCreatedByUser: false,
     ingredients: [
       { id: 21, name: "Spinach", quantity: 100, unit: "g" },
       { id: 22, name: "Banana", quantity: 2, unit: "pieces" },
       { id: 23, name: "Almond Milk", quantity: 200, unit: "ml" },
-      { id: 24, name: "Chia Seeds", quantity: 1, unit: "tbsp" }
-    ]
+      { id: 24, name: "Chia Seeds", quantity: 1, unit: "tbsp" },
+    ],
   },
   {
     id: 7,
@@ -233,22 +281,21 @@ export const mockRecipes = [
     image_url:
       "https://images.unsplash.com/photo-1565299585323-38174c4a6706?w=400&h=300&fit=crop",
     category: "COMIDA",
-    origin: "americana",     // <— added
-    type: "frito",           // <— added
+    origin: "americana", // <— added
+    type: "frito", // <— added
     is_favorite: true,
     isCreatedByUser: true,
     ingredients: [
       { id: 25, name: "Ground Beef", quantity: 400, unit: "g" },
       { id: 26, name: "Taco Shells", quantity: 8, unit: "pieces" },
       { id: 27, name: "Lettuce", quantity: 1, unit: "head" },
-      { id: 28, name: "Lime", quantity: 2, unit: "pieces" }
-    ]
+      { id: 28, name: "Lime", quantity: 2, unit: "pieces" },
+    ],
   },
   {
     id: 8,
     name: "Swamp Soup",
-    description:
-      "A mysterious and hearty soup with green vegetables and herbs",
+    description: "A mysterious and hearty soup with green vegetables and herbs",
     user_id: 2,
     category_id: 1,
     duration_minutes: 40,
@@ -257,17 +304,17 @@ export const mockRecipes = [
     updated_at: "2024-01-22T17:00:00Z",
     image_url: null,
     category: "COMIDA",
-    origin: "españa",        // <— added
-    type: "sopa",            // <— added
+    origin: "españa", // <— added
+    type: "sopa", // <— added
     is_favorite: false,
     isCreatedByUser: false,
     ingredients: [
       { id: 29, name: "Broccoli", quantity: 300, unit: "g" },
       { id: 30, name: "Spinach", quantity: 200, unit: "g" },
       { id: 31, name: "Vegetable Broth", quantity: 1, unit: "L" },
-      { id: 32, name: "Herbs", quantity: 2, unit: "tbsp" }
-    ]
-  }
+      { id: 32, name: "Herbs", quantity: 2, unit: "tbsp" },
+    ],
+  },
 ];
 
 // Mock users data
@@ -281,18 +328,18 @@ export const mockUsers = [
     is_admin: false,
     biography: "Home cook passionate about Mediterranean cuisine",
     created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z"
+    updated_at: "2024-01-01T00:00:00Z",
   },
   {
     id: 2,
     username: "asian_fusion",
-    email: "alex@example.com", 
+    email: "alex@example.com",
     name: "Alex",
     surname: "Chen",
     is_admin: false,
     biography: "Specializing in Asian fusion dishes",
     created_at: "2024-01-02T00:00:00Z",
-    updated_at: "2024-01-02T00:00:00Z"
+    updated_at: "2024-01-02T00:00:00Z",
   },
   {
     id: 3,
@@ -303,7 +350,6 @@ export const mockUsers = [
     is_admin: true,
     biography: "Traditional Italian recipes passed down through generations",
     created_at: "2024-01-03T00:00:00Z",
-    updated_at: "2024-01-03T00:00:00Z"
-  }
+    updated_at: "2024-01-03T00:00:00Z",
+  },
 ];
-

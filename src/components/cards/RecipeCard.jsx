@@ -1,11 +1,14 @@
-import React from 'react';
-import TimerBadge from '../buttons/TimerBadge';
-import ActionButton from '../buttons/ActionButton';
-import OpenRecipeButton from '../buttons/OpenRecipeButton';
+import React from "react";
+import TimerBadge from "../TimerBadge";
+import ActionButton from "../buttons/ActionButton";
+import OpenRecipeButton from "../buttons/OpenRecipeButton";
 
 const RecipeCard = ({ recipe, onLike, onDislike }) => {
   return (
-    <div className="flex flex-col items-center w-full px-4" style={{ backgroundColor: '#FDF3E8' }}>
+    <div
+      className="flex flex-col items-center w-full px-4"
+      style={{ backgroundColor: "#FDF3E8" }}
+    >
       {/* Recipe Image */}
       <div className="relative w-full mb-4 aspect-[4/3] max-h-80">
         <div className="bg-gray-100 rounded-xl w-full h-full flex items-center justify-center overflow-hidden shadow-sm">
@@ -56,14 +59,14 @@ const RecipeCard = ({ recipe, onLike, onDislike }) => {
           <h2 className="text-lg font-semibold text-gray-900 mb-2 text-center">
             {recipe.name}
           </h2>
-          
+
           {/* Description centered */}
           {recipe.description && (
             <p className="text-gray-600 text-sm mb-3 text-center">
               {recipe.description}
             </p>
           )}
-          
+
           {/* Category and Timer on edges */}
           <div className="flex justify-between items-center">
             {recipe.category ? (
@@ -97,7 +100,7 @@ const RecipeCard = ({ recipe, onLike, onDislike }) => {
       {/* Open Recipe Button */}
       <div className="w-full sm:max-w-[140px] mx-auto">
         <OpenRecipeButton
-          onClick={() => window.location.href = `/recipe/${recipe.id}`}
+          onClick={() => (window.location.href = `/recipe/${recipe.id}`)}
         />
       </div>
     </div>

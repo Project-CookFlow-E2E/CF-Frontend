@@ -61,8 +61,18 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
     localStorage.setItem("favorites", JSON.stringify(updated));
   };
 
-  if (loading) return <p data-testid={`loading-recipe-${id}`} className="text-center">Loading recipe {id}…</p>;
-  if (!recipe) return <p data-testid={`notfound-recipe-${id}`} className="text-center">Recipe {id} not found 😢</p>;
+  if (loading)
+    return (
+      <p data-testid={`loading-recipe-${id}`} className="text-center">
+        Loading recipe {id}…
+      </p>
+    );
+  if (!recipe)
+    return (
+      <p data-testid={`notfound-recipe-${id}`} className="text-center">
+        Recipe {id} not found 😢
+      </p>
+    );
 
   return (
     <Card
@@ -71,7 +81,7 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
       image={recipe.image_url}
       name={recipe.name}
       category={recipe.category}
-      time={`${recipe.duration_minutes} m`}
+      time={`${recipe.duration_minutes}`}
       isFavorite={isFavorite}
       onToggleFavorite={handleToggleFavorite}
     />
@@ -221,7 +231,7 @@ const Home = () => {
             role="button"
             tabIndex={0}
             onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleInspireClick();
+              if (e.key === "Enter" || e.key === " ") handleInspireClick();
             }}
           >
             <span className="text-white font-semibold text-lg">Inspire me</span>
