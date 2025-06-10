@@ -12,7 +12,7 @@
  */
 
 import { useState } from 'react';
-import SwipeCard from '../components/cards/SwipeCard';
+import SwipeCard from '../components/SwipeCard';
 import { mockRecipes } from '../data/mockData';
 import useRecipe from '../hooks/useRecipe';
 

@@ -1,9 +1,9 @@
 // components/cards/SwipeCard.jsx
 
-import TimerBadge from '../buttons/TimerBadge';
-import OpenRecipeButton from '../buttons/OpenRecipeButton';
-import FavoriteButton from '../buttons/FavoriteButton';
-import SkipButton from '../buttons/SkipButton';
+import TimerBadge from './buttons/TimerBadge';
+import OpenRecipeButton from './buttons/OpenRecipeButton';
+import FavoriteButton from './buttons/FavoriteButton';
+import SkipButton from './buttons/SkipButton';
 
 const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
   const handleFavoriteToggle = () => {
