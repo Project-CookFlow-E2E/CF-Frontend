@@ -21,6 +21,9 @@ import TimerBadge from "./TimerBadge";
  *
  * @modifiedby Ángel Aragón
  * @modified Sustituido el componente de FavoriteButton por el componente reutilizable Button e implementado ReactIcons para los íconos de favorito.
+ * 
+ * @modifiedby Ana Castro
+ * @modified Adaptado para que el componente Card pueda recibir props y así no tener que usar RecipeCard.jsx, cambios de estilos.
  */
 const Card = ({
   id,
@@ -51,7 +54,7 @@ const Card = ({
         )}
       </div>
 
-      <div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px]">
+      <div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px] text-left">
         <div className="flex justify-between items-start mb-1">
           <h3
             className="text-lg font-bold text-gray-900 pr-2"

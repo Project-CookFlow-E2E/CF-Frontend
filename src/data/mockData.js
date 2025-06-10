@@ -279,7 +279,7 @@ export const mockRecipes = [
     created_at: "2024-01-21T12:30:00Z",
     updated_at: "2024-01-21T12:30:00Z",
     image_url:
-      "https://images.unsplash.com/photo-1565299585323-38174c4a6706?w=400&h=300&fit=crop",
+      "https://cdn.pixabay.com/photo/2023/08/08/08/46/tacos-8176774_1280.jpg",
     category: "COMIDA",
     origin: "americana", // <— added
     type: "frito", // <— added
@@ -302,7 +302,7 @@ export const mockRecipes = [
     commensals: 4,
     created_at: "2024-01-22T17:00:00Z",
     updated_at: "2024-01-22T17:00:00Z",
-    image_url: null,
+    image_url: "https://static.wixstatic.com/media/ad2ede_23c1f196a09f4b36b0846c2c88bf53b0~mv2.jpg/v1/fill/w_402,h_537,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ad2ede_23c1f196a09f4b36b0846c2c88bf53b0~mv2.jpg",
     category: "COMIDA",
     origin: "españa", // <— added
     type: "sopa", // <— added
