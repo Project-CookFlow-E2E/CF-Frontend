@@ -26,7 +26,9 @@ const AddRecipe = () => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [ingredients, setIngredients] = useState([{ name: "", quantity: "", unit: "" }]);  
-  const [categoria, setCategoria] = useState("");
+  // const [categoria, setCategoria] = useState("");
+  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]); 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tiempo, setTiempo] = useState("");
   const [foto, setFoto] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -39,6 +41,13 @@ const AddRecipe = () => {
    */
   const addIngredient = () => {
     setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
+  };
+  const handleCategoriaChange = (categoria) => {
+    setCategoriasSeleccionadas((prev) =>
+      prev.includes(categoria)
+        ? prev.filter((item) => item !== categoria)
+        : [...prev, categoria]
+    );
   };
   /**
    * Añade un nuevo campo de paso a la lista.
@@ -218,7 +227,7 @@ const AddRecipe = () => {
   const handleSubmit = async () => {
     const recipe = {
       nombre,
-      categoria,
+      // categoria,
       tiempo,
       ingredients,
       pasos: steps.map(step => ({
@@ -334,7 +343,7 @@ const AddRecipe = () => {
 
 
           <div className="flex gap-4">
-            <div className="flex-1" data-testid="category-input-wrapper">
+            {/* <div className="flex-1" data-testid="category-input-wrapper">
               <AutocompleteInput
                 label="Categoría"
                 suggestions={categoriasMock}
@@ -342,7 +351,54 @@ const AddRecipe = () => {
                 onChange={(value) => setCategoria(value)}
                 data-testid="category-input"
               />
-            </div>
+            </div> */}
+            {/* cuadro combinado */}
+            {/* <div className="flex-1" data-testid="category-input-wrapper">
+              <label className="block text-sm font-medium text-gray-700">Categoría</label>
+              <select
+                multiple
+                className="w-full border rounded-lg p-2"
+                value={categoriasSeleccionadas}
+                onChange={handleCategoriaChange}
+                data-testid="category-select"
+              >
+                {categoriasMock.map((categoria) => (
+                  <option key={categoria} value={categoria}>
+                    {categoria}
+                  </option>
+                ))}
+              </select>
+            </div> */}
+            <div className="flex-1 relative" data-testid="category-input-wrapper">
+                  <label className="block text-sm font-medium text-gray-700">Categoría</label>
+
+                  {/* 🔹 Campo visual que simula un cuadro combinado */}
+                  <div
+                    className="w-full border rounded-lg p-2 bg-white cursor-pointer"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    {categoriasSeleccionadas.length > 0
+                      ? categoriasSeleccionadas.join(", ")
+                      : "Selecciona categorías"}
+                  </div>
+
+                  {/* 🔹 Lista desplegable con el mismo ancho que el campo */}
+                  {dropdownOpen && (
+                      <div className="absolute left-0 w-full rounded-lg bg-white mt-2 p-2 shadow-lg z-10">
+                      {categoriasMock.map((categoria) => (
+                        <div
+                          key={categoria}
+                          className={`p-2 hover:bg-gray-200 cursor-pointer ${
+                            categoriasSeleccionadas.includes(categoria) ? "bg-gray-300" : ""
+                          }`}
+                          onClick={() => handleCategoriaChange(categoria)}
+                        >
+                          {categoria}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
 
             <div className="flex-[0.6]">
               <label
