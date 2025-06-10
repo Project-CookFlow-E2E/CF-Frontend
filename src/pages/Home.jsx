@@ -149,6 +149,7 @@ const Home = () => {
                                 time={`${recipe.duration_minutes} m`}
                                 isFavorite={favorites.includes(String(recipe.id))}
                                 onToggleFavorite={() => toggleFavorite(recipe.id)}
+                                onClick={() => navigate(`/recipe/${recipe.id}`)}
                             />
                         ))}
                     </div>
