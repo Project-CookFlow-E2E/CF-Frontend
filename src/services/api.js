@@ -13,7 +13,7 @@
  * @module api
  * @requires axios
  * @author Nico
- * @modified by Saturnino
+ * @modified by Saturnino Méndez
  */
 import axios from "axios";
 import { getToken, refreshAuthToken, logout } from "../services/authService"
