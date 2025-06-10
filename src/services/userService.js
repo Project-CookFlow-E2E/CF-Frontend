@@ -28,10 +28,9 @@ const BASE_URL = '/users';
 const ADMIN_BASE_URL = '/admin/users';
 
 /**
- * Service for interacting with user-related API endpoints.
- * Provides methods for fetching, updating user profiles,
- * and administrative operations on users.
- */
+* Service for interacting with favorite API endpoints.
+* Provides methods for managing user favorites and administrative favorite operations.
+*/
 export const userService = {
 
     /**
