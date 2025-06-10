@@ -161,7 +161,9 @@ const Landing = () => {
                 category={recipe.category}
                 time={`${recipe.duration_minutes} m`}
                 isFavorite={favorites.includes(String(recipe.id))}
-                onToggleFavorite={() => navigate("/signup")} />
+                onToggleFavorite={() => navigate("/signup")}
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
+            />
           ))}
         </div>
         <div className="pb-20" data-testid="signup-button-container" id="signup-button-container">
