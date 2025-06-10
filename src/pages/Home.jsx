@@ -7,10 +7,13 @@
  * - Marcar recetas como favoritas (persistidas en localStorage).
  * - Recibir inspiración aleatoria con un botón.
  *
- * Usa `useRecipe` para cargar datos individuales de recetas por ID.
- * Navega a otras páginas con `useNavigate` de react-router-dom.
+ * Usa `useNavigate` para la navegación entre páginas.
+ * Usa `useFavorites` para gestionar las recetas favoritas del usuario
  *
  * @module Home
+ * @modifiedby Ana Castro
+ * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites
+ *  y seleccion de las tres ultimas recetas creadas. 
  */
 
 import React from "react";
@@ -34,49 +37,6 @@ const categoryMap = {
 const categories = Object.keys(categoryMap);
 
 /**
- * RecipeCard Component
- *
- * Representa una tarjeta de receta individual.
- * Carga los datos desde el hook `useRecipe` en base al ID recibido.
- * Muestra un `Card` con información básica y permite marcar como favorita.
- *
- * @param {Object} props
- * @param {number} props.id - ID de la receta a cargar
- * @param {string[]} props.favorites - Lista de IDs favoritas
- * @param {Function} props.setFavorites - Función para actualizar favoritos
- */
-// const RecipeCard = ({ id, favorites, setFavorites }) => {
-//   const { recipe, loading } = useRecipe(id);
-//   const isFavorite = favorites.includes(String(id));
-
-//   const handleToggleFavorite = () => {
-//     const idStr = String(id);
-//     const updated = isFavorite
-//       ? favorites.filter((fav) => fav !== idStr)
-//       : [...favorites, idStr];
-
-//     setFavorites(updated);
-//     localStorage.setItem("favorites", JSON.stringify(updated));
-//   };
-
-//   if (loading) return <p data-testid={`loading-recipe-${id}`} className="text-center">Loading recipe {id}…</p>;
-//   if (!recipe) return <p data-testid={`notfound-recipe-${id}`} className="text-center">Recipe {id} not found 😢</p>;
-
-//   return (
-//     <Card
-//       id={`recipe-card-${recipe.id}`}
-//       data-testid={`recipe-card-${recipe.id}`}
-//       image={recipe.image_url}
-//       name={recipe.name}
-//       category={recipe.category}
-//       time={`${recipe.duration_minutes} m`}
-//       isFavorite={isFavorite}
-//       onToggleFavorite={handleToggleFavorite}
-//     />
-//   );
-// };
-
-/**
  * Página principal de la app.
  * Presenta un buscador por categorías, últimas recetas y un botón de inspiración.
  */
@@ -84,14 +44,20 @@ const Home = () => {
     const navigate = useNavigate();
     const [selectedCategories, setSelectedCategories] = React.useState([]);
     
-    // Alterna una categoría seleccionada
+    /**
+     * Alterna una categoría seleccionada en la lista de búsqueda.
+     *
+     * @param {string} category - Nombre de la categoría seleccionada.
+     */
     const toggleCategory = (category) => {
         setSelectedCategories((prev) =>
             prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
         );
     };
 
-    // Redirige a la página de búsqueda con categorías seleccionadas
+    /**
+     * Redirige a la página de búsqueda con las categorías seleccionadas.
+     */
     const handleSearchClick = () => {
         if (selectedCategories.length === 0) return;
 
@@ -101,7 +67,9 @@ const Home = () => {
         navigate(`/search?category=${uniqueMapped.join(",")}`);
     };
 
-    // Redirige a la ruta de inspiración aleatoria
+    /**
+     * Redirige a una página con recetas aleatorias para inspiración.
+     */
     const handleInspireClick = () => {
         navigate("/inspire-me");
     };
