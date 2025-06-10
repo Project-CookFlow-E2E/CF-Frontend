@@ -71,6 +71,8 @@ const AddRecipe = () => {
    * Maneja el evento de drag over para un paso específico.
    * @param {DragEvent} e - Evento de drag over.
    * @param {number} stepIndex - Índice del paso.
+   * @author Rafael
+
    */
   const handleStepDragOver = (e, stepIndex) => {
     e.preventDefault();
@@ -84,6 +86,7 @@ const AddRecipe = () => {
    * Maneja el evento de drag leave para un paso específico.
    * @param {DragEvent} e - Evento de drag leave.
    * @param {number} stepIndex - Índice del paso.
+   * @author Rafael
    */
   const handleStepDragLeave = (e, stepIndex) => {
     e.preventDefault();
@@ -97,6 +100,7 @@ const AddRecipe = () => {
    * Maneja el evento de drop para un paso específico.
    * @param {DragEvent} e - Evento de drop.
    * @param {number} stepIndex - Índice del paso.
+   * @author Rafael
    */
   const handleStepDrop = (e, stepIndex) => {
     e.preventDefault();
@@ -167,6 +171,7 @@ const AddRecipe = () => {
   /**
    * Maneja el evento de drag leave para quitar el estado visual.
    * @param {DragEvent} e - Evento de drag leave.
+   * @author Rafael
    */
   const handleDragLeave = (e) => {
     e.preventDefault();
@@ -177,6 +182,7 @@ const AddRecipe = () => {
   /**
    * Maneja el evento de drop para procesar la imagen arrastrada.
    * @param {DragEvent} e - Evento de drop.
+   * @author Rafael
    */
   const handleDrop = (e) => {
     e.preventDefault();
