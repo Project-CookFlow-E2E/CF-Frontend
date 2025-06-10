@@ -10,8 +10,8 @@
  * Componentes utilizados:
  * - Button: Botón reutilizable
  * - Card: Vista individual de receta
- * - useRecipe: Hook personalizado para obtener datos de receta (mock en este caso)
- *
+ * - useFavorites: Hook para gestionar recetas favoritas
+ * - mockRecipes: Datos simulados de recetas destacadas
  * Navegación:
  * - Los botones redirigen a la ruta `/signup` para incentivar el registro.
  *
@@ -21,10 +21,9 @@
 import React from "react";
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
-import useRecipe from "../hooks/useRecipe";
+import useFavorites from "../hooks/useFavorites";
+import { mockRecipes } from "../data/mockData";
 
-// IDs simulados de recetas destacadas (vendrán del backend en futuro)
-const recipeIds = [1, 2, 3];
 
 /**
  * Renderiza una receta individual dentro del carrusel de recetas destacadas.
@@ -32,38 +31,10 @@ const recipeIds = [1, 2, 3];
  *
  * @param {Object} props
  * @param {number} props.id - ID de la receta
+ * 
+ * @modifiedby Ána Castro
+ * @modified Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
  */
-const RecipeCard = ({ id }) => {
-  const { recipe, loading } = useRecipe(id);
-  const navigate = useNavigate();
-
-  const handleToggleFavorite = () => {
-    navigate("/signup");
-  };
-
-  if (loading)
-    return (
-      <p className="text-center" data-testid={`loading-recipe-${id}`}>
-        Loading recipe {id}…
-      </p>
-    );
-  if (!recipe)
-    return (
-      <p className="text-center" data-testid={`notfound-recipe-${id}`}>
-        Recipe {id} not found 😢
-      </p>
-    );
-
-  return (
-    <Card
-      {...recipe}
-      isFavorite={false}
-      onToggleFavorite={handleToggleFavorite}
-      data-testid={`recipe-card-${id}`}
-      id={`recipe-card-${id}`}
-    />
-  );
-};
 
 /**
  * Página principal de entrada para nuevos usuarios.
@@ -75,6 +46,10 @@ const RecipeCard = ({ id }) => {
  * @returns {JSX.Element}
  */
 const Landing = () => {
+    const { favorites } = useFavorites();
+    const featuredRecipes = mockRecipes.slice(0, 3);
+    const navigate = useNavigate();
+
   return (
     <div
       className="flex flex-col items-center justify-center w-full font-sans"
@@ -178,8 +153,15 @@ const Landing = () => {
           data-testid="recipe-cards-grid"
           id="recipe-cards-grid"
         >
-          {recipeIds.map((id) => (
-            <RecipeCard key={id} id={id} />
+          {featuredRecipes.map((recipe) => (
+            <Card key={recipe.id}
+                id={`recipe-card-${recipe.id}`}
+                image={recipe.image_url}
+                name={recipe.name}
+                category={recipe.category}
+                time={`${recipe.duration_minutes} m`}
+                isFavorite={favorites.includes(String(recipe.id))}
+                onToggleFavorite={() => navigate("/signup")} />
           ))}
         </div>
         <div className="pb-20" data-testid="signup-button-container" id="signup-button-container">
