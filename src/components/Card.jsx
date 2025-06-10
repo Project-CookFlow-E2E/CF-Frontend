@@ -53,7 +53,7 @@ const Card = ({
             
 
             {/* Content */}
-            <div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px]">
+            <div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px] text-left">
                 {/* Title and bookmark in one line */}
                 <div className="flex justify-between items-start mb-1">                                                                
                         <h3 className="text-lg font-bold text-gray-900 pr-2" data-testid="card-title">
