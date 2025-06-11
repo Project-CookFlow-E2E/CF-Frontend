@@ -2,16 +2,19 @@ import React from "react";
 import logo from "../assets/logo.svg";
 import { Link } from "react-router-dom";
 import Button from "./Button";
+import { isTokenValid } from "../services/authService";
 
-const LogoTitle = () => (
-  <Link to="/" className="flex items-center gap-3" data-testid="logo-title-link">
+const LogoTitle = () =>{
+    const isLoggedIn = isTokenValid();
+    return (   
+  <Link to={isLoggedIn ? "/main" : "/"} className="flex items-center gap-3" data-testid="logo-title-link">
     <img src={logo} alt="CookFlow Logo" width={35} height={35} data-testid="logo-image" />
     <h1 className="text-xl font-mate" data-testid="logo-title">
       <span className="text-3xl">C</span>OOK
       <span className="text-3xl">F</span>LOW
     </h1>
   </Link>
-);
+)};
 
 
 /**
