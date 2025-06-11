@@ -47,7 +47,7 @@ const Input = ({
       </div>
       {error && (
         <span className="text-xs text-red-500 mt-1" data-testid="input-error">
-          <MdError className="inline-block mr-1" /> {error}
+          <MdError size={16} className="inline-block mr-1 mb-1" /> {error}
         </span>
       )}
     </div>

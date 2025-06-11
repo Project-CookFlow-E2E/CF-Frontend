@@ -20,6 +20,13 @@
  * Navegación:
  * - Redirecciona a la página principal ("/") al hacer clic en "Crear cuenta".
  * - Enlace hacia la página de inicio de sesión ("/login").
+ *
+ * @author Nico
+ * @modifiedby Ángel Aragón
+ * @modified
+ * - Agregado validación de contraseña para evitar coincidencias con datos personales.
+ * - Implementado el hook useForm de react-hook-form para manejo de formularios.
+ * - Agregado manejo de errores y mensajes de validación.
  */
 
 import { Button } from "../components";
