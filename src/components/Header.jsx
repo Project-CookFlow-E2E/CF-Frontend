@@ -2,7 +2,6 @@ import React from "react";
 import logo from "../assets/logo.svg";
 import { Link } from "react-router-dom";
 import Button from "./Button";
-import { useAuthStore } from "../store/useAuthStore";
 
 const LogoTitle = () => (
   <Link to="/" className="flex items-center gap-3" data-testid="logo-title-link">
