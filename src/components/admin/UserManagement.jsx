@@ -3,7 +3,7 @@ import {getAllUsersAdmin} from '../../services/userService';
 
 const UserManagement = () => {
 
-   const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const UserManagement = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
           </svg>
-          Añadir nuevo usuario
+          Añadir usuario
         </button>
       </div>
    
@@ -74,9 +74,9 @@ const UserManagement = () => {
                   <td className="py-2 px-4 border-b text-sm text-gray-700">{user.created_at}</td>
                   <td className="py-2 px-4 border-b text-sm text-gray-700">{user.updated_at}</td>
                   <td className="py-2 px-4 border-b text-sm">
-                    <button className="text-blue-600 hover:text-blue-900 mr-2">Manage</button>
-                    <button className="text-yellow-600 hover:text-yellow-900 mr-2">Edit</button>
-                    <button className="text-red-600 hover:text-red-900">Delete</button>
+                    <button className="text-blue-600 hover:text-blue-900 mr-2">Ver</button>
+                    <button className="text-yellow-600 hover:text-yellow-900 mr-2">Editar</button>
+                    <button className="text-red-600 hover:text-red-900">Borrar</button>
                   </td>
                 </tr>
               ))
@@ -85,8 +85,8 @@ const UserManagement = () => {
         </table>
       </div>
       <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-        <button className="px-3 py-1 border rounded-md mr-1">Previous</button>
-        <button className="px-3 py-1 border rounded-md">Next</button>
+        <button className="px-3 py-1 border rounded-md mr-1">Anterior</button>
+        <button className="px-3 py-1 border rounded-md">Siguiente</button>
       </div>
     </div>
   );
