@@ -20,7 +20,7 @@ function App() {
     <BrowserRouter data-testid="app-browser-router">
       <Header data-testid="app-header" />
       <Routes data-testid="app-routes">
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
@@ -30,7 +30,7 @@ function App() {
         <Route path="/add-recipe" element={<AddRecipe />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/shopping-list" element={<ShoppingList />} />
-        <Route path="/main" element={<Landing />} />
+        <Route path="/main" element={<Home />} />
       </Routes>
       <Footer data-testid="app-footer" />
     </BrowserRouter>
