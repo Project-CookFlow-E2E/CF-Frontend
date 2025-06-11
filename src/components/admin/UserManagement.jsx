@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {getAllUsersAdmin} from '../../services/userService';
+import {userService} from '../../services/userService';
 
 const UserManagement = () => {
 
@@ -9,7 +9,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await getAllUsersAdmin();
+        const data = await userService.getAllUsersAdmin();
         setUsers(data);
       } catch (error) {
         {error}

@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {getAllCategories} from '../../services/categoryService';
+import {categoryService} from '../../services/categoryService';
 
 const CategoryManagement = () => {
      const [categories, setCategories] = useState([]);
@@ -8,7 +8,7 @@ const CategoryManagement = () => {
     useEffect(() => {
       const fetchCategories = async () => {
         try {
-          const data = await getAllCategories();
+          const data = await categoryService.getAllCategories();
           setCategories(data);
         } catch (error) {
           {error}

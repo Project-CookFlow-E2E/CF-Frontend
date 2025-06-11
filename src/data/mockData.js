@@ -307,3 +307,40 @@ export const mockUsers = [
   }
 ];
 
+// Mock categories for CategoryManagement (simulando la estructura del backend)
+export const mockCategoriesAdmin = [
+  {
+    id: 1,
+    name: "Comida",
+    user_id: 1,
+    parent_category_id: null,
+    created_at: "2024-01-01T10:00:00Z",
+    updated_at: "2024-01-01T10:00:00Z",
+    // Puedes añadir más campos si tu backend los devuelve
+  },
+  {
+    id: 2,
+    name: "Cena",
+    user_id: 2,
+    parent_category_id: 1,
+    created_at: "2024-01-02T12:00:00Z",
+    updated_at: "2024-01-02T12:00:00Z",
+  },
+  {
+    id: 3,
+    name: "Desayuno",
+    user_id: 3,
+    parent_category_id: null,
+    created_at: "2024-01-03T08:00:00Z",
+    updated_at: "2024-01-03T08:00:00Z",
+  },
+  {
+    id: 4,
+    name: "Merienda",
+    user_id: 1,
+    parent_category_id: 3,
+    created_at: "2024-01-04T17:00:00Z",
+    updated_at: "2024-01-04T17:00:00Z",
+  }
+];
+

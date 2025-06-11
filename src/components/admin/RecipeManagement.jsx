@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRecipes } from "../../services/recipesService";
+import { recipeService } from "../../services/recipeService";
 
 
 const RecipeManagement = () => {
@@ -9,7 +9,7 @@ const RecipeManagement = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const data = await getRecipes();
+        const data = await recipeService.getRecipes();
         setRecipes(data);
       } catch (error) {
         {error}
