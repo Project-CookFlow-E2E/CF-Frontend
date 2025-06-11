@@ -1,0 +1,235 @@
+// src/components/admin/IngredientManagement.jsx
+
+import React, { useState, useEffect } from 'react';
+import { ingredientService } from '../../services/ingredientService';
+
+const IngredientManagement = () => {
+  // Estado para guardar los ingredientes obtenidos
+  const [ingredients, setIngredients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Estado para tabs de navegación (todos, pendientes, aprobados)
+  const [activeTab, setActiveTab] = useState('all');
+
+  // Estado para el buscador
+  const [search, setSearch] = useState('');
+
+  // Estados para el modal de edición
+  const [editModal, setEditModal] = useState({ open: false, ingredient: null });
+  const [editForm, setEditForm] = useState({ name: '', categories: '', unit_type: '' });
+
+  // 🔁 Cargar ingredientes al montar el componente
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      setLoading(true);
+      try {
+        const data = await ingredientService.getAllIngredientsAdmin();
+        setIngredients(data);
+      } catch (error) {
+        console.error('Error loading ingredients:', error);
+      }
+      setLoading(false);
+    };
+    fetchIngredients();
+  }, []);
+
+  // ✅ Aprobar ingrediente
+  const handleApprove = async (id) => {
+    await ingredientService.updateIngredientAdmin(id, { is_approved: true });
+    setIngredients(prev =>
+      prev.map(ing => (ing.id === id ? { ...ing, is_approved: true } : ing))
+    );
+  };
+
+  // ❌ Rechazar o eliminar ingrediente
+  const handleReject = async (id) => {
+    await ingredientService.deleteIngredientAdmin(id);
+    setIngredients(prev => prev.filter(ing => ing.id !== id));
+  };
+
+  const handleDelete = handleReject; // Alias para claridad semántica
+
+  // ✏️ Abrir el modal de edición
+  const openEditModal = (ingredient) => {
+    setEditForm({
+      name: ingredient.name || '',
+      categories: Array.isArray(ingredient.categories)
+        ? ingredient.categories.map(c => c.name).join(', ')
+        : '',
+      unit_type: ingredient.unit_type?.name || '',
+      is_approved: ingredient.is_approved || false
+    });
+    setEditModal({ open: true, ingredient });
+  };
+
+  const closeEditModal = () => setEditModal({ open: false, ingredient: null });
+
+  // 🔄 Manejar cambios en los inputs del modal
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  // 📤 Enviar cambios editados
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const id = editModal.ingredient.id;
+    const updatedData = {
+      name: editForm.name,
+      categories: editForm.categories.split(',').map(s => s.trim()),
+      unit_type: editForm.unit_type,
+      is_approved: editForm.is_approved
+    };
+    await ingredientService.updateIngredientAdmin(id, updatedData);
+    setIngredients(prev =>
+      prev.map(ing => (ing.id === id ? { ...ing, ...updatedData } : ing))
+    );
+    closeEditModal();
+  };
+
+  // 🔎 Filtrar ingredientes por búsqueda y tab activo
+  const filteredIngredients = ingredients
+    .filter(ing => {
+      if (activeTab === 'pending') return !ing.is_approved;
+      if (activeTab === 'approved') return ing.is_approved;
+      return true;
+    })
+    .filter(ing => ing.name.toLowerCase().includes(search.toLowerCase()));
+
+  // Contadores para tabs
+  const pendingCount = ingredients.filter(ing => !ing.is_approved).length;
+  const approvedCount = ingredients.filter(ing => ing.is_approved).length;
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">Ingredient Management</h2>
+        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          Add Ingredient
+        </button>
+      </div>
+
+      <div className="mb-4">
+        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
+          {pendingCount} ingredient{pendingCount !== 1 ? 's' : ''} pending approval
+        </span>
+      </div>
+
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          <button
+            className={`${activeTab === 'all' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => setActiveTab('all')}
+          >
+            All Ingredients ({ingredients.length})
+          </button>
+          <button
+            className={`${activeTab === 'pending' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => setActiveTab('pending')}
+          >
+            Pending Approval ({pendingCount})
+          </button>
+          <button
+            className={`${activeTab === 'approved' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => setActiveTab('approved')}
+          >
+            Approved ({approvedCount})
+          </button>
+        </nav>
+      </div>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search ingredients..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Ingredient Name</th>
+              <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Categories</th>
+              <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Unit</th>
+              <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Added By</th>
+              <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Status</th>
+              <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="6" className="text-center py-4">Loading...</td></tr>
+            ) : filteredIngredients.length === 0 ? (
+              <tr><td colSpan="6" className="text-center py-4">No ingredients found.</td></tr>
+            ) : filteredIngredients.map(ing => (
+              <tr key={ing.id}>
+                <td className="py-2 px-4 border-b">{ing.name}</td>
+                <td className="py-2 px-4 border-b">{ing.categories?.map(c => c.name).join(', ')}</td>
+                <td className="py-2 px-4 border-b">{ing.unit_type?.name || '-'}</td>
+                <td className="py-2 px-4 border-b">{ing.user_id ? (ing.user_id.username || ing.user_id.email || '-') : '-'}</td>
+                <td className="py-2 px-4 border-b">
+                  {ing.is_approved ? (
+                    <span className="text-green-600 font-medium">Approved</span>
+                  ) : (
+                    <span className="text-yellow-600 font-medium">Pending</span>
+                  )}
+                </td>
+                <td className="py-2 px-4 border-b space-x-2">
+                  {!ing.is_approved && (
+                    <>
+                      <button onClick={() => handleApprove(ing.id)} className="text-green-600 hover:underline">Approve</button>
+                      <button onClick={() => handleReject(ing.id)} className="text-red-600 hover:underline">Reject</button>
+                    </>
+                  )}
+                  <button onClick={() => openEditModal(ing)} className="text-blue-600 hover:underline">Edit</button>
+                  <button onClick={() => handleDelete(ing.id)} className="text-red-600 hover:underline">Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Modal de edición mejorado */}
+      {editModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Edit Ingredient</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input type="text" name="name" value={editForm.name} onChange={handleEditChange} className="w-full border p-2 rounded" placeholder="Name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Categories (comma-separated)</label>
+                <input type="text" name="categories" value={editForm.categories} onChange={handleEditChange} className="w-full border p-2 rounded" placeholder="Categories" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Unit Type</label>
+                <input type="text" name="unit_type" value={editForm.unit_type} onChange={handleEditChange} className="w-full border p-2 rounded" placeholder="Unit Type" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Approved</label>
+                <select name="is_approved" value={editForm.is_approved ? 'true' : 'false'} onChange={e => setEditForm({ ...editForm, is_approved: e.target.value === 'true' })} className="w-full border p-2 rounded">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button type="button" onClick={closeEditModal} className="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default IngredientManagement;
