@@ -282,7 +282,7 @@ const AddRecipe = () => {
               <div className="flex-1 relative" data-testid="category-input-wrapper">
                 <label className="block text-sm font-medium text-gray-700">Categoría</label>
                 <div
-                  className="w-full border border-gray-300 rounded-lg p-2 bg-white cursor-pointer"
+                  className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 >
                   {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
