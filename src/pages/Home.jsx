@@ -162,7 +162,7 @@ const Home = () => {
                 image={recipe.image_url}
                 name={recipe.name}
                 category={recipe.category}
-                time={`${recipe.duration_minutes} m`}
+                time={`${recipe.duration_minutes}`}
                 isFavorite={favorites.includes(String(recipe.id))}
                 onToggleFavorite={() => toggleFavorite(recipe.id)}
               />

@@ -60,7 +60,7 @@ const RecipeCard = ({ id, favorites, setFavorites }) => {
       image={recipe.image_url}
       name={recipe.name}
       category={recipe.category}
-      time={`${recipe.duration_minutes} m`}
+      time={`${recipe.duration_minutes}`}
       isFavorite={isFavorite}
       onToggleFavorite={handleToggleFavorite}
       data-testid={`recipe-card-${recipe.id}`}
@@ -118,10 +118,7 @@ const Profile = () => {
   ).length;
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      data-testid="profile-page"
-    >
+    <div className="min-h-screen bg-background" data-testid="profile-page">
       <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
         {/* Profile Section */}
         <div className="mb-8" data-testid="profile-section">
@@ -152,7 +149,7 @@ const Profile = () => {
         <div className="flex space-x-4 mb-6" data-testid="profile-tabs">
           <button
             onClick={() => handleTabChange("saved")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
               activeTab === "saved"
                 ? "bg-gray-800 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -164,7 +161,7 @@ const Profile = () => {
           </button>
           <button
             onClick={() => handleTabChange("created")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
               activeTab === "created"
                 ? "bg-gray-800 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -177,7 +174,10 @@ const Profile = () => {
         </div>
 
         {/* Recipes Grid */}
-        <div className="flex justify-center" data-testid="recipes-grid-container">
+        <div
+          className="flex justify-center"
+          data-testid="recipes-grid-container"
+        >
           <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               <div
@@ -203,7 +203,10 @@ const Profile = () => {
             <div className="text-6xl mb-4" data-testid="empty-state-icon">
               {activeTab === "saved" ? "🔖" : "👨‍🍳"}
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2" data-testid="empty-state-title">
+            <h3
+              className="text-xl font-semibold text-gray-700 mb-2"
+              data-testid="empty-state-title"
+            >
               {activeTab === "saved"
                 ? "No tienes recetas guardadas"
                 : "No has creado recetas aún"}

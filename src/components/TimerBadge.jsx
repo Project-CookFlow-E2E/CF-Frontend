@@ -31,7 +31,7 @@ const TimerBadge = ({
   >
     <IoMdTime size={sizeIcon} />
 
-    <span className="text-xs sm:text-sm">{minutes}m</span>
+    <span className="text-xs sm:text-sm">{minutes}min</span>
   </div>
 );
 

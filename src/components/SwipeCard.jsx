@@ -1,11 +1,29 @@
-// components/cards/SwipeCard.jsx
+import TimerBadge from "./TimerBadge";
+import Button from "./Button";
+import { IoMdClose } from "react-icons/io";
+import { BsBookmarkFill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
-import TimerBadge from "./buttons/TimerBadge";
-import OpenRecipeButton from "./buttons/OpenRecipeButton";
-import FavoriteButton from "./buttons/FavoriteButton";
-import SkipButton from "./buttons/SkipButton";
-
+/**
+ * Componente SwipeCard para mostrar una tarjeta de receta con opciones de interacción.
+ * Permite marcar como favorito, saltar a la siguiente receta y ver detalles de la receta.
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {Object} props.recipe - Objeto de receta con detalles como id, nombre, imagen, duración, etc.
+ * @param {Function} props.onToggleFavorite - Función para manejar el cambio de estado de favorito.
+ * @param {Function} props.onSkip - Función para manejar el salto a la siguiente receta.
+ * @returns {JSX.Element} Tarjeta de receta con imagen, título, descripción, categoría y botones de acción.
+ * @author Hema Priya
+ *
+ * @modifiedby Ángel Aragón
+ * @modified
+ * - Creada documentación.
+ * - Cambiado el componente de FavoriteButton por el componente reutilizable Button e implementado ReactIcons para los íconos de favorito y cerrar.
+ * - Cambiado el componente de SkipButton por el componente reutilizable Button e implementado ReactIcons para el ícono de cerrar.
+ * - Agregado botón para ver detalles de la receta que redirige a la página de detalles de la receta usando Navigate de react-router-dom.
+ */
 const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
+  const navigate = useNavigate();
   const handleFavoriteToggle = () => {
     onToggleFavorite(recipe.id);
   };
@@ -20,7 +38,6 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
       style={{ backgroundColor: "#FDF3E8" }}
       data-testid="swipe-card"
     >
-      {/* Recipe Image */}
       <div
         className="relative w-full mb-4 aspect-[4/3] max-h-80"
         data-testid="recipe-image-container"
@@ -45,9 +62,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
         </div>
       </div>
 
-      {/* Content Section */}
       <div className="w-full mb-6 px-2" data-testid="recipe-content">
-        {/* Desktop Layout: Title and Timer */}
         <div className="hidden sm:flex justify-between items-start mb-1">
           <h2
             className="text-xl font-semibold text-gray-900 flex-1 mr-4"
@@ -58,7 +73,6 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
           <TimerBadge minutes={recipe.duration_minutes} />
         </div>
 
-        {/* Desktop Layout: Description and Category */}
         <div className="hidden sm:flex justify-between items-center">
           {recipe.description && (
             <p
@@ -80,7 +94,6 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
           )}
         </div>
 
-        {/* Mobile Layout */}
         <div className="sm:hidden">
           <h2
             className="text-lg font-semibold text-gray-900 mb-2 text-center"
@@ -114,24 +127,37 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex justify-center w-full mb-8 gap-20">
-        <SkipButton onClick={handleSkip} />
-        <FavoriteButton
-          isFavorite={recipe.is_favorite}
-          onToggle={handleFavoriteToggle}
-          withCircle={true}
-        />
+        <Button
+          onClick={handleSkip}
+          aria-label="Saltar receta"
+          hoverColor="hover:bg-gray-300"
+          className="px-2 py-2 rounded-full hover:border-gray-500 bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border-1 border-gray-300"
+        >
+          <IoMdClose size={28} color="#6B7280" />
+        </Button>
+        <Button
+          onClick={handleFavoriteToggle}
+          aria-label="Agregar a Favoritos"
+          hoverColor="hover:bg-rose-100"
+          className="px-3  py-2 rounded-full bg-white shadow-md hover:shadow-lg hover:border-accent transition-shadow duration-200 border-1 border-gray-300"
+        >
+          <BsBookmarkFill size={20} color="#F37A7E" />
+        </Button>
       </div>
 
-      {/* Open Recipe Button */}
       <div
         className="w-full sm:max-w-[140px] mx-auto mb-2"
         data-testid="open-recipe-button-wrapper"
       >
-        <OpenRecipeButton
-          onClick={() => (window.location.href = `/recipe/${recipe.id}`)}
-        />
+        <Button
+          onClick={() => navigate(`/recipes/${recipe.id}`)}
+          type="button"
+          className="w-full px-4 py-2 rounded-lg"
+          aria-label="Ver receta"
+        >
+          Ver receta
+        </Button>
       </div>
     </div>
   );
