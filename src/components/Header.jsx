@@ -4,18 +4,16 @@ import { Link } from "react-router-dom";
 import Button from "./Button";
 import { isTokenValid } from "../services/authService";
 
-//logica para determinar la direccion a la que se redirige el logo condicionalmente
-// si el usuario esta logueado, lo redirige a /main, si no, a / . Esta sin comprobar hasta que se implemente el login.
 const LogoTitle = () =>{
     const isLoggedIn = isTokenValid();
-    return (    
-    <Link to={isLoggedIn ? "/main" : "/"} className="flex items-center gap-3" data-testid="logo-title-link">
-        <img src={logo} alt="CookFlow Logo" width={35} height={35} data-testid="logo-image" />
-        <h1 className="text-xl font-mate" data-testid="logo-title">
-        <span className="text-3xl">C</span>OOK
-        <span className="text-3xl">F</span>LOW
-        </h1>
-    </Link>
+    return (   
+  <Link to={isLoggedIn ? "/main" : "/"} className="flex items-center gap-3" data-testid="logo-title-link">
+    <img src={logo} alt="CookFlow Logo" width={35} height={35} data-testid="logo-image" />
+    <h1 className="text-xl font-mate" data-testid="logo-title">
+      <span className="text-3xl">C</span>OOK
+      <span className="text-3xl">F</span>LOW
+    </h1>
+  </Link>
 )};
 
 
@@ -31,55 +29,43 @@ const LogoTitle = () =>{
  * @param {boolean} [props.isLoggedIn=true] - Indica si el usuario ha iniciado sesión.
  * @returns {JSX.Element} Encabezado dinámico de la aplicación.
  */
-const Header = ({ isLoggedIn = true }) => {
+
+const Header = () => {
+   const isLoggedIn = useAuthStore.isAuthenticated;
   return (
-    <header className="bg-background px-4 py-3" data-testid="header">
-      {isLoggedIn ? (
-        <div
-          className="flex justify-between items-center mx-auto max-w-6xl"
-          data-testid="logged-in-header"
-        >
-          <LogoTitle />
+     <header className="bg-background px-4 py-3" data-testid="header">
+      <div className="flex justify-between items-center mx-auto max-w-6xl">
+        <LogoTitle />
+        {isLoggedIn ? (
           <Link to="/profile" data-testid="profile-link">
-            <Button data-testid="profile-button">Mi Perfil</Button>
+            <Button
+              className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+              data-testid="profile-button"
+            >
+              Mi Perfil
+            </Button>
           </Link>
-        </div>
-      ) : (
-        <div
-          className="flex justify-between items-center max-w-screen-2xl mx-auto"
-          data-testid="logged-out-header"
-        >
-          <div className="flex items-center gap-3" data-testid="logo-container">
-            <img src={logo} alt="CookFlow Logo" width={35} height={35} data-testid="logo-image" />
-            <h1 className="hidden md:block text-xl font-mate" data-testid="logo-title">
-              <span className="text-3xl">C</span>OOK
-              <span className="text-3xl">F</span>LOW
-            </h1>
+        ) : (
+        <div className="flex gap-4">
+            <Link to="/login" data-testid="login-link">
+              <Button
+                className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                data-testid="login-button"
+              >
+                Iniciar Sesión
+              </Button>
+            </Link>
+            <Link to="/register" data-testid="register-link">
+              <Button
+                className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                data-testid="register-button"
+              >
+                Registrarse
+              </Button>
+            </Link>
           </div>
-          <ul className="flex gap-5 items-center" data-testid="auth-buttons">
-            <li>
-              <Link to="/login" data-testid="login-link">
-                <Button
-                  className="bg-white text-accent px-3 py-1.5 rounded-full hover:bg-gray-100"
-                  data-testid="login-button"
-                >
-                  Iniciar Sesion
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link to="/register" data-testid="register-link">
-                <Button
-                  className="bg-accent text-white px-3 py-1.5 rounded-full hover:bg-gray-500 transition-colors duration-300"
-                  data-testid="register-button"
-                >
-                  Registrarse
-                </Button>
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 };
