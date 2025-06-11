@@ -60,7 +60,11 @@ const REFRESH_TOKEN_KEY = "cookflow_refreshToken";
  * @param {string} username - The username/email for login.
  * @param {string} password - The user's password.
  * @returns {Promise<object>} An object containing the access and refresh tokens, along with any other data from the backend.
- * @throws {Error} If the login request fails (e.g., invalid credentials, network error).
+ * @throws {object} If the server responds with validation errors (HTTP 4xx/5xx status),
+ * the error object will be the `error.response.data` from Axios,
+ * containing specific error messages (e.g., `{ "password": ["..."], "detail": "..." }`).
+ * @throws {Error} If no response is received from the server (e.g., network error),
+ * or if an unexpected error occurs during the request setup.
  */
 export const login = async (username, password) => {
   try {
@@ -73,8 +77,19 @@ export const login = async (username, password) => {
     };
     return res.data;
   } catch (error) {
-    console.error(`Error logging in: ${error.message}`);
-    throw error;
+    if (error.response){
+      console.error("Authentication error or backend validation failed:", error.response.data);
+      console.error("Status code:", error.response.status);
+      throw error.response.data;
+    }
+    else if (error.request) {
+      console.error("No response received from the server:", error.request);
+      throw new Error("No response received from the server. Please check your network connection.");
+    }  
+    else {
+      console.error("Error during authentication request:", error.message);
+      throw new Error("An error occurred during the authentication request.");
+    };
   }
 };
 
