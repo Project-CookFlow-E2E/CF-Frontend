@@ -1,5 +1,6 @@
 import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing } from './pages'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { setGlobalNavigateFunction } from './main';
 import { Footer } from './components';
 import { Header } from './components';
 import { useEffect } from 'react';
