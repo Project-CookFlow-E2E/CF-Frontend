@@ -6,6 +6,10 @@ const RecipeManagement = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Estado para el modal de edición
+  const [editModal, setEditModal] = useState({ open: false, recipe: null });
+  const [editForm, setEditForm] = useState({ name: "", category: "" });
+
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
@@ -19,6 +23,38 @@ const RecipeManagement = () => {
     };
     fetchRecipes();
   }, []);
+
+  // Abrir modal de edición
+  const openEditModal = (recipe) => {
+    setEditForm({
+      name: recipe.name || "",
+      category: recipe.category || "",
+    });
+    setEditModal({ open: true, recipe });
+  };
+
+  // Cerrar modal
+  const closeEditModal = () => setEditModal({ open: false, recipe: null });
+
+  // Cambios en el formulario
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  // Guardar cambios
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const id = editModal.recipe.id;
+    const updatedData = {
+      name: editForm.name,
+      category: editForm.category,
+    };
+    await recipeService.updateRecipeAdmin(id, updatedData);
+    setRecipes((prev) =>
+      prev.map((rec) => (rec.id === id ? { ...rec, ...updatedData } : rec))
+    );
+    closeEditModal();
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -46,7 +82,7 @@ const RecipeManagement = () => {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Receta
+                Nombre
               </th>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
                 Autor
@@ -103,7 +139,10 @@ const RecipeManagement = () => {
                     <button className="text-blue-600 hover:text-blue-900 mr-2">
                       Ver
                     </button>
-                    <button className="text-yellow-600 hover:text-yellow-900 mr-2">
+                    <button
+                      className="text-yellow-600 hover:text-yellow-900 mr-2"
+                      onClick={() => openEditModal(recipe)}
+                    >
                       Editar
                     </button>
                     <button className="text-red-600 hover:text-red-900">
@@ -122,6 +161,54 @@ const RecipeManagement = () => {
           <button className="px-3 py-1 border rounded-md">Siguiente</button>
         </div>
       </div>
+
+      {/* Modal de edición */}
+      {editModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Editar Receta</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Nombre</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Nombre de la receta"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Categoría</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={editForm.category}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Categoría"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

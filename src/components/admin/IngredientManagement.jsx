@@ -1,5 +1,3 @@
-// src/components/admin/IngredientManagement.jsx
-
 import React, { useState, useEffect } from 'react';
 import { ingredientService } from '../../services/ingredientService';
 
