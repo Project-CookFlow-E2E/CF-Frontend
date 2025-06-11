@@ -1,6 +1,7 @@
 import Button from "./Button";
 import PropTypes from "prop-types";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import TimerBadge from "./TimerBadge";
 
 /**
  * Card muestra una tarjeta visual con imagen, título, categoría, tiempo y botón de favorito.
@@ -20,7 +21,7 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
  *
  * @modifiedby Ángel Aragón
  * @modified Sustituido el componente de FavoriteButton por el componente reutilizable Button e implementado ReactIcons para los íconos de favorito.
- * 
+ *
  * @modifiedby Ana Castro
  * @modified Adaptado para que el componente Card pueda recibir props y así no tener que usar RecipeCard.jsx, cambios de estilos.
  */
@@ -70,10 +71,10 @@ const Card = ({
               aria-label={
                 isFavorite ? "Quitar de Favoritos" : "Agregar a Favoritos"
               }
-              className={`${"p-3 hover:bg-transparent bg-transparent text-[#F37A7E]"}`}
+              className={`${"hover:bg-transparent bg-transparent"}`}
             >
               {isFavorite ? (
-                <BsBookmarkFill size={20} />
+                <BsBookmarkFill size={20} color="#F37A7E" />
               ) : (
                 <BsBookmark size={20} color="#F37A7E" />
               )}
@@ -88,26 +89,7 @@ const Card = ({
           >
             {category || "LUNCH"}
           </p>
-          <div
-            className="flex items-center text-gray-600 text-sm"
-            data-testid="card-time"
-          >
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>{time || "20 m"}</span>
-          </div>
+          <TimerBadge minutes={time} color="text-gray-600" />
         </div>
         {children}
       </div>

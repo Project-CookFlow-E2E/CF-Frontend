@@ -171,12 +171,16 @@ const Search = () => {
   const getFilteredRecipes = () => {
     return popularRecipes.filter((recipe) => {
       const matchCategory =
-        selectedCategory.length === 0 || selectedCategory.includes(recipe.category);
+        selectedCategory.length === 0 ||
+        selectedCategory.includes(recipe.category);
       const matchOrigin =
         selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin);
       const matchType =
-        selectedCookingType.length === 0 || selectedCookingType.includes(recipe.type);
-      const matchSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
+        selectedCookingType.length === 0 ||
+        selectedCookingType.includes(recipe.type);
+      const matchSearch = recipe.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
       return matchCategory && matchOrigin && matchType && matchSearch;
     });
   };
@@ -266,7 +270,9 @@ const Search = () => {
   return (
     <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-15 lg:px-10">
       <div className="w-full lg:w-1/2 pr-4">
-        <h4 className="text-xl font-bold text-black mb-2">¿Qué quieres cocinar?</h4>
+        <h4 className="text-xl font-bold text-black mb-2">
+          ¿Qué quieres cocinar?
+        </h4>
         <div className="w-full max-w-xl lg:max-w-2xl border border-black rounded-lg mb-10 mt-0 lg:mt-4">
           <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 lg:px-6 lg:py-4 w-full">
             <input
@@ -332,9 +338,7 @@ const Search = () => {
                 className="mb-6"
               />
               <div className="flex justify-center">
-                <Button className="mb-3 w-40 px-1" onClick={handleSearch}>
-                  Buscar
-                </Button>
+                <Button onClick={handleSearch}>Buscar</Button>
               </div>
             </>
           )}
@@ -342,7 +346,9 @@ const Search = () => {
 
         <div className="w-full md:w-1/2 md:pl-4 md:mt-0">
           <div className="flex justify-between items-center px-1 sm:px-2">
-            <h4 className="text-xl font-bold text-black mb-1">Recetas populares</h4>
+            <h4 className="text-xl font-bold text-black mb-1">
+              Recetas populares
+            </h4>
             <h4
               className="text-l text-gray-500 cursor-pointer"
               onClick={() => setShowAll(!showAll)}

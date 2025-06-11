@@ -23,11 +23,10 @@ import useProfileRecipes from "../hooks/useProfileRecipes";
 import { Card, Pagination } from "../components";
 import { useNavigate } from "react-router-dom";
 
-
 const Profile = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const {
+  const {
     activeTab,
     setActiveTab,
     currentPage,
@@ -38,13 +37,10 @@ const Profile = () => {
     totalPages,
     paginatedRecipes,
     filteredRecipes,
-  } = useProfileRecipes();  
+  } = useProfileRecipes();
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      data-testid="profile-page"
-    >
+    <div className="min-h-screen bg-background" data-testid="profile-page">
       <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
         {/* Profile Section */}
         <div className="mb-8" data-testid="profile-section">
@@ -74,7 +70,7 @@ const Profile = () => {
         {/* Tabs */}
         <div className="flex space-x-4 mb-6" data-testid="profile-tabs">
           <button
-            onClick={() => setActiveTab("saved")}
+            onClick={() => handleTabChange("saved")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === "saved"
                 ? "bg-gray-800 text-white"
@@ -86,7 +82,7 @@ const Profile = () => {
             Recetas guardadas ({favorites.length})
           </button>
           <button
-            onClick={() => setActiveTab("created")}
+            onClick={() => handleTabChange("created")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === "created"
                 ? "bg-gray-800 text-white"
@@ -100,7 +96,10 @@ const Profile = () => {
         </div>
 
         {/* Recipes Grid */}
-        <div className="flex justify-center" data-testid="recipes-grid-container">
+        <div
+          className="flex justify-center"
+          data-testid="recipes-grid-container"
+        >
           <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               <div
@@ -131,7 +130,10 @@ const Profile = () => {
             <div className="text-6xl mb-4" data-testid="empty-state-icon">
               {activeTab === "saved" ? "🔖" : "👨‍🍳"}
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2" data-testid="empty-state-title">
+            <h3
+              className="text-xl font-semibold text-gray-700 mb-2"
+              data-testid="empty-state-title"
+            >
               {activeTab === "saved"
                 ? "No tienes recetas guardadas"
                 : "No has creado recetas aún"}
