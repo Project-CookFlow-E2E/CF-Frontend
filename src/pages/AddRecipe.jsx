@@ -1,235 +1,185 @@
-/**
-   * Valida y procesa un archivo de imagen.
-   * @param {File} file - Archivo a validar y procesar.
-   *//**
- * @file AddRecipe.jsx
- * @module AddRecipe
- * @description Página para que el usuario cree una nueva receta de cocina.
- * Permite ingresar título, imagen, categoría, tiempo, ingredientes y pasos.
- * También realiza validaciones básicas de tipo y tamaño de imagen antes de subir.
- * Ahora incluye funcionalidad de drag & drop para imágenes.
- * 
- * 👉 Esta página se conecta visualmente con el resto de la app y en el futuro deberá integrarse con una API.
- * Actualmente utiliza datos simulados (mock) para categorías e ingredientes.
- * 
- * @author Nico
- */
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
-import { categoriasMock, ingredientesMock } from "../data/mockData";
-import { AutocompleteInput, Button, Input } from "../components/";
+import { ingredientesMock } from "../data/mockData";
+import { Button, Input } from "../components/";
 
 const AddRecipe = () => {
-  const [ingredients, setIngredients] = useState([""]);
-  const [steps, setSteps] = useState([{ text: "", image: null, imagePreview: null, isDragOver: false }]);
-  const [nombre, setNombre] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [tiempo, setTiempo] = useState("");
-  const [foto, setFoto] = useState(null);
+  // Estado para categorías desde la API
+  const [categorias, setCategorias] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  /**
-   * Añade un nuevo campo de ingrediente a la lista.
-   */
-  const addIngredient = () => setIngredients([...ingredients, ""]);
+  // React Hook Form setup
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    getValues,
+    reset,
+  } = useForm({
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      tiempo: "",
+      categoriasSeleccionadas: [],
+      foto: null,
+      ingredients: [{ name: "", quantity: "", unit: "" }],
+      steps: [{ text: "", image: null, imagePreview: null, isDragOver: false }],
+    },
+  });
 
-  /**
-   * Añade un nuevo campo de paso a la lista.
-   */
-  const addStep = () => setSteps([...steps, { text: "", image: null, imagePreview: null, isDragOver: false }]);
+  // Field arrays para ingredientes y pasos
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    update: updateIngredient,
+  } = useFieldArray({
+    control,
+    name: "ingredients",
+  });
 
-  /**
-   * Maneja la subida de imagen para un paso específico.
-   * @param {number} stepIndex - Índice del paso.
-   * @param {File} file - Archivo de imagen.
-   */
-  const handleStepImageUpload = (stepIndex, file) => {
-    if (!file) return;
+  const {
+    fields: stepFields,
+    append: appendStep,
+    update: updateStep,
+  } = useFieldArray({
+    control,
+    name: "steps",
+  });
 
-    const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 2 * 1024 * 1024;
+  // Cargar categorías desde la API
+  useEffect(() => {
+    fetch("http://localhost:8000/api/categories/")
+      .then((res) => res.json())
+      .then((data) => setCategorias(data))
+      .catch(() => setCategorias([]));
+  }, []);
 
-    if (!tiposPermitidos.includes(file.type)) {
-      alert("Solo se permiten imágenes JPEG, PNG o WebP");
-      return;
+  // Si no hay categorías desde la API, usar mock y adaptar estructura
+  const categoriasToShow = categorias.length > 0
+    ? categorias
+    : ingredientesMock.map((cat, idx) =>
+        typeof cat === "string"
+          ? { id: idx, name: cat }
+          : { id: cat.id ?? idx, name: cat.name ?? String(cat) }
+      );
+
+  // Imagen principal
+  const foto = watch("foto");
+
+  // Vista previa de imagen principal
+  useEffect(() => {
+    if (foto && foto instanceof File) {
+      const url = URL.createObjectURL(foto);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreview(null);
     }
+  }, [foto]);
 
-    if (file.size > maxSize) {
-      alert("La imagen no puede superar los 2MB");
-      return;
-    }
-
-    const newSteps = [...steps];
-    newSteps[stepIndex].image = file;
-    newSteps[stepIndex].imagePreview = URL.createObjectURL(file);
-    setSteps(newSteps);
-  };
-
-  /**
-   * Maneja el evento de drag over para un paso específico.
-   * @param {DragEvent} e - Evento de drag over.
-   * @param {number} stepIndex - Índice del paso.
-   * @author Rafael
-
-   */
-  const handleStepDragOver = (e, stepIndex) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newSteps = [...steps];
-    newSteps[stepIndex].isDragOver = true;
-    setSteps(newSteps);
-  };
-
-  /**
-   * Maneja el evento de drag leave para un paso específico.
-   * @param {DragEvent} e - Evento de drag leave.
-   * @param {number} stepIndex - Índice del paso.
-   * @author Rafael
-   */
-  const handleStepDragLeave = (e, stepIndex) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newSteps = [...steps];
-    newSteps[stepIndex].isDragOver = false;
-    setSteps(newSteps);
-  };
-
-  /**
-   * Maneja el evento de drop para un paso específico.
-   * @param {DragEvent} e - Evento de drop.
-   * @param {number} stepIndex - Índice del paso.
-   * @author Rafael
-   */
-  const handleStepDrop = (e, stepIndex) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newSteps = [...steps];
-    newSteps[stepIndex].isDragOver = false;
-    setSteps(newSteps);
-
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      const file = files[0];
-      handleStepImageUpload(stepIndex, file);
-    }
-  };
-
-  /**
-   * Elimina la imagen de un paso específico.
-   * @param {number} stepIndex - Índice del paso.
-   */
-  const deleteStepImage = (stepIndex) => {
-    const newSteps = [...steps];
-    if (newSteps[stepIndex].imagePreview) {
-      URL.revokeObjectURL(newSteps[stepIndex].imagePreview);
-    }
-    newSteps[stepIndex].image = null;
-    newSteps[stepIndex].imagePreview = null;
-    setSteps(newSteps);
-  };
+  // Manejo de imagen principal
   const processImageFile = (file) => {
     if (!file) return;
-
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
-
     if (!tiposPermitidos.includes(file.type)) {
       alert("Solo se permiten imágenes JPEG, PNG o WebP");
       return;
     }
-
     if (file.size > maxSize) {
       alert("La imagen no puede superar los 2MB");
       return;
     }
-
-    setFoto(file);
-    setPreview(URL.createObjectURL(file));
+    setValue("foto", file);
   };
 
-  /**
-   * Maneja el cambio de archivo de imagen: realiza validación de tipo y tamaño antes de aceptar.
-   * @param {Event} e - Evento de cambio de input file.
-   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     processImageFile(file);
   };
 
-  /**
-   * Maneja el evento de drag over para permitir el drop.
-   * @param {DragEvent} e - Evento de drag over.
-   */
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(true);
   };
 
-  /**
-   * Maneja el evento de drag leave para quitar el estado visual.
-   * @param {DragEvent} e - Evento de drag leave.
-   * @author Rafael
-   */
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   };
 
-  /**
-   * Maneja el evento de drop para procesar la imagen arrastrada.
-   * @param {DragEvent} e - Evento de drop.
-   * @author Rafael
-   */
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      const file = files[0];
-      processImageFile(file);
+      processImageFile(files[0]);
     }
   };
 
-  /**
-   * Elimina la imagen actualmente seleccionada y su vista previa.
-   */
   const deleteImg = () => {
-    setFoto(null);
+    setValue("foto", null);
     setPreview(null);
   };
 
-  /**
-   * Maneja el envío del formulario.
-   * Por ahora, muestra la receta por consola y simula subida de imagen.
-   */
-  const handleSubmit = async () => {
-    const recipe = {
-      nombre,
-      categoria,
-      tiempo,
-      ingredients,
-      pasos: steps.map(step => ({
-        texto: step.text,
-        imagen: step.image ? step.image.name : null
-      })),
-      imagen: foto ? foto.name : null,
-    };
+  // Manejo de selección de categorías
+  const categoriasSeleccionadas = watch("categoriasSeleccionadas");
+  const handleCategoriaChange = (categoria) => {
+    const seleccionadas = categoriasSeleccionadas || [];
+    if (seleccionadas.includes(categoria.id)) {
+      setValue(
+        "categoriasSeleccionadas",
+        seleccionadas.filter((id) => id !== categoria.id)
+      );
+    } else {
+      setValue("categoriasSeleccionadas", [...seleccionadas, categoria.id]);
+    }
+  };
 
+  // Ingredientes
+  const handleIngredientChange = (index, key, value) => {
+    const updated = [...getValues("ingredients")];
+    updated[index][key] = value;
+    setValue("ingredients", updated);
+  };
+
+  // Pasos
+  const handleStepChange = (index, key, value) => {
+    const updated = [...getValues("steps")];
+    updated[index][key] = value;
+    setValue("steps", updated);
+  };
+
+  // Envío del formulario
+  const onSubmit = (data) => {
+    const recipe = {
+      nombre: data.nombre,
+      descripcion: data.descripcion,
+      categorias: data.categoriasSeleccionadas,
+      tiempo: data.tiempo,
+      ingredients: data.ingredients,
+      pasos: data.steps.map((step) => ({
+        texto: step.text,
+        imagen: step.image ? step.image.name : null,
+      })),
+      imagen: data.foto ? data.foto.name : null,
+    };
     console.log("Receta enviada con éxito:", recipe);
 
-    if (foto) {
+    if (data.foto) {
       console.log("Simulando subida de imagen...");
-
       setTimeout(() => {
-        console.log(`Imagen "${foto.name}" subida y procesada correctamente.`);
+        console.log(`Imagen "${data.foto.name}" subida y procesada correctamente.`);
       }, 1000);
     }
+    reset(); // limpiar el formulario tras enviar
   };
 
   return (
@@ -245,7 +195,7 @@ const AddRecipe = () => {
         {/* Imagen de la receta */}
         <div
           className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${
-            isDragOver ? 'border-accent border-2 bg-accent/5' : ''
+            isDragOver ? "border-accent border-2 bg-accent/5" : ""
           }`}
           data-testid="image-upload-area"
           onDragOver={handleDragOver}
@@ -291,174 +241,299 @@ const AddRecipe = () => {
           )}
         </div>
 
-        {/* Formulario de datos */}
-
-        <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="nombre-receta">
-            Nombre de la receta
-          </label>
-          <Input
-            id="nombre-receta"
-            label="Nombre de la receta"
-            placeholder="Ej: Huevos rancheros, fabada ..."
-            onChange={(e) => setNombre(e.target.value)}
-            data-testid="recipe-name-input"
-          />
-
-          <div className="flex gap-4">
-            <div className="flex-1" data-testid="category-input-wrapper">
-              <AutocompleteInput
-                label="Categoría"
-                suggestions={categoriasMock}
-                placeholder="Selecciona una categoría"
-                onChange={(value) => setCategoria(value)}
-                data-testid="category-input"
-              />
-            </div>
-
-            <div className="flex-[0.6]">
-              <label
-                className="block text-sm font-medium text-gray-700 mb-1"
-                htmlFor="tiempo-preparacion"
-              >
-                Tiempo
-              </label>
-              <div className="relative">
+        {/* Formulario */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="nombre-receta">
+              Nombre de la receta
+            </label>
+            <Controller
+              control={control}
+              name="nombre"
+              render={({ field }) => (
                 <Input
-                  id="tiempo-preparacion"
-                  label="Time"
-                  type="number"
-                  placeholder="15"
-                  className="pr-10"
-                  onChange={(e) => setTiempo(e.target.value)}
-                  data-testid="time-input"
+                  {...field}
+                  id="nombre-receta"
+                  label="Nombre de la receta"
+                  placeholder="Ej: Huevos rancheros, fabada ..."
+                  data-testid="recipe-name-input"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
-                  min
-                </span>
+              )}
+            />
+
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="descripcion-receta">
+              Descripción
+            </label>
+            <Controller
+              control={control}
+              name="descripcion"
+              render={({ field }) => (
+                <textarea
+                  {...field}
+                  id="descripcion-receta"
+                  placeholder="Ej: Un platillo tradicional con un toque especial..."
+                  data-testid="recipe-description-input"
+                  className="w-full border border-gray-300 rounded-lg p-2 resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-accent bg-white"
+                />
+              )}
+            />
+
+            <div className="flex gap-4">
+              <div className="flex-1 relative" data-testid="category-input-wrapper">
+                <label className="block text-sm font-medium text-gray-700">Categoría</label>
+                <div
+                  className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
+                    ? categoriasToShow
+                        .filter((cat) => categoriasSeleccionadas.includes(cat.id))
+                        .map((cat) => cat.name)
+                        .join(", ")
+                    : (
+                      <span className="text-gray-700">Selecciona categorías</span>
+                    )
+                  }
+                </div>
+                {dropdownOpen && (
+                  <div className="absolute left-0 w-full border border-gray-300 rounded-lg bg-white mt-2 p-2 shadow-lg z-10">
+                    {categoriasToShow.map((categoria) => (
+                      <div
+                        key={categoria.id}
+                        className={`p-2 hover:bg-gray-200 cursor-pointer ${
+                          categoriasSeleccionadas && categoriasSeleccionadas.includes(categoria.id)
+                            ? "bg-gray-300"
+                            : ""
+                        }`}
+                        onClick={() => handleCategoriaChange(categoria)}
+                      >
+                        {categoria.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-[0.6]">
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="tiempo-preparacion"
+                >
+                  Tiempo
+                </label>
+                <Controller
+                  control={control}
+                  name="tiempo"
+                  render={({ field }) => (
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        id="tiempo-preparacion"
+                        label="Time"
+                        type="number"
+                        placeholder="15"
+                        className="pr-10"
+                        data-testid="time-input"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
+                        min
+                      </span>
+                    </div>
+                  )}
+                />
               </div>
             </div>
-          </div>
 
-          <div className="items-center">
-            <label className="block text-sm font-medium text-gray-700 mb-1" data-testid="ingredients-label">
-              Ingredientes
-            </label>
-            <div className="flex justify-center flex-wrap gap-3 items-center" data-testid="ingredients-list">
-              {ingredients.map((value, index) => (
-                <AutocompleteInput
-                  key={index}
-                  placeholder={`Ingrediente número ${index + 1}`}
-                  suggestions={ingredientesMock}
-                  value={value}
-                  onChange={(val) => {
-                    const nuevos = [...ingredients];
-                    nuevos[index] = val;
-                    setIngredients(nuevos);
-                  }}
-                  data-testid={`ingredient-input-${index}`}
-                />
-              ))}
-              <button
-                onClick={addIngredient}
-                className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
-                data-testid="add-ingredient-button"
-              >
-                Añadir ingrediente
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Pasos */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" data-testid="steps-label">
-              Pasos de la preparación
-            </label>
-            <div className="flex flex-col gap-6 items-center" data-testid="steps-list">
-              {steps.map((step, index) => (
-                <div key={index} className="w-full space-y-3">
-                  <Input
-                    placeholder={`Paso número ${index + 1}`}
-                    value={step.text}
-                    onChange={(e) => {
-                      const nuevos = [...steps];
-                      nuevos[index].text = e.target.value;
-                      setSteps(nuevos);
-                    }}
-                    data-testid={`step-input-${index}`}
-                  />
-                  
-                  {/* Área de imagen del paso - igual al diseño principal */}
-                  <div
-                    className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${
-                      step.isDragOver ? 'border-accent border-2 bg-accent/5' : ''
-                    }`}
-                    data-testid={`step-image-upload-area-${index}`}
-                    onDragOver={(e) => handleStepDragOver(e, index)}
-                    onDragLeave={(e) => handleStepDragLeave(e, index)}
-                    onDrop={(e) => handleStepDrop(e, index)}
-                  >
-                    {step.imagePreview ? (
-                      <>
-                        <img
-                          src={step.imagePreview}
-                          alt={`Imagen paso ${index + 1}`}
-                          className="object-contain w-full h-full"
-                          data-testid={`step-image-preview-${index}`}
+            {/* Ingredientes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ingredientes</label>
+              <div className="flex flex-col gap-3 items-center">
+                {ingredientFields.map((ingredient, index) => (
+                  <div key={ingredient.id} className="flex flex-col w-full gap-2">
+                    <Controller
+                      control={control}
+                      name={`ingredients.${index}.name`}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          placeholder={`Ingrediente ${index + 1}`}
+                          className="w-full"
                         />
-                        <button
-                          onClick={() => deleteStepImage(index)}
-                          className="absolute top-2 right-2 bg-white/80 text-red-600 border border-red-300 rounded-full px-2 py-1 text-xs hover:bg-white"
-                          data-testid={`delete-step-image-${index}`}
-                        >
-                          Eliminar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Image className="w-8 h-8 text-accent" data-testid={`step-upload-icon-${index}`} />
-                        <label
-                          className="mt-2 px-4 py-1 border-2 border-accent rounded-xl text-accent cursor-pointer"
-                          data-testid={`step-upload-label-${index}`}
-                        >
-                          Añadir Foto
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleStepImageUpload(index, e.target.files[0])}
-                            data-testid={`step-image-input-${index}`}
+                      )}
+                    />
+                    <div className="flex gap-4">
+                      <Controller
+                        control={control}
+                        name={`ingredients.${index}.quantity`}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="Cantidad"
+                            className="w-24"
                           />
-                        </label>
-                        {step.isDragOver && (
-                          <p className="text-accent text-sm mt-2">Suelta la imagen aquí</p>
                         )}
-                      </>
-                    )}
+                      />
+                      <Controller
+                        control={control}
+                        name={`ingredients.${index}.unit`}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            placeholder="Unidad (ej. g, ml, taza)"
+                            className="w-28"
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-              <button
-                onClick={addStep}
-                className="border rounded-xl px-6 py-3 h-10 flex justify-center items-center"
-                data-testid="add-step-button"
-              >
-                Añadir paso
-                <Plus className="w-5 h-5" />
-              </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
+                  className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
+                >
+                  Añadir ingrediente <Plus className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Guardar */}
-          <Button
-            onClick={handleSubmit}
-            className="w-full border border-accent text-accent rounded-full py-2 mt-6"
-            data-testid="submit-recipe-button"
-          >
-            Guardar
-          </Button>
-        </div>
+            {/* Pasos */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1" data-testid="steps-label">
+                Pasos de la preparación
+              </label>
+              <div className="flex flex-col gap-6 items-center" data-testid="steps-list">
+                {stepFields.map((step, index) => (
+                  <div key={step.id} className="w-full space-y-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={`step-textarea-${index}`}>
+                      Paso número {index + 1}
+                    </label>
+                    <Controller
+                      control={control}
+                      name={`steps.${index}.text`}
+                      render={({ field }) => (
+                        <textarea
+                          {...field}
+                          id={`step-textarea-${index}`}
+                          placeholder={`Describe el paso ${index + 1}`}
+                          data-testid={`step-input-${index}`}
+                          className="w-full border border-gray-300 rounded-lg p-2 resize-y min-h-[60px] focus:outline-none focus:ring-2 focus:ring-accent bg-white"
+                        />
+                      )}
+                    />
+                    {/* Área de imagen del paso */}
+                    <Controller
+                      control={control}
+                      name={`steps.${index}`}
+                      render={({ field }) => (
+                        <div
+                          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${
+                            field.value?.isDragOver ? "border-accent border-2 bg-accent/5" : ""
+                          }`}
+                          data-testid={`step-image-upload-area-${index}`}
+                          onDragOver={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            field.onChange({ ...field.value, isDragOver: true });
+                          }}
+                          onDragLeave={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            field.onChange({ ...field.value, isDragOver: false });
+                          }}
+                          onDrop={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const files = e.dataTransfer.files;
+                            let imagePreview = field.value?.imagePreview;
+                            if (files.length > 0) {
+                              if (imagePreview) URL.revokeObjectURL(imagePreview);
+                              const file = files[0];
+                              const url = URL.createObjectURL(file);
+                              field.onChange({ ...field.value, image: file, imagePreview: url, isDragOver: false });
+                            } else {
+                              field.onChange({ ...field.value, isDragOver: false });
+                            }
+                          }}
+                        >
+                          {field.value?.imagePreview ? (
+                            <>
+                              <img
+                                src={field.value.imagePreview}
+                                alt={`Imagen paso ${index + 1}`}
+                                className="object-contain w-full h-full"
+                                data-testid={`step-image-preview-${index}`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (field.value?.imagePreview) URL.revokeObjectURL(field.value.imagePreview);
+                                  field.onChange({ ...field.value, image: null, imagePreview: null });
+                                }}
+                                className="absolute top-2 right-2 bg-white/80 text-red-600 border border-red-300 rounded-full px-2 py-1 text-xs hover:bg-white"
+                                data-testid={`delete-step-image-${index}`}
+                              >
+                                Eliminar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <Image className="w-8 h-8 text-accent" data-testid={`step-upload-icon-${index}`} />
+                              <label
+                                className="mt-2 px-4 py-1 border-2 border-accent rounded-xl text-accent cursor-pointer"
+                                data-testid={`step-upload-label-${index}`}
+                              >
+                                Añadir Foto
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={e => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      if (field.value?.imagePreview) URL.revokeObjectURL(field.value.imagePreview);
+                                      const url = URL.createObjectURL(file);
+                                      field.onChange({ ...field.value, image: file, imagePreview: url });
+                                    }
+                                  }}
+                                  data-testid={`step-image-input-${index}`}
+                                />
+                              </label>
+                              {field.value?.isDragOver && (
+                                <p className="text-accent text-sm mt-2">Suelta la imagen aquí</p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    appendStep({ text: "", image: null, imagePreview: null, isDragOver: false })
+                  }
+                  className="border rounded-xl px-6 py-3 h-10 flex justify-center items-center"
+                  data-testid="add-step-button"
+                >
+                  Añadir paso
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Guardar */}
+            <Button
+              type="submit"
+              className="w-full border border-accent text-accent rounded-full py-2 mt-6"
+              data-testid="submit-recipe-button"
+            >
+              Guardar
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );
