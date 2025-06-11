@@ -49,6 +49,31 @@ export const recipeService = {
     },
 
     /**
+    * Fetches a specified number of the most recently created recipes.
+    * This assumes your backend allows ordering by a creation timestamp
+    * (e.g., `created_at` or `id` in descending order) and supports a `limit` parameter
+    * for pagination.
+    *
+    * Example API request: `GET /api/recipes/?ordering=-created_at&limit=<amountRecipes>`
+    *
+    * @async
+    * @param {number} amountRecipes - The number of most recent recipes to fetch.
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of the most recent Recipe objects.
+    * @throws {Error} If the API request fails or if `amountRecipes` is not a valid positive number.
+    */
+    getMostRecentRecipes: async (amountRecipes) => {
+        if (typeof amountRecipes !== 'number' || !Number.isInteger(amountRecipes) || amountRecipes <= 0) {
+            throw new Error("Invalid parameter: received parameter must be a positive integer number");
+        }
+        const params = {
+            ordering: "-created_at",
+            limit: amountRecipes,
+        };
+        const response = await api.get(`${BASE_URL}/`, { params });
+        return response.data;
+    },
+
+    /**
     * Creates a new recipe.
     * This typically requires user authentication.
     * The `user` field for the recipe will be automatically assigned by the backend
