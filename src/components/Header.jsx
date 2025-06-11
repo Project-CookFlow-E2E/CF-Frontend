@@ -3,7 +3,7 @@ import logo from "../assets/logo.svg";
 import { Link } from "react-router-dom";
 import Button from "./Button";
 import { isTokenValid } from "../services/authService";
-import useAuthStore from "../stores/authStore";
+import {useAuthStore } from "../store/useAuthStore";
 
 const LogoTitle = () =>{
     const isLoggedIn = isTokenValid();
