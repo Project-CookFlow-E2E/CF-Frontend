@@ -2,8 +2,17 @@ import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Sea
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Footer } from './components';
 import { Header } from './components';
-import {useAuthStore} from './store/useAuthStore';
+import { useEffect } from 'react';
 
+const NavigationSetter = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setGlobalNavigateFunction(navigate);
+  }, [navigate]);
+
+  return null;
+};
 
 function App() {
   return (

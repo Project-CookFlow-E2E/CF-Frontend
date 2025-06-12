@@ -1,129 +1,49 @@
 /**
  * @file Profile.jsx
- * @description Página de perfil de usuario que muestra recetas guardadas (favoritos) y recetas creadas por el usuario.
- * Incluye paginación, tabs de navegación y control de favoritos almacenados en localStorage.
+ * @description Página de perfil de usuario que muestra recetas guardadas (favoritas) y recetas creadas por el usuario.
+ * Incluye paginación, navegación por pestañas y control de favoritos almacenados en localStorage.
  *
  * Funcionalidades:
  * - Alternancia entre recetas guardadas y creadas por el usuario.
  * - Visualización paginada de recetas (8 por página).
  * - Posibilidad de marcar/desmarcar recetas como favoritas.
+ * - Muestra información del usuario con nombre y descripción.
  *
- * Componentes usados:
- * - Card: para mostrar cada receta.
- * - Pagination: control de cambio de página.
- * - useRecipe: hook que obtiene los detalles de una receta por ID.
- * - mockRecipes: datos simulados de recetas.
+ * Componentes utilizados:
+ * - Card: Vista individual de receta con botón de favorito.
+ * - Pagination: Control de cambio de página.
+ * - useProfileRecipes: Hook para gestionar lógica de perfil y recetas.
  *
  * @module pages/Profile
+ * @modifiedby Ana Castro
+ * @modified Adaptación del componente Card.jsx para usarlo directamente, gestión de favoritos y recetas propias a través del hook useProfileRecipes.
+ * @modifiedby Ángel Aragón
+ * @modified Agregado cursor-pointer a los botones de las pestañas.
  */
 
-import { useState, useEffect } from "react";
-import useRecipe from "../hooks/useRecipe";
-import { mockRecipes } from "../data/mockData";
+import useProfileRecipes from "../hooks/useProfileRecipes";
 import { Card, Pagination } from "../components";
+import { useNavigate } from "react-router-dom";
 
-/**
- * Componente para renderizar una tarjeta de receta individual con funcionalidad de favoritos.
- *
- * @param {Object} props
- * @param {number} props.id - ID de la receta a mostrar.
- * @param {string[]} props.favorites - Lista de IDs marcados como favoritos.
- * @param {Function} props.setFavorites - Función para actualizar favoritos.
- * @returns {JSX.Element}
- */
-const RecipeCard = ({ id, favorites, setFavorites }) => {
-  const { recipe, loading } = useRecipe(id);
-  const isFavorite = favorites.includes(String(id));
-
-  const handleToggleFavorite = () => {
-    const idStr = String(id);
-    const updated = isFavorite
-      ? favorites.filter((fav) => fav !== idStr)
-      : [...favorites, idStr];
-
-    setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-  };
-
-  if (loading)
-    return (
-      <div
-        className="animate-pulse bg-gray-200 h-64 rounded-lg"
-        data-testid={`recipe-loading-${id}`}
-      ></div>
-    );
-  if (!recipe) return null;
-
-  return (
-    <Card
-      id={recipe.id}
-      image={recipe.image_url}
-      name={recipe.name}
-      category={recipe.category}
-      time={`${recipe.duration_minutes} m`}
-      isFavorite={isFavorite}
-      onToggleFavorite={handleToggleFavorite}
-      data-testid={`recipe-card-${recipe.id}`}
-      favorite-testid={isFavorite ? "favorite-true" : "favorite-false"}
-    />
-  );
-};
-
-/**
- * Página de perfil del usuario.
- * Permite al usuario ver sus recetas guardadas y las creadas, con navegación por pestañas y paginación.
- *
- * @returns {JSX.Element}
- */
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState("saved");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const navigate = useNavigate();
 
-  const recipesPerPage = 8;
-
-  const filteredRecipes = mockRecipes.filter((recipe) => {
-    if (activeTab === "saved") {
-      return favorites.includes(String(recipe.id));
-    } else {
-      return recipe.isCreatedByUser;
-    }
-  });
-
-  const filteredRecipeIds = filteredRecipes.map((recipe) => recipe.id);
-  const totalPages = Math.ceil(filteredRecipeIds.length / recipesPerPage);
-  const startIndex = (currentPage - 1) * recipesPerPage;
-  const currentRecipeIds = filteredRecipeIds.slice(
-    startIndex,
-    startIndex + recipesPerPage
-  );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab]);
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const createdRecipesCount = mockRecipes.filter(
-    (recipe) => recipe.isCreatedByUser
-  ).length;
+  const {
+    activeTab,
+    setActiveTab,
+    currentPage,
+    setCurrentPage,
+    favorites,
+    toggleFavorite,
+    createdRecipesCount,
+    totalPages,
+    paginatedRecipes,
+    filteredRecipes,
+  } = useProfileRecipes();
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      data-testid="profile-page"
-    >
+    <div className="min-h-screen bg-background" data-testid="profile-page">
       <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
-        {/* Profile Section */}
         <div className="mb-8" data-testid="profile-section">
           <div className="flex items-center space-x-6 mb-4">
             <div
@@ -148,11 +68,10 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex space-x-4 mb-6" data-testid="profile-tabs">
           <button
-            onClick={() => handleTabChange("saved")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            onClick={() => setActiveTab("saved")}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
               activeTab === "saved"
                 ? "bg-gray-800 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -163,8 +82,8 @@ const Profile = () => {
             Recetas guardadas ({favorites.length})
           </button>
           <button
-            onClick={() => handleTabChange("created")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            onClick={() => setActiveTab("created")}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
               activeTab === "created"
                 ? "bg-gray-800 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -176,20 +95,27 @@ const Profile = () => {
           </button>
         </div>
 
-        {/* Recipes Grid */}
-        <div className="flex justify-center" data-testid="recipes-grid-container">
+        <div
+          className="flex justify-center"
+          data-testid="recipes-grid-container"
+        >
           <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               <div
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10"
                 data-testid="recipes-grid"
               >
-                {currentRecipeIds.map((id) => (
-                  <RecipeCard
-                    key={id}
-                    id={id}
-                    favorites={favorites}
-                    setFavorites={setFavorites}
+                {paginatedRecipes.map((recipe) => (
+                  <Card
+                    key={recipe.id}
+                    id={recipe.id}
+                    image={recipe.image_url}
+                    name={recipe.name}
+                    category={recipe.category}
+                    time={`${recipe.duration_minutes}`}
+                    isFavorite={favorites.includes(String(recipe.id))}
+                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
               </div>
@@ -197,13 +123,15 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Estado vacío si no hay recetas */}
-        {filteredRecipeIds.length === 0 && (
+        {filteredRecipes.length === 0 && (
           <div className="text-center py-12" data-testid="empty-state">
             <div className="text-6xl mb-4" data-testid="empty-state-icon">
               {activeTab === "saved" ? "🔖" : "👨‍🍳"}
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2" data-testid="empty-state-title">
+            <h3
+              className="text-xl font-semibold text-gray-700 mb-2"
+              data-testid="empty-state-title"
+            >
               {activeTab === "saved"
                 ? "No tienes recetas guardadas"
                 : "No has creado recetas aún"}
@@ -216,12 +144,11 @@ const Profile = () => {
           </div>
         )}
 
-        {/* Paginación */}
         {totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={setCurrentPage}
             data-testid="pagination"
           />
         )}

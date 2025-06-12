@@ -1,4 +1,7 @@
-import FavoriteButton from './buttons/FavoriteButton';
+import Button from "./Button";
+import PropTypes from "prop-types";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import TimerBadge from "./TimerBadge";
 
 /**
  * Card muestra una tarjeta visual con imagen, título, categoría, tiempo y botón de favorito.
@@ -15,15 +18,35 @@ import FavoriteButton from './buttons/FavoriteButton';
  * @param {boolean} props.isFavorite - Indica si el ítem está marcado como favorito.
  * @param {Function} props.onToggleFavorite - Función para manejar el cambio de estado de favorito.
  * @returns {JSX.Element} Tarjeta visual con contenido y acción de favorito.
+ *
+ * @modifiedby Ángel Aragón
+ * @modified Sustituido el componente de FavoriteButton por el componente reutilizable Button e implementado ReactIcons para los íconos de favorito.
+ *
+ * @modifiedby Ana Castro
+ * @modified Adaptado para que el componente Card pueda recibir props y así no tener que usar RecipeCard.jsx, cambios de estilos.
  */
-const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite }) => {
+const Card = ({
+  id,
+  image,
+  name,
+  category,
+  time,
+  isFavorite,
+  onClick,
+  onToggleFavorite,
+  className = "",
+  imageClassName = "",
+  children,
+}) => {
   return (
-    <div 
-      className="w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-      data-testid={`card-${id}`}
+    <div
+      onClick={onClick}
+      className={`cursor-pointer w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 ${className}`}
     >
-      {/* Image */}
-      <div className="h-40 bg-gray-200 flex items-center justify-center" data-testid="card-image">
+      <div
+        className={`relative h-40 bg-gray-200 flex items-center justify-center ${imageClassName}`}
+        data-testid="card-image"
+      >
         {image ? (
           <img src={image} alt={name} className="w-full h-full object-cover" />
         ) : (
@@ -31,49 +54,65 @@ const Card = ({ id, image, name, category, time, isFavorite, onToggleFavorite })
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 bg-secondary">
-        {/* Title and bookmark in one line */}
+      <div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px] text-left">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="text-lg font-bold text-gray-900" data-testid="card-title">
-            {name || 'Swamp Soup'}
+          <h3
+            className="text-lg font-bold text-gray-900 pr-2"
+            data-testid="card-title"
+          >
+            {name || "Swamp Soup"}
           </h3>
-          <FavoriteButton
-            isFavorite={isFavorite}
-            onToggle={() => onToggleFavorite(id)}
-            data-testid={`favorite-button-${id}`}
-          />
+          {onToggleFavorite && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(id);
+              }}
+              aria-label={
+                isFavorite ? "Quitar de Favoritos" : "Agregar a Favoritos"
+              }
+              className={`${"hover:bg-transparent bg-transparent"}`}
+            >
+              {isFavorite ? (
+                <BsBookmarkFill size={20} color="#F37A7E" />
+              ) : (
+                <BsBookmark size={20} color="#F37A7E" />
+              )}
+            </Button>
+          )}
         </div>
 
-        {/* Category and time */}
         <div className="flex justify-between items-center">
           <p
             className="text-xs font-semibold text-gray-500 uppercase tracking-wider"
             data-testid="card-category"
           >
-            {category || 'LUNCH'}
+            {category || "LUNCH"}
           </p>
-          <div className="flex items-center text-gray-600 text-sm" data-testid="card-time">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>{time || '20 m'}</span>
-          </div>
+          <TimerBadge minutes={time} color="text-gray-600" />
         </div>
+        {children}
       </div>
     </div>
   );
+};
+
+Card.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  image: PropTypes.string,
+  name: PropTypes.string,
+  category: PropTypes.string,
+  time: PropTypes.string,
+  isFavorite: PropTypes.bool,
+  onToggleFavorite: PropTypes.func,
+  className: PropTypes.string,
+  imageClassName: PropTypes.string,
+  children: PropTypes.node,
+  onClick: PropTypes.func,
+};
+
+Card.defaultProps = {
+  onClick: () => {},
 };
 
 export default Card;

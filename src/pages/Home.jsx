@@ -7,19 +7,20 @@
  * - Marcar recetas como favoritas (persistidas en localStorage).
  * - Recibir inspiración aleatoria con un botón.
  *
- * Usa `useRecipe` para cargar datos individuales de recetas por ID.
- * Navega a otras páginas con `useNavigate` de react-router-dom.
+ * Usa `useNavigate` para la navegación entre páginas.
+ * Usa `useFavorites` para gestionar las recetas favoritas del usuario
  *
  * @module Home
+ * @modifiedby Ana Castro
+ * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites
+ *  y seleccion de las tres ultimas recetas creadas.
  */
 
 import React from "react";
-import useRecipe from "../hooks/useRecipe";
 import { useNavigate } from "react-router-dom";
 import { Badge, Button, Card } from "../components";
-
-// IDs de recetas que se muestran en la sección "Últimas recetas"
-const recipeIds = [1, 2, 3];
+import { mockRecipes } from "../data/mockData";
+import useFavorites from "../hooks/useFavorites";
 
 // Mapeo de categorías legibles a slugs de URL
 const categoryMap = {
@@ -36,64 +37,18 @@ const categoryMap = {
 const categories = Object.keys(categoryMap);
 
 /**
- * RecipeCard Component
- *
- * Representa una tarjeta de receta individual.
- * Carga los datos desde el hook `useRecipe` en base al ID recibido.
- * Muestra un `Card` con información básica y permite marcar como favorita.
- *
- * @param {Object} props
- * @param {number} props.id - ID de la receta a cargar
- * @param {string[]} props.favorites - Lista de IDs favoritas
- * @param {Function} props.setFavorites - Función para actualizar favoritos
- */
-const RecipeCard = ({ id, favorites, setFavorites }) => {
-  const { recipe, loading } = useRecipe(id);
-  const isFavorite = favorites.includes(String(id));
-
-  const handleToggleFavorite = () => {
-    const idStr = String(id);
-    const updated = isFavorite
-      ? favorites.filter((fav) => fav !== idStr)
-      : [...favorites, idStr];
-
-    setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-  };
-
-  if (loading) return <p data-testid={`loading-recipe-${id}`} className="text-center">Loading recipe {id}…</p>;
-  if (!recipe) return <p data-testid={`notfound-recipe-${id}`} className="text-center">Recipe {id} not found 😢</p>;
-
-  return (
-    <Card
-      id={`recipe-card-${recipe.id}`}
-      data-testid={`recipe-card-${recipe.id}`}
-      image={recipe.image_url}
-      name={recipe.name}
-      category={recipe.category}
-      time={`${recipe.duration_minutes} m`}
-      isFavorite={isFavorite}
-      onToggleFavorite={handleToggleFavorite}
-    />
-  );
-};
-
-/**
  * Página principal de la app.
  * Presenta un buscador por categorías, últimas recetas y un botón de inspiración.
  */
 const Home = () => {
   const navigate = useNavigate();
-
-  // Estado de favoritos persistido en localStorage
-  const [favorites, setFavorites] = React.useState(() => {
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
-  });
-
   const [selectedCategories, setSelectedCategories] = React.useState([]);
 
-  // Alterna una categoría seleccionada
+  /**
+   * Alterna una categoría seleccionada en la lista de búsqueda.
+   *
+   * @param {string} category - Nombre de la categoría seleccionada.
+   */
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
@@ -102,7 +57,9 @@ const Home = () => {
     );
   };
 
-  // Redirige a la página de búsqueda con categorías seleccionadas
+  /**
+   * Redirige a la página de búsqueda con las categorías seleccionadas.
+   */
   const handleSearchClick = () => {
     if (selectedCategories.length === 0) return;
 
@@ -112,10 +69,17 @@ const Home = () => {
     navigate(`/search?category=${uniqueMapped.join(",")}`);
   };
 
-  // Redirige a la ruta de inspiración aleatoria
+  /**
+   * Redirige a una página con recetas aleatorias para inspiración.
+   */
   const handleInspireClick = () => {
     navigate("/inspire-me");
   };
+
+  const latestRecipes = [...mockRecipes]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3);
+  const { favorites, toggleFavorite } = useFavorites();
 
   return (
     <div className="min-h-screen bg-background w-full" data-testid="home-page">
@@ -191,12 +155,17 @@ const Home = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
             data-testid="latest-recipes-list"
           >
-            {recipeIds.map((id) => (
-              <RecipeCard
-                key={id}
-                id={id}
-                favorites={favorites}
-                setFavorites={setFavorites}
+            {latestRecipes.map((recipe) => (
+              <Card
+                key={recipe.id}
+                id={`recipe-card-${recipe.id}`}
+                image={recipe.image_url}
+                name={recipe.name}
+                category={recipe.category}
+                time={`${recipe.duration_minutes}`}
+                isFavorite={favorites.includes(String(recipe.id))}
+                onToggleFavorite={() => toggleFavorite(recipe.id)}
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
               />
             ))}
           </div>
@@ -221,7 +190,7 @@ const Home = () => {
             role="button"
             tabIndex={0}
             onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleInspireClick();
+              if (e.key === "Enter" || e.key === " ") handleInspireClick();
             }}
           >
             <span className="text-white font-semibold text-lg">Inspire me</span>
