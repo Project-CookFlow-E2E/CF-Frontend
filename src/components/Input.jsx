@@ -18,8 +18,8 @@ import { MdError } from "react-icons/md";
  * @param {React.ComponentType} [props.icon] - Componente de ícono (por ejemplo: un ícono de búsqueda o usuario).
  * @returns {JSX.Element} Campo de entrada con estilos y funcionalidad personalizables.
  *
- * @modifiedby Ángel Aragón
- * @modified Agregado PropTypes, error, error icon (MdError) y name como propiedades opcionales.
+ * @modifiedby Ángel Aragón, Saturnino Méndez
+ * @modified Agregado PropTypes, error, error icon (MdError), name como propiedades opcionales y añadidas propiedades faltantes para los test.
  */
 const Input = ({
   type,
@@ -29,12 +29,14 @@ const Input = ({
   icon: Icon,
   name,
   error,
+  inputTestId,
+  iconTestId,
   ...rest
 }) => {
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 w-full">
-        {Icon && <Icon className="mr-3 text-black w-5 h-5" />}
+        {Icon && <Icon className="mr-3 text-black w-5 h-5" data-testid={iconTestId} />}
         <input
           type={type}
           name={name}
@@ -42,6 +44,7 @@ const Input = ({
           value={value}
           placeholder={placeholder}
           className="outline-none w-full bg-transparent"
+          data-testid={inputTestId}
           {...rest}
         />
       </div>

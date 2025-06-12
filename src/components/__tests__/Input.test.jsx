@@ -6,12 +6,12 @@ import Input from "../Input";
 
 vi.mock('react-icons/md', () => ({
     MdError: vi.fn((props) => {
-        <span data-testid="mock-error-icon" data-size={props.size} className={props.className} />
+        return <span data-testid="mock-error-icon" data-size={props.size} className={props.className} />
     })
 }));
 
 const MockLeftIcon = vi.fn((props) => (
-    <svg data-testid="mock-left-icon" className={props.className} />
+    <svg data-testid={props['data-testId']} className={props.className} />
 ));
 
 describe("Input Component", () => {
@@ -64,8 +64,8 @@ describe("Input Component", () => {
         expect(inputElement).not.toHaveAttribute("name");
     });
 
-    it("Renders the provided icon component", () => {
-        render(<Input {...defaultProps} name={MockLeftIcon} />);
+    it("Renders the provided for icon component", () => {
+        render(<Input {...defaultProps} iconTestId="mock-left-icon" />);
         const iconElement = screen.getByTestId("mock-left-icon");
 
         expect(iconElement).toBeInTheDocument();
@@ -103,8 +103,7 @@ describe("Input Component", () => {
         render(<Input {...defaultProps} error={undefined} />);
         const inputElement = screen.getByPlaceholderText(defaultProps.placeholder);
 
-        expect(inputElement).toBeDisabled();
-        expect(inputElement).toHaveAttribute("readOnly");
-        expect(inputElement).toHaveAttribute("data-custom-attr", "test-value");
+        expect(screen.queryByTestId('input-error')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('mock-error-icon')).not.toBeInTheDocument();
     });
 });
