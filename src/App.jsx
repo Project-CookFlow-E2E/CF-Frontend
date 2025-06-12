@@ -1,9 +1,21 @@
-import { AddRecipe, AdminDashboard, Home, InspireMe, Login, Profile, Recipe, Search, SignUp, ShoppingList, Landing } from './pages'
+import {
+  AddRecipe,
+  AdminDashboard,
+  Home,
+  InspireMe,
+  Login,
+  Profile,
+  Recipe,
+  Search,
+  SignUp,
+  ShoppingList,
+  Landing,
+} from "./pages";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import { setGlobalNavigateFunction } from './main';
-import { Footer } from './components';
-import { Header } from './components';
-import { useEffect } from 'react';
+import { setGlobalNavigateFunction } from "./main";
+import { Footer } from "./components";
+import { Header } from "./components";
+import { useEffect } from "react";
 
 const NavigationSetter = () => {
   const navigate = useNavigate();
@@ -22,7 +34,7 @@ function App() {
       <Routes data-testid="app-routes">
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/register" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path="/search" element={<Search />} />

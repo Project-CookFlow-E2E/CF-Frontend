@@ -34,6 +34,8 @@ import Input from "../components/Input";
 import { Mail, Lock, PersonStanding } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { userService } from "../services/userService";
+import { useState } from "react";
 
 const passwordValidation = (value, allValues) => {
   if (!value) return "La contraseña es obligatoria";
@@ -52,6 +54,7 @@ const passwordValidation = (value, allValues) => {
 };
 
 const SignUp = () => {
+  const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
   const {
     register,
@@ -59,13 +62,34 @@ const SignUp = () => {
     watch,
     formState: { errors },
     getValues,
+    setError,
   } = useForm();
 
-  const onSubmit = (data) => {
-    //TODO: Aquí iría la lógica de registro (API)
-    //TODO: Borrar console.log una vez implementada la API
-    console.log("Datos de registro:", data);
-    navigate("/");
+  const onSubmit = async (data) => {
+    setApiError(""); // Limpia errores previos
+    try {
+      await userService.createUser({
+        username: data.username,
+        name: data.name,
+        surname: data.lastname1,
+        second_surname: data.lastname2,
+        email: data.email,
+        password: data.password,
+      });
+      navigate("/login", {
+        state: { successMsg: "¡Registro exitoso!" },
+      });
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setError("email", {
+          type: "manual",
+          message: "El correo electrónico o nombre de usuario ya existe",
+        });
+        setApiError("El correo electrónico o nombre de usuario ya existe");
+      } else {
+        setApiError("Error al registrar usuario. Inténtalo de nuevo.");
+      }
+    }
   };
 
   const password = watch("password", "");
@@ -108,7 +132,61 @@ const SignUp = () => {
           >
             Únete a CookFlow y empieza tu viaje culinario
           </h4>
-
+          {apiError && (
+            <div
+              className="text-red-500 text-sm mb-4"
+              data-testid="signup-api-error"
+            >
+              {apiError}
+            </div>
+          )}
+          <div
+            className="flex flex-col mb-4 w-full"
+            data-testid="signup-username-container"
+          >
+            <label
+              className="text-xs mb-2 font-bold text-black"
+              htmlFor="username-input"
+            >
+              Nombre de usuario
+            </label>
+            <Input
+              placeholder="Nombre de usuario"
+              type="text"
+              icon={PersonStanding}
+              id="username-input"
+              name="username"
+              {...register("username", {
+                required: "El nombre de usuario es obligatorio",
+                minLength: {
+                  value: 3,
+                  message:
+                    "El nombre de usuario debe tener al menos 3 caracteres",
+                },
+              })}
+              error={errors.username?.message}
+            />
+          </div>
+          <div
+            className="flex flex-col mb-4 w-full"
+            data-testid="signup-name-container"
+          >
+            <label
+              className="text-xs mb-2 font-bold text-black"
+              htmlFor="name-input"
+            >
+              Nombre
+            </label>
+            <Input
+              placeholder="Nombre"
+              type="text"
+              icon={PersonStanding}
+              id="name-input"
+              name="name"
+              {...register("name", { required: "El nombre es obligatorio" })}
+              error={errors.name?.message}
+            />
+          </div>
           <div
             className="flex flex-col mb-4 w-full"
             data-testid="signup-lastname1-container"
@@ -152,27 +230,6 @@ const SignUp = () => {
                 required: "El segundo apellido es obligatorio",
               })}
               error={errors.lastname2?.message}
-            />
-          </div>
-
-          <div
-            className="flex flex-col mb-4 w-full"
-            data-testid="signup-name-container"
-          >
-            <label
-              className="text-xs mb-2 font-bold text-black"
-              htmlFor="name-input"
-            >
-              Nombre
-            </label>
-            <Input
-              placeholder="Nombre"
-              type="text"
-              icon={PersonStanding}
-              id="name-input"
-              name="name"
-              {...register("name", { required: "El nombre es obligatorio" })}
-              error={errors.name?.message}
             />
           </div>
 
