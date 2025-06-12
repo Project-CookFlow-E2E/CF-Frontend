@@ -23,7 +23,7 @@ import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
 import useFavorites from "../hooks/useFavorites";
 import { mockRecipes } from "../data/mockData";
-
+import { FaGear } from "react-icons/fa6";
 
 /**
  * Renderiza una receta individual dentro del carrusel de recetas destacadas.
@@ -31,9 +31,11 @@ import { mockRecipes } from "../data/mockData";
  *
  * @param {Object} props
  * @param {number} props.id - ID de la receta
- * 
- * @modifiedby Ána Castro
- * @modified Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
+ *
+ * @modifiedby Ána Castro, Ángel Aragón
+ * @modified - Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
+ * - Agregado el icono de engranaje para representar la receta y arreglado tiempo en card.
+ * @returns {JSX.Element} Componente de tarjeta de receta
  */
 
 /**
@@ -46,9 +48,9 @@ import { mockRecipes } from "../data/mockData";
  * @returns {JSX.Element}
  */
 const Landing = () => {
-    const { favorites } = useFavorites();
-    const featuredRecipes = mockRecipes.slice(0, 3);
-    const navigate = useNavigate();
+  const { favorites } = useFavorites();
+  const featuredRecipes = mockRecipes.slice(0, 3);
+  const navigate = useNavigate();
 
   return (
     <div
@@ -56,7 +58,6 @@ const Landing = () => {
       data-testid="landing-page"
       id="landing-page-container"
     >
-      {/* Hero Section */}
       <div
         className="w-full h-[500px] bg-cover bg-center flex flex-col items-center justify-center text-center px-4"
         style={{ backgroundImage: "url('/landing.png')" }}
@@ -82,7 +83,6 @@ const Landing = () => {
         </Link>
       </div>
 
-      {/* Problem Section */}
       <div
         className="bg-[#e9e6d7] w-full py-16 text-center"
         data-testid="problem-section"
@@ -105,7 +105,9 @@ const Landing = () => {
             data-testid="problem-card-1"
             id="problem-card-1"
           >
-            <div className="text-2xl mb-2">⚙️</div>
+            <div className="text-2xl mb-2 flex justify-center">
+              <FaGear />
+            </div>
             <h3 className="font-semibold text-lg mb-2">What to cook today?</h3>
             <p className="text-gray-600 text-sm">
               The daily decision fatigue that creates stress and frustration
@@ -117,8 +119,12 @@ const Landing = () => {
             data-testid="problem-card-2"
             id="problem-card-2"
           >
-            <div className="text-2xl mb-2">⚙️</div>
-            <h3 className="font-semibold text-lg mb-2">No time or organization</h3>
+            <div className="text-2xl mb-2 flex justify-center">
+              <FaGear />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">
+              No time or organization
+            </h3>
             <p className="text-gray-600 text-sm">
               Lost recipes, improvised shopping, and the stress of cooking
               without a clear plan
@@ -127,7 +133,6 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Solution Section */}
       <div
         className="bg-[#fdf2f2] w-full py-16 px-4 text-center"
         data-testid="solution-section"
@@ -154,19 +159,24 @@ const Landing = () => {
           id="recipe-cards-grid"
         >
           {featuredRecipes.map((recipe) => (
-            <Card key={recipe.id}
-                id={`recipe-card-${recipe.id}`}
-                image={recipe.image_url}
-                name={recipe.name}
-                category={recipe.category}
-                time={`${recipe.duration_minutes} m`}
-                isFavorite={favorites.includes(String(recipe.id))}
-                onToggleFavorite={() => navigate("/signup")}
-                onClick={() => navigate(`/recipe/${recipe.id}`)}
+            <Card
+              key={recipe.id}
+              id={`recipe-card-${recipe.id}`}
+              image={recipe.image_url}
+              name={recipe.name}
+              category={recipe.category}
+              time={`${recipe.duration_minutes}`}
+              isFavorite={favorites.includes(String(recipe.id))}
+              onToggleFavorite={() => navigate("/signup")}
+              onClick={() => navigate(`/recipe/${recipe.id}`)}
             />
           ))}
         </div>
-        <div className="pb-20" data-testid="signup-button-container" id="signup-button-container">
+        <div
+          className="pb-20"
+          data-testid="signup-button-container"
+          id="signup-button-container"
+        >
           <Link to="/signup" data-testid="signup-link" id="signup-link">
             <Button>A cocinar</Button>
           </Link>

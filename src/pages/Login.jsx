@@ -31,6 +31,8 @@ import { getToken } from "../services/authService";
  * y un botón para simular login.
  *
  * @returns {JSX.Element} Vista de login
+ * @modifiedby Ángel Aragón
+ * @modified Arreglado componente Button
  */
 const Login = () => {
   const navigate = useNavigate();
@@ -66,7 +68,6 @@ const Login = () => {
       data-testid="login-page"
       id="login-page"
     >
-      {/* Image */}
       <div
         className="hidden md:block w-1/2"
         data-testid="login-image-container"
@@ -81,7 +82,6 @@ const Login = () => {
         />
       </div>
 
-      {/* Form */}
       <div
         className="w-full md:w-1/2 flex justify-center items-start pt-20"
         data-testid="login-form-container"
@@ -158,7 +158,7 @@ const Login = () => {
           <div data-testid="login-button-container" id="login-button-container">
             <Button
               onClick={handleLogin}
-              className="mb-3 w-40 px-1"
+              className="mb-3 w-40 py-2 rounded-xl"
               data-testid="login-button"
               id="login-button"
             >
