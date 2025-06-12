@@ -1,3 +1,33 @@
+/**
+ * @file CategoryManagement.jsx
+ * @description
+ * Componente de administración de categorías para el panel de administración.
+ * Permite visualizar, editar y gestionar categorías de recetas.
+ * 
+ * Funcionalidades principales:
+ * - Listar todas las categorías existentes.
+ * - Editar el nombre y la categoría padre de una categoría mediante un modal.
+ * - Botón para añadir nuevas categorías (funcionalidad pendiente de implementar).
+ * - Acciones de edición y borrado para cada categoría.
+ * 
+ * Estados:
+ * - categories: array de categorías obtenidas del backend.
+ * - loading: booleano para mostrar el estado de carga.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición.
+ * 
+ * Servicios utilizados:
+ * - categoryService.getAllCategories(): obtiene todas las categorías.
+ * - categoryService.updateCategoryAdmin(id, data): actualiza una categoría.
+ * 
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite modificar los campos "Nombre" y "Categoría Padre" de cada categoría.
+ * 
+ * @author
+ * Lorena Martínez
+ */
+
 import { useState, useEffect } from 'react';
 import { categoryService } from '../../services/categoryService';
 
@@ -5,7 +35,7 @@ const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado para el modal de edición
+
   const [editModal, setEditModal] = useState({ open: false, category: null });
   const [editForm, setEditForm] = useState({ name: '', parent_category_id: '' });
 
@@ -23,7 +53,7 @@ const CategoryManagement = () => {
     fetchCategories();
   }, []);
 
-  // Abrir modal de edición
+
   const openEditModal = (category) => {
     setEditForm({
       name: category.name || '',
@@ -32,15 +62,15 @@ const CategoryManagement = () => {
     setEditModal({ open: true, category });
   };
 
-  // Cerrar modal
+
   const closeEditModal = () => setEditModal({ open: false, category: null });
 
-  // Cambios en el formulario
+
   const handleEditChange = (e) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  // Guardar cambios
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     const id = editModal.category.id;

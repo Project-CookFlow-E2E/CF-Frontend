@@ -1,3 +1,33 @@
+/**
+ * @file UserManagement.jsx
+ * @description
+ * Componente de administración de usuarios para el panel de administración.
+ * Permite visualizar, editar y gestionar usuarios.
+ * 
+ * Funcionalidades principales:
+ * - Listar todos los usuarios existentes.
+ * - Editar el nombre y el rol de un usuario mediante un modal.
+ * - Botón para añadir nuevos usuarios (funcionalidad pendiente de implementar).
+ * - Acciones de edición y borrado para cada usuario.
+ * 
+ * Estados:
+ * - users: array de usuarios obtenidos del backend.
+ * - loading: booleano para mostrar el estado de carga.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición.
+ * 
+ * Servicios utilizados:
+ * - userService.getAllUsersAdmin(): obtiene todos los usuarios.
+ * - userService.updateUserAdmin(id, data): actualiza un usuario.
+ * 
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite modificar los campos "Nombre" y "Rol" de cada usuario.
+ * 
+ * @author
+ * Lorena Martínez
+ */
+
 import { useState, useEffect } from 'react';
 import { userService } from '../../services/userService';
 
@@ -5,7 +35,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado para el modal de edición
+
   const [editModal, setEditModal] = useState({ open: false, user: null });
   const [editForm, setEditForm] = useState({ name: '', is_staff: false });
 
@@ -23,7 +53,7 @@ const UserManagement = () => {
     fetchUsers();
   }, []);
 
-  // Abrir modal de edición
+ 
   const openEditModal = (user) => {
     setEditForm({
       name: user.name || '',
@@ -32,10 +62,10 @@ const UserManagement = () => {
     setEditModal({ open: true, user });
   };
 
-  // Cerrar modal
+ 
   const closeEditModal = () => setEditModal({ open: false, user: null });
 
-  // Cambios en el formulario
+ 
   const handleEditChange = (e) => {
     const { name, value, type } = e.target;
     setEditForm({
@@ -44,7 +74,7 @@ const UserManagement = () => {
     });
   };
 
-  // Guardar cambios
+  
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     const id = editModal.user.id;
@@ -128,7 +158,7 @@ const UserManagement = () => {
         <button className="px-3 py-1 border rounded-md">Siguiente</button>
       </div>
 
-      {/* Modal de edición */}
+     
       {editModal.open && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">

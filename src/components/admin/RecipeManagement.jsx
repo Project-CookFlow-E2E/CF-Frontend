@@ -1,3 +1,33 @@
+/**
+ * @file RecipeManagement.jsx
+ * @description
+ * Componente de administración de recetas para el panel de administración.
+ * Permite visualizar, editar y gestionar recetas.
+ * 
+ * Funcionalidades principales:
+ * - Listar todas las recetas existentes.
+ * - Editar el nombre y la categoría de una receta mediante un modal.
+ * - Botón para añadir nuevas recetas (funcionalidad pendiente de implementar).
+ * - Acciones de edición y borrado para cada receta.
+ * 
+ * Estados:
+ * - recipes: array de recetas obtenidas del backend.
+ * - loading: booleano para mostrar el estado de carga.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición.
+ * 
+ * Servicios utilizados:
+ * - recipeService.getRecipes(): obtiene todas las recetas.
+ * - recipeService.updateRecipeAdmin(id, data): actualiza una receta.
+ * 
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite modificar los campos "Nombre" y "Categoría" de cada receta.
+ * 
+ * @author
+ * Lorena Martínez
+ */
+
 import { useEffect, useState } from "react";
 import { recipeService } from "../../services/recipeService";
 
@@ -6,7 +36,7 @@ const RecipeManagement = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado para el modal de edición
+
   const [editModal, setEditModal] = useState({ open: false, recipe: null });
   const [editForm, setEditForm] = useState({ name: "", category: "" });
 
@@ -24,7 +54,7 @@ const RecipeManagement = () => {
     fetchRecipes();
   }, []);
 
-  // Abrir modal de edición
+
   const openEditModal = (recipe) => {
     setEditForm({
       name: recipe.name || "",
@@ -33,15 +63,15 @@ const RecipeManagement = () => {
     setEditModal({ open: true, recipe });
   };
 
-  // Cerrar modal
+  
   const closeEditModal = () => setEditModal({ open: false, recipe: null });
 
-  // Cambios en el formulario
+  
   const handleEditChange = (e) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  // Guardar cambios
+  
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     const id = editModal.recipe.id;
