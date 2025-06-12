@@ -2,10 +2,11 @@
  * @file UserManagement.jsx
  * @description
  * Componente de administración de usuarios para el panel de administración.
- * Permite visualizar, editar y gestionar usuarios.
+ * Permite visualizar, buscar, editar y gestionar usuarios.
  *
  * Funcionalidades principales:
  * - Listar todos los usuarios existentes.
+ * - Buscar usuarios por nombre mediante un input de búsqueda.
  * - Editar el nombre y el rol de un usuario mediante un modal.
  * - Botón para añadir nuevos usuarios (funcionalidad pendiente de implementar).
  * - Acciones de edición y borrado para cada usuario.
@@ -17,6 +18,7 @@
  * - editModal: controla la visibilidad y datos del modal de edición.
  * - editForm: almacena los valores del formulario de edición.
  * - page: página actual de la paginación.
+ * - search: término de búsqueda para filtrar usuarios por nombre.
  *
  * Servicios utilizados:
  * - userService.getAllUsersAdmin(): obtiene todos los usuarios.
@@ -24,7 +26,7 @@
  *
  * Uso:
  * Este componente está pensado para ser usado por administradores.
- * Permite modificar los campos "Nombre" y "Rol" de cada usuario,
+ * Permite buscar y modificar los campos "Nombre" y "Rol" de cada usuario,
  * navegar entre páginas y gestionar la información de usuarios de forma sencilla.
  *
  * @author
@@ -44,6 +46,7 @@ const UserManagement = () => {
   const [editForm, setEditForm] = useState({ name: "", is_staff: false });
 
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -93,8 +96,14 @@ const UserManagement = () => {
     closeEditModal();
   };
 
-  const totalPages = Math.ceil(users.length / PAGE_SIZE);
-  const paginatedUsers = users.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
 
   const handlePrev = () => setPage((p) => Math.max(1, p - 1));
   const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
@@ -120,6 +129,15 @@ const UserManagement = () => {
           </svg>
           Añadir usuario
         </button>
+      </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Buscar usuarios..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <div className="overflow-x-auto">

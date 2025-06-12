@@ -2,10 +2,11 @@
  * @file RecipeManagement.jsx
  * @description
  * Componente de administración de recetas para el panel de administración.
- * Permite visualizar, editar y gestionar recetas.
+ * Permite visualizar, buscar, editar y gestionar recetas.
  *
  * Funcionalidades principales:
  * - Listar todas las recetas existentes.
+ * - Buscar recetas por nombre mediante un input de búsqueda.
  * - Editar el nombre y la categoría de una receta mediante un modal.
  * - Botón para añadir nuevas recetas (funcionalidad pendiente de implementar).
  * - Acciones de edición y borrado para cada receta.
@@ -18,6 +19,7 @@
  * - editModal: controla la visibilidad y datos del modal de edición.
  * - editForm: almacena los valores del formulario de edición.
  * - page: página actual de la paginación.
+ * - search: término de búsqueda para filtrar recetas por nombre.
  *
  * Servicios utilizados:
  * - recipeService.getRecipes(): obtiene todas las recetas.
@@ -25,7 +27,7 @@
  *
  * Uso:
  * Este componente está pensado para ser usado por administradores.
- * Permite modificar los campos "Nombre" y "Categoría" de cada receta,
+ * Permite buscar y modificar los campos "Nombre" y "Categoría" de cada receta,
  * navegar entre páginas y ver las recetas ordenadas por fecha de creación.
  *
  * @author
@@ -45,6 +47,7 @@ const RecipeManagement = () => {
   const [editForm, setEditForm] = useState({ name: "", category: "" });
 
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -94,8 +97,12 @@ const RecipeManagement = () => {
     closeEditModal();
   };
 
-  const totalPages = Math.ceil(recipes.length / PAGE_SIZE);
-  const paginatedRecipes = recipes.slice(
+ 
+  const filteredRecipes = recipes.filter((rec) =>
+    rec.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredRecipes.length / PAGE_SIZE);
+  const paginatedRecipes = filteredRecipes.slice(
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE
   );
@@ -124,6 +131,15 @@ const RecipeManagement = () => {
           </svg>
           Añadir nueva receta
         </button>
+      </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Buscar recetas..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <div className="overflow-x-auto">

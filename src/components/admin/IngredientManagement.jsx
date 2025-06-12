@@ -119,7 +119,6 @@ const IngredientManagement = () => {
     closeEditModal();
   };
 
-  // Filtros y paginación
   const filteredIngredients = ingredients
     .filter((ing) => {
       if (activeTab === "pending") return !ing.is_approved;

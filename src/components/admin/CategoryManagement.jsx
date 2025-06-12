@@ -2,10 +2,11 @@
  * @file CategoryManagement.jsx
  * @description
  * Componente de administración de categorías para el panel de administración.
- * Permite visualizar, editar y gestionar categorías de recetas.
+ * Permite visualizar, buscar, editar y gestionar categorías de recetas.
  *
  * Funcionalidades principales:
  * - Listar todas las categorías existentes.
+ * - Buscar categorías por nombre mediante un input de búsqueda.
  * - Editar el nombre y la categoría padre de una categoría mediante un modal.
  * - Botón para añadir nuevas categorías (funcionalidad pendiente de implementar).
  * - Acciones de edición y borrado para cada categoría.
@@ -18,6 +19,7 @@
  * - editModal: controla la visibilidad y datos del modal de edición.
  * - editForm: almacena los valores del formulario de edición.
  * - page: página actual de la paginación.
+ * - search: término de búsqueda para filtrar categorías por nombre.
  *
  * Servicios utilizados:
  * - categoryService.getAllCategories(): obtiene todas las categorías.
@@ -25,7 +27,7 @@
  *
  * Uso:
  * Este componente está pensado para ser usado por administradores.
- * Permite modificar los campos "Nombre" y "Categoría Padre" de cada categoría,
+ * Permite buscar y modificar los campos "Nombre" y "Categoría Padre" de cada categoría,
  * navegar entre páginas y ver las categorías ordenadas por fecha de creación.
  *
  * @author
@@ -48,6 +50,7 @@ const CategoryManagement = () => {
   });
 
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -97,9 +100,12 @@ const CategoryManagement = () => {
     closeEditModal();
   };
 
-  // Paginación
-  const totalPages = Math.ceil(categories.length / PAGE_SIZE);
-  const paginatedCategories = categories.slice(
+ 
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
+  const paginatedCategories = filteredCategories.slice(
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE
   );
@@ -128,6 +134,15 @@ const CategoryManagement = () => {
           </svg>
           Añadir categoría
         </button>
+      </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Buscar categorías..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200">
