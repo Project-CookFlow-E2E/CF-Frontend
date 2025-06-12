@@ -8,7 +8,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
-import { ingredientesMock } from "../data/mockData";
+import { mockCategories } from "../data/mockData";
 import { Button, Input } from "../components/";
 
 /**
@@ -27,6 +27,7 @@ const AddRecipe = () => {
    * @typedef {Object} Ingredient
    * @property {string} name           Nombre del ingrediente.
    * @property {string} quantity       Cantidad del ingrediente.
+   * @property {string} type           Tipo de unidad (nuevo campo, ej. sólido, líquido).
    * @property {string} unit           Unidad de medida (ej. g, ml, taza).
    *
    * @typedef {Object} Step
@@ -55,7 +56,6 @@ const AddRecipe = () => {
     handleSubmit,
     setValue,
     watch,
-    getValues,
     reset,
   } = useForm({
     defaultValues: {
@@ -64,7 +64,7 @@ const AddRecipe = () => {
       tiempo: "",
       categoriasSeleccionadas: [],
       foto: null,
-      ingredients: [{ name: "", quantity: "", unit: "" }],
+      ingredients: [{ name: "", quantity: "", type: "", unit: "" }],
       steps: [{ text: "", image: null, imagePreview: null, isDragOver: false }],
     },
   });
@@ -73,7 +73,6 @@ const AddRecipe = () => {
   const {
     fields: ingredientFields,
     append: appendIngredient,
-    update: updateIngredient,
   } = useFieldArray({
     control,
     name: "ingredients",
@@ -82,7 +81,6 @@ const AddRecipe = () => {
   const {
     fields: stepFields,
     append: appendStep,
-    update: updateStep,
   } = useFieldArray({
     control,
     name: "steps",
@@ -96,14 +94,16 @@ const AddRecipe = () => {
       .catch(() => setCategorias([]));
   }, []);
 
-  // Adaptar estructura de categorías si es necesario
+  // Adaptar estructura de categorías para mostrar el label de mockCategories si existe
   const categoriasToShow = categorias.length > 0
-    ? categorias
-    : ingredientesMock.map((cat, idx) =>
-        typeof cat === "string"
-          ? { id: idx, name: cat }
-          : { id: cat.id ?? idx, name: cat.name ?? String(cat) }
-      );
+    ? categorias.map(cat => ({
+        id: cat.id || cat.label || cat.name,
+        name: cat.label || cat.name || cat.id
+      }))
+    : (mockCategories || []).map(cat => ({
+        id: cat.id,
+        name: cat.label
+      }));
 
   // Imagen principal
   const foto = watch("foto");
@@ -211,30 +211,6 @@ const AddRecipe = () => {
   };
 
   /**
-   * Actualiza un ingrediente.
-   * @param {number} index
-   * @param {string} key
-   * @param {string|number} value
-   */
-  const handleIngredientChange = (index, key, value) => {
-    const updated = [...getValues("ingredients")];
-    updated[index][key] = value;
-    setValue("ingredients", updated);
-  };
-
-  /**
-   * Actualiza un paso.
-   * @param {number} index
-   * @param {string} key
-   * @param {string} value
-   */
-  const handleStepChange = (index, key, value) => {
-    const updated = [...getValues("steps")];
-    updated[index][key] = value;
-    setValue("steps", updated);
-  };
-
-  /**
    * Envía el formulario de receta y muestra los mensajes en el campo "mensaje".
    * @param {Object} data
    */
@@ -265,7 +241,7 @@ const AddRecipe = () => {
         setMensaje("");
       }
     }, 3000);
-    reset(); 
+    reset();
   };
 
   return (
@@ -470,6 +446,18 @@ const AddRecipe = () => {
                           />
                         )}
                       />
+                      {/* Nuevo input para tipo de unidad */}
+                      <Controller
+                        control={control}
+                        name={`ingredients.${index}.type`}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            placeholder="Tipo (ej. sólido, líquido)"
+                            className="w-28"
+                          />
+                        )}
+                      />
                       <Controller
                         control={control}
                         name={`ingredients.${index}.unit`}
@@ -486,7 +474,7 @@ const AddRecipe = () => {
                 ))}
                 <button
                   type="button"
-                  onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
+                  onClick={() => appendIngredient({ name: "", quantity: "", type: "", unit: "" })}
                   className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
