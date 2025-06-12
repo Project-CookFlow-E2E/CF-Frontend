@@ -32,34 +32,38 @@ const ADMIN_BASE_URL = "/admin/users";
  * Provides methods for managing user favorites and administrative favorite operations.
  */
 export const userService = {
-  /**
-   * Fetches the profile of the currently authenticated user.
-   * GET /api/users/me/
-   * @returns {Promise<object>} A promise that resolves with the authenticated user's profile data.
-   * @throws {Error} If the API request fails (e.g., 401 Unauthorized if not logged in).
-   */
-  getMe: async () => {
-    const response = await api.get(`${BASE_URL}/me/`);
-    return response.data;
-  },
 
-  /**
-   * Updates the profile of the currently authenticated user.
-   * Uses PATCH for partial updates, but can be changed to PUT if full updates are required.
-   * PATCH /api/users/me/
-   * @param {object} userData - An object containing the user data to update (e.g., { email: 'new@example.com' }).
-   * @returns {Promise<object>} A promise that resolves with the updated user profile data.
-   * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
-   */
-  updateMe: async (userData) => {
-    const response = await api.patch(`${BASE_URL}/me/`, userData);
-    return response.data;
-  },
+    /**
+    * Fetches the profile of the currently authenticated user.
+    * GET /api/users/me/
+    * 
+    * @returns {Promise<object>} A promise that resolves with the authenticated user's profile data.
+    * @throws {Error} If the API request fails (e.g., 401 Unauthorized if not logged in).
+    */
+    getMe: async () => {
+        const response = await api.get(`${BASE_URL}/me/`);
+        return response.data;
+    },
+
+    /**
+    * Updates the profile of the currently authenticated user.
+    * Uses PATCH for partial updates, but can be changed to PUT if full updates are required.
+    * PATCH /api/users/me/
+    * 
+    * @param {object} userData - An object containing the user data to update (e.g., { email: 'new@example.com' }).
+    * @returns {Promise<object>} A promise that resolves with the updated user profile data.
+    * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
+    */
+    updateMe: async (userData) => {
+        const response = await api.patch(`${BASE_URL}/me/`, userData);
+        return response.data;
+    },
 
   /**
    * Fetches the details of a specific user by their ID.
    * This is typically for viewing public profiles or by other authenticated users.
    * GET /api/users/<int:pk>/
+    * 
    * @param {number} userId - The ID of the user to fetch.
    * @returns {Promise<object>} A promise that resolves with the user's data.
    * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized).
@@ -87,70 +91,76 @@ export const userService = {
 
   // --- Admin-specific methods ---
 
-  /**
-   * Fetches the details of a specific user by their ID (for administrators).
-   * This method requires administrator privileges.
-   * GET /api/admin/users/<int:pk>/
-   * @param {number} userId - The ID of the user to fetch.
-   * @returns {Promise<object>} A promise that resolves with the user's data.
-   * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
-   */
-  getUserByIdAdmin: async (userId) => {
-    const response = await api.get(`${ADMIN_BASE_URL}/${userId}/`);
-    return response.data;
-  },
+    /**
+    * Fetches the details of a specific user by their ID (for administrators).
+    * This method requires administrator privileges.
+    * GET /api/admin/users/<int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to fetch.
+    * @returns {Promise<object>} A promise that resolves with the user's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    */
+    getUserByIdAdmin: async (userId) => {
+        const response = await api.get(`${ADMIN_BASE_URL}/${userId}/`);
+        return response.data;
+    },
 
-  /**
-   * Fetches a list of all users.
-   * This method requires administrator privileges.
-   * GET /api/admin/users/
-   * @returns {Promise<Array<object>>} A promise that resolves with an array of user objects.
-   * @throws {Error} If the API request fails (e.g., 403 Forbidden for non-admins).
-   */
-  getAllUsersAdmin: async () => {
-    const response = await api.get(`${ADMIN_BASE_URL}/`);
-    return response.data;
-  },
+    /**
+    * Fetches a list of all users.
+    * This method requires administrator privileges.
+    * GET /api/admin/users/
+    * 
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of user objects.
+    * @throws {Error} If the API request fails (e.g., 403 Forbidden for non-admins).
+    */
+    getAllUsersAdmin: async () => {
+        const response = await api.get(`${ADMIN_BASE_URL}/`);
+        return response.data;
+    },
 
-  /**
-   * Creates a new user (for administrators).
-   * This method requires administrator privileges.
-   * POST /api/admin/users/
-   * @param {object} userData - An object containing the data for the new user.
-   * @returns {Promise<object>} A promise that resolves with the newly created user object.
-   * @throws {Error} If the API request fails (e.g., validation errors, 403 Forbidden).
-   */
-  createUserAdmin: async (userData) => {
-    const response = await api.post(`${ADMIN_BASE_URL}/`, userData);
-    return response.data;
-  },
+    /**
+    * Creates a new user (for administrators).
+    * This method requires administrator privileges.
+    * POST /api/admin/users/
+    * 
+    * @param {object} userData - An object containing the data for the new user.
+    * @returns {Promise<object>} A promise that resolves with the newly created user object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 403 Forbidden).
+    */
+    createUserAdmin: async (userData) => {
+        const response = await api.post(`${ADMIN_BASE_URL}/`, userData);
+        return response.data;
+    },
+    
+    /**
+    * Updates an existing user by their ID (for administrators).
+    * Uses PATCH for partial updates, but can be changed to PUT for full updates.
+    * This method requires administrator privileges.
+    * PATCH /api/admin/users/<int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to update.
+    * @param {object} userData - An object containing the user data to update.
+    * @returns {Promise<object>} A promise that resolves with the updated user object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    */
+    updateUserAdmin: async (userId, userData) => {
+        const response = await api.patch(`${ADMIN_BASE_URL}/${userId}/`, userData);
+        return response.data;
+    }, 
 
-  /**
-   * Updates an existing user by their ID (for administrators).
-   * Uses PATCH for partial updates, but can be changed to PUT for full updates.
-   * This method requires administrator privileges.
-   * PATCH /api/admin/users/<int:pk>/
-   * @param {number} userId - The ID of the user to update.
-   * @param {object} userData - An object containing the user data to update.
-   * @returns {Promise<object>} A promise that resolves with the updated user object.
-   * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
-   */
-  updateUserAdmin: async (userId, userData) => {
-    const response = await api.patch(`${ADMIN_BASE_URL}/${userId}/`, userData);
-    return response.data;
-  },
+    /**
+    * Deletes a user by their ID (for administrators).
+    * This method requires administrator privileges.
+    * DELETE /api/admin/users/<int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to delete.
+    * @returns {Promise<void>} A promise that resolves when the user is successfully deleted.
+    * No data is typically returned for a successful DELETE.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    */
+    deleteUserAdmin: async (userId) => {
+        await api.delete (`${ADMIN_BASE_URL}/${userId}/`);
+        return true;
+    }
 
-  /**
-   * Deletes a user by their ID (for administrators).
-   * This method requires administrator privileges.
-   * DELETE /api/admin/users/<int:pk>/
-   * @param {number} userId - The ID of the user to delete.
-   * @returns {Promise<void>} A promise that resolves when the user is successfully deleted.
-   * No data is typically returned for a successful DELETE.
-   * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
-   */
-  deleteUserAdmin: async (userId) => {
-    await api.delete(`${ADMIN_BASE_URL}/${userId}/`);
-    return true;
-  },
 };

@@ -13,11 +13,11 @@ import api from "./api";
 
 /**
  * Base URL for UnitType API endpoints.
- * Corresponds to `/api/unit-types/` in your backend router.
+ * Corresponds to `/api/measurements/unit-types/` in your backend router.
  * 
  * @type {string}
  */
-const BASE_URL = "/unit-types";
+const BASE_URL = "/measurements/unit-types";
 
 /**
  * Service for interacting with UnitType API endpoints.
@@ -26,7 +26,7 @@ export const unitTypeService = {
 
     /**
     * Fetches a list of all measurement unit types.
-    * GET /api/unit-types/
+    * GET /api/measurements/unit-types/
     * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of UnitType objects.
     * @throws {Error} If the API request fails.
@@ -38,7 +38,7 @@ export const unitTypeService = {
 
     /**
     * Fetches the details of a specific measurement unit type by its ID.
-    * GET /api/unit-types/<int:pk>/
+    * GET /api/measurements/unit-types/<int:pk>/
     * @param {number} unitTypeId - The ID of the unit type to fetch.
     * @returns {Promise<object>} A promise that resolves with the UnitType's data.
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
