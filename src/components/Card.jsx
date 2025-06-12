@@ -42,6 +42,7 @@ const Card = ({
     <div
       onClick={onClick}
       className={`cursor-pointer w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 ${className}`}
+      data-testid="main-card-container"
     >
       <div
         className={`relative h-40 bg-gray-200 flex items-center justify-center ${imageClassName}`}

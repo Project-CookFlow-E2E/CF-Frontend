@@ -1,23 +1,61 @@
+/**
+ * Componente AddRecipe
+ * Permite crear una nueva receta con imagen, ingredientes, pasos y categorías.
+ * Utiliza React Hook Form para la gestión del formulario.
+ * @modify Rafael Fernández
+ */
+
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
-import { ingredientesMock } from "../data/mockData";
+import { mockCategories } from "../data/mockData";
 import { Button, Input } from "../components/";
 
+/**
+ * Componente principal para añadir recetas.
+ * @returns {JSX.Element}
+ */
 const AddRecipe = () => {
-  // Estado para categorías desde la API
+  // Estado para categorías, dropdown, imagen principal y drag&drop
   const [categorias, setCategorias] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [mensaje, setMensaje] = useState("");
 
-  // React Hook Form setup
+  /**
+   * @typedef {Object} Ingredient
+   * @property {string} name           Nombre del ingrediente.
+   * @property {string} quantity       Cantidad del ingrediente.
+   * @property {string} type           Tipo de unidad (nuevo campo, ej. sólido, líquido).
+   * @property {string} unit           Unidad de medida (ej. g, ml, taza).
+   *
+   * @typedef {Object} Step
+   * @property {string}       text          Descripción del paso.
+   * @property {File|null}    image         Archivo de imagen asociado al paso o null.
+   * @property {string|null}  imagePreview  URL de vista previa de la imagen o null.
+   * @property {boolean}      isDragOver    Flag que indica si el área está en estado drag-over.
+   *
+   * @typedef {Object} FormValues
+   * @property {string}            nombre                    Nombre de la receta.
+   * @property {string}            descripcion               Descripción de la receta.
+   * @property {string}            tiempo                    Tiempo de preparación (minutos).
+   * @property {number[]}          categoriasSeleccionadas   IDs de las categorías seleccionadas.
+   * @property {File|null}         foto                      Archivo de la foto principal o null.
+   * @property {Ingredient[]}      ingredients               Array de ingredientes.
+   * @property {Step[]}            steps                     Array de pasos de preparación.
+   */
+
+  /**
+   * Inicializa React Hook Form con la configuración del formulario de receta.
+   *
+   * @type {import("react-hook-form").UseFormReturn<FormValues>}
+   */
   const {
     control,
     handleSubmit,
     setValue,
     watch,
-    getValues,
     reset,
   } = useForm({
     defaultValues: {
@@ -26,7 +64,7 @@ const AddRecipe = () => {
       tiempo: "",
       categoriasSeleccionadas: [],
       foto: null,
-      ingredients: [{ name: "", quantity: "", unit: "" }],
+      ingredients: [{ name: "", quantity: "", type: "", unit: "" }],
       steps: [{ text: "", image: null, imagePreview: null, isDragOver: false }],
     },
   });
@@ -35,7 +73,6 @@ const AddRecipe = () => {
   const {
     fields: ingredientFields,
     append: appendIngredient,
-    update: updateIngredient,
   } = useFieldArray({
     control,
     name: "ingredients",
@@ -44,13 +81,12 @@ const AddRecipe = () => {
   const {
     fields: stepFields,
     append: appendStep,
-    update: updateStep,
   } = useFieldArray({
     control,
     name: "steps",
   });
 
-  // Cargar categorías desde la API
+  // Cargar categorías desde la API o usar mock
   useEffect(() => {
     fetch("http://localhost:8000/api/categories/")
       .then((res) => res.json())
@@ -58,14 +94,16 @@ const AddRecipe = () => {
       .catch(() => setCategorias([]));
   }, []);
 
-  // Si no hay categorías desde la API, usar mock y adaptar estructura
+  // Adaptar estructura de categorías para mostrar el label de mockCategories si existe
   const categoriasToShow = categorias.length > 0
-    ? categorias
-    : ingredientesMock.map((cat, idx) =>
-        typeof cat === "string"
-          ? { id: idx, name: cat }
-          : { id: cat.id ?? idx, name: cat.name ?? String(cat) }
-      );
+    ? categorias.map(cat => ({
+        id: cat.id || cat.label || cat.name,
+        name: cat.label || cat.name || cat.id
+      }))
+    : (mockCategories || []).map(cat => ({
+        id: cat.id,
+        name: cat.label
+      }));
 
   // Imagen principal
   const foto = watch("foto");
@@ -81,49 +119,74 @@ const AddRecipe = () => {
     }
   }, [foto]);
 
-  // Manejo de imagen principal
+  /**
+   * Procesa y valida la imagen principal.
+   * @param {File} file
+   */
   const processImageFile = (file) => {
     if (!file) return;
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
     if (!tiposPermitidos.includes(file.type)) {
-      alert("Solo se permiten imágenes JPEG, PNG o WebP");
+      setMensaje("Solo se permiten imágenes JPEG, PNG o WebP");
+      setTimeout(() => setMensaje(""), 3000);
       return;
     }
     if (file.size > maxSize) {
-      alert("La imagen no puede superar los 2MB");
+      setMensaje("La imagen no puede superar los 2MB");
+      setTimeout(() => setMensaje(""), 3000);
       return;
     }
     setValue("foto", file);
   };
 
+  /**
+   * Maneja el cambio de archivo de imagen principal.
+   * @param {Event} e
+   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     processImageFile(file);
   };
 
+  /**
+   * Maneja el evento de arrastrar encima (dragover) en el área de la imagen principal.
+   * @param {DragEvent} e
+   */
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(true);
   };
 
+  /**
+   * Maneja el evento de abandonar el área de arrastre (dragleave) en el área de la imagen principal.
+   * @param {DragEvent} e
+   */
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   };
 
+  /**
+   * Maneja el evento de soltar un archivo (drop) en el área de la imagen principal.
+   * @param {DragEvent} e
+   */
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       processImageFile(files[0]);
     }
   };
 
+  /**
+   * Elimina la imagen principal.
+   */
   const deleteImg = () => {
     setValue("foto", null);
     setPreview(null);
@@ -131,6 +194,10 @@ const AddRecipe = () => {
 
   // Manejo de selección de categorías
   const categoriasSeleccionadas = watch("categoriasSeleccionadas");
+  /**
+   * Alterna la selección de una categoría en react-hook-form.
+   * @param {{ id: number | string }} categoria
+   */
   const handleCategoriaChange = (categoria) => {
     const seleccionadas = categoriasSeleccionadas || [];
     if (seleccionadas.includes(categoria.id)) {
@@ -143,21 +210,10 @@ const AddRecipe = () => {
     }
   };
 
-  // Ingredientes
-  const handleIngredientChange = (index, key, value) => {
-    const updated = [...getValues("ingredients")];
-    updated[index][key] = value;
-    setValue("ingredients", updated);
-  };
-
-  // Pasos
-  const handleStepChange = (index, key, value) => {
-    const updated = [...getValues("steps")];
-    updated[index][key] = value;
-    setValue("steps", updated);
-  };
-
-  // Envío del formulario
+  /**
+   * Envía el formulario de receta y muestra los mensajes en el campo "mensaje".
+   * @param {Object} data
+   */
   const onSubmit = (data) => {
     const recipe = {
       nombre: data.nombre,
@@ -171,15 +227,21 @@ const AddRecipe = () => {
       })),
       imagen: data.foto ? data.foto.name : null,
     };
-    console.log("Receta enviada con éxito:", recipe);
 
-    if (data.foto) {
-      console.log("Simulando subida de imagen...");
-      setTimeout(() => {
-        console.log(`Imagen "${data.foto.name}" subida y procesada correctamente.`);
-      }, 1000);
-    }
-    reset(); // limpiar el formulario tras enviar
+    setMensaje(`Receta enviada con éxito: ${JSON.stringify(recipe, null, 2)}`);
+
+    setTimeout(() => {
+      if (data.foto) {
+        setMensaje((prev) => prev + "\nSimulando subida de imagen...");
+        setTimeout(() => {
+          setMensaje((prev) => prev + `\nImagen "${data.foto.name}" subida y procesada correctamente.`);
+          setTimeout(() => setMensaje(""), 3000);
+        }, 3000);
+      } else {
+        setMensaje("");
+      }
+    }, 3000);
+    reset();
   };
 
   return (
@@ -191,6 +253,16 @@ const AddRecipe = () => {
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
           Añadir receta
         </h1>
+
+        {/* Campo para mostrar mensajes tipo consola */}
+        {mensaje && (
+          <div
+            className="mb-4 px-3 py-4 rounded-lg text-lg font-semibold text-white bg-footer text-center transition-all duration-300"
+            data-testid="console-message"
+          >
+            {mensaje}
+          </div>
+        )}
 
         {/* Imagen de la receta */}
         <div
@@ -374,6 +446,18 @@ const AddRecipe = () => {
                           />
                         )}
                       />
+                      {/* Nuevo input para tipo de unidad */}
+                      <Controller
+                        control={control}
+                        name={`ingredients.${index}.type`}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            placeholder="Tipo (ej. sólido, líquido)"
+                            className="w-28"
+                          />
+                        )}
+                      />
                       <Controller
                         control={control}
                         name={`ingredients.${index}.unit`}
@@ -390,7 +474,7 @@ const AddRecipe = () => {
                 ))}
                 <button
                   type="button"
-                  onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
+                  onClick={() => appendIngredient({ name: "", quantity: "", type: "", unit: "" })}
                   className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
