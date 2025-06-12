@@ -16,12 +16,14 @@
  * @module pages/Login
  */
 
-import React from "react";
+import React, { useState } from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import api from "../services/api";
+import { getToken } from "../services/authService";
 
 /**
  * Página de inicio de sesión para acceder a la app.
@@ -29,12 +31,35 @@ import { Link } from "react-router-dom";
  * y un botón para simular login.
  *
  * @returns {JSX.Element} Vista de login
+ * @modifiedby Ángel Aragón
+ * @modified Arreglado componente Button
  */
 const Login = () => {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate("/");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const response = await api.post("/token/", {
+        username: username,
+        password: password,
+      });
+
+      const { access, refresh } = response.data;
+
+      // Guarda en localStorage
+      localStorage.setItem("cookflow_accessToken", access);
+      localStorage.setItem("cookflow_refreshToken", refresh);
+
+      console.log("✅ Token guardado:", getToken());
+
+      navigate("/main");
+    } catch (error) {
+      console.error("❌ Error al iniciar sesión:", error);
+      alert("Credenciales inválidas");
+    }
   };
 
   return (
@@ -43,7 +68,6 @@ const Login = () => {
       data-testid="login-page"
       id="login-page"
     >
-      {/* Image */}
       <div
         className="hidden md:block w-1/2"
         data-testid="login-image-container"
@@ -58,7 +82,6 @@ const Login = () => {
         />
       </div>
 
-      {/* Form */}
       <div
         className="w-full md:w-1/2 flex justify-center items-start pt-20"
         data-testid="login-form-container"
@@ -102,7 +125,9 @@ const Login = () => {
                 icon={Mail}
                 id="email-input"
                 data-testid="email-input"
-              />
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                />     
             </div>
           </div>
 
@@ -124,14 +149,16 @@ const Login = () => {
                 icon={Lock}
                 id="password-input"
                 data-testid="password-input"
-              />
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                />
             </div>
           </div>
 
           <div data-testid="login-button-container" id="login-button-container">
             <Button
               onClick={handleLogin}
-              className="mb-3 w-40 px-1"
+              className="mb-3 w-40 py-2 rounded-xl"
               data-testid="login-button"
               id="login-button"
             >

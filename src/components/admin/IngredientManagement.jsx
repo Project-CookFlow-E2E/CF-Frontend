@@ -1,24 +1,56 @@
-// src/components/admin/IngredientManagement.jsx
+/**
+ * @file IngredientManagement.jsx
+ * @description
+ * Componente de administración de ingredientes para el panel de administración.
+ * Permite visualizar, buscar, filtrar, aprobar, editar y eliminar ingredientes.
+ * 
+ * Funcionalidades principales:
+ * - Listar todos los ingredientes obtenidos del backend.
+ * - Filtrar ingredientes por estado (todos, pendientes, aprobados) y por búsqueda.
+ * - Aprobar, rechazar/eliminar y editar ingredientes.
+ * - Editar ingredientes mediante un modal (nombre, categorías, unidad y estado de aprobación).
+ * - Botón para añadir nuevos ingredientes (funcionalidad pendiente de implementar).
+ * 
+ * Estados:
+ * - ingredients: array de ingredientes obtenidos del backend.
+ * - loading: booleano para mostrar el estado de carga.
+ * - activeTab: controla el filtro de pestañas (todos, pendientes, aprobados).
+ * - search: almacena el texto de búsqueda.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición.
+ * 
+ * Servicios utilizados:
+ * - ingredientService.getAllIngredientsAdmin(): obtiene todos los ingredientes.
+ * - ingredientService.updateIngredientAdmin(id, data): actualiza un ingrediente.
+ * - ingredientService.deleteIngredientAdmin(id): elimina un ingrediente.
+ * 
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite gestionar ingredientes y su estado de aprobación de forma sencilla.
+ * 
+ * @author
+ * Noemi Casaprima
+ */
 
 import React, { useState, useEffect } from 'react';
 import { ingredientService } from '../../services/ingredientService';
 
 const IngredientManagement = () => {
-  // Estado para guardar los ingredientes obtenidos
+
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado para tabs de navegación (todos, pendientes, aprobados)
+
   const [activeTab, setActiveTab] = useState('all');
 
-  // Estado para el buscador
+
   const [search, setSearch] = useState('');
 
-  // Estados para el modal de edición
+ 
   const [editModal, setEditModal] = useState({ open: false, ingredient: null });
   const [editForm, setEditForm] = useState({ name: '', categories: '', unit_type: '' });
 
-  // 🔁 Cargar ingredientes al montar el componente
+
   useEffect(() => {
     const fetchIngredients = async () => {
       setLoading(true);
@@ -33,7 +65,7 @@ const IngredientManagement = () => {
     fetchIngredients();
   }, []);
 
-  // ✅ Aprobar ingrediente
+
   const handleApprove = async (id) => {
     await ingredientService.updateIngredientAdmin(id, { is_approved: true });
     setIngredients(prev =>
@@ -41,15 +73,15 @@ const IngredientManagement = () => {
     );
   };
 
-  // ❌ Rechazar o eliminar ingrediente
+
   const handleReject = async (id) => {
     await ingredientService.deleteIngredientAdmin(id);
     setIngredients(prev => prev.filter(ing => ing.id !== id));
   };
 
-  const handleDelete = handleReject; // Alias para claridad semántica
+  const handleDelete = handleReject; 
 
-  // ✏️ Abrir el modal de edición
+
   const openEditModal = (ingredient) => {
     setEditForm({
       name: ingredient.name || '',
@@ -64,12 +96,12 @@ const IngredientManagement = () => {
 
   const closeEditModal = () => setEditModal({ open: false, ingredient: null });
 
-  // 🔄 Manejar cambios en los inputs del modal
+ 
   const handleEditChange = (e) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  // 📤 Enviar cambios editados
+ 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     const id = editModal.ingredient.id;
@@ -86,7 +118,7 @@ const IngredientManagement = () => {
     closeEditModal();
   };
 
-  // 🔎 Filtrar ingredientes por búsqueda y tab activo
+  
   const filteredIngredients = ingredients
     .filter(ing => {
       if (activeTab === 'pending') return !ing.is_approved;
@@ -95,7 +127,7 @@ const IngredientManagement = () => {
     })
     .filter(ing => ing.name.toLowerCase().includes(search.toLowerCase()));
 
-  // Contadores para tabs
+ 
   const pendingCount = ingredients.filter(ing => !ing.is_approved).length;
   const approvedCount = ingredients.filter(ing => ing.is_approved).length;
 
@@ -195,7 +227,7 @@ const IngredientManagement = () => {
           </tbody>
         </table>
       </div>
-      {/* Modal de edición mejorado */}
+      
       {editModal.open && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
