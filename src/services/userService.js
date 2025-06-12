@@ -59,37 +59,38 @@ export const userService = {
         return response.data;
     },
 
-  /**
-   * Fetches the details of a specific user by their ID.
-   * This is typically for viewing public profiles or by other authenticated users.
-   * GET /api/users/<int:pk>/
+    /**
+    * Fetches the details of a specific user by their ID.
+    * This is typically for viewing public profiles or by other authenticated users.
+    * GET /api/users/<int:pk>/
     * 
-   * @param {number} userId - The ID of the user to fetch.
-   * @returns {Promise<object>} A promise that resolves with the user's data.
-   * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized).
-   */
-  getUserById: async (userId) => {
-    const response = await api.get(`${BASE_URL}/${userId}/`);
-    return response.data;
-  },
+    * @param {number} userId - The ID of the user to fetch.
+    * @returns {Promise<object>} A promise that resolves with the user's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized).
+    */
+    getUserById: async (userId) => {
+        const response = await api.get(`${BASE_URL}/${userId}/`);
+        return response.data;
+    },
 
-  /**
-   * Creates a new user (for non-administrators).
-   * This method is typically used for user registration.
-   * POST /api/register/
-   * @param {object} userData - An object containing the data for the new user (e.g., { username: 'newuser', password: 'password' }).
-   * @returns {Promise<object>} A promise that resolves with the newly created user object.
-   * @throws {Error} If the API request fails.
-   *
-   * @author Ángel Aragón
-   */
-  createUser: async (userData) => {
-    console.log("Creating user with data:", userData);
-    const response = await api.post(`/register/`, userData);
-    return response.data;
-  },
+    /**
+    * Creates a new user (for non-administrators).
+    * This method is typically used for user registration.
+    * POST /api/register/
+    * 
+    * @param {object} userData - An object containing the data for the new user (e.g., { username: 'newuser', password: 'password' }).
+    * @returns {Promise<object>} A promise that resolves with the newly created user object.
+    * @throws {Error} If the API request fails.
+    *
+    * @author Ángel Aragón
+    */
+    createUser: async (userData) => {
+        console.log("Creating user with data:", userData);
+        const response = await api.post(`/register/`, userData);
+        return response.data;
+    },
 
-  // --- Admin-specific methods ---
+    // --- Admin-specific methods ---
 
     /**
     * Fetches the details of a specific user by their ID (for administrators).
