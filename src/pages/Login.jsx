@@ -16,12 +16,14 @@
  * @module pages/Login
  */
 
-import React from "react";
+import React, { useState } from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import api from "../services/api";
+import { getToken } from "../services/authService";
 
 /**
  * Página de inicio de sesión para acceder a la app.
@@ -33,8 +35,29 @@ import { Link } from "react-router-dom";
 const Login = () => {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate("/");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const response = await api.post("/token/", {
+        username: username,
+        password: password,
+      });
+
+      const { access, refresh } = response.data;
+
+      // Guarda en localStorage
+      localStorage.setItem("cookflow_accessToken", access);
+      localStorage.setItem("cookflow_refreshToken", refresh);
+
+      console.log("✅ Token guardado:", getToken());
+
+      navigate("/main");
+    } catch (error) {
+      console.error("❌ Error al iniciar sesión:", error);
+      alert("Credenciales inválidas");
+    }
   };
 
   return (
@@ -102,7 +125,9 @@ const Login = () => {
                 icon={Mail}
                 id="email-input"
                 data-testid="email-input"
-              />
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                />     
             </div>
           </div>
 
@@ -124,7 +149,9 @@ const Login = () => {
                 icon={Lock}
                 id="password-input"
                 data-testid="password-input"
-              />
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                />
             </div>
           </div>
 
