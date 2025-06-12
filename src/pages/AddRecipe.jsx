@@ -4,19 +4,15 @@
  * Utiliza React Hook Form para la gestión del formulario.
  * @modify Rafael Fernández
  */
-
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
-import { mockCategories } from "../data/mockData";
 import { Button, Input } from "../components/";
+import { recipeService } from "../services/recipeService";
+import {categoryService} from "../services/categoryService";
 
-/**
- * Componente principal para añadir recetas.
- * @returns {JSX.Element}
- */
+
 const AddRecipe = () => {
-  // Estado para categorías, dropdown, imagen principal y drag&drop
   const [categorias, setCategorias] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -27,7 +23,7 @@ const AddRecipe = () => {
    * @typedef {Object} Ingredient
    * @property {string} name           Nombre del ingrediente.
    * @property {string} quantity       Cantidad del ingrediente.
-   * @property {string} type           Tipo de unidad (nuevo campo, ej. sólido, líquido).
+   * @property {string} type           Tipo de unidad (ej. sólido, líquido).
    * @property {string} unit           Unidad de medida (ej. g, ml, taza).
    *
    * @typedef {Object} Step
@@ -41,16 +37,12 @@ const AddRecipe = () => {
    * @property {string}            descripcion               Descripción de la receta.
    * @property {string}            tiempo                    Tiempo de preparación (minutos).
    * @property {number[]}          categoriasSeleccionadas   IDs de las categorías seleccionadas.
+   * @property {number}            comensales                Número de comensales.
    * @property {File|null}         foto                      Archivo de la foto principal o null.
    * @property {Ingredient[]}      ingredients               Array de ingredientes.
    * @property {Step[]}            steps                     Array de pasos de preparación.
    */
 
-  /**
-   * Inicializa React Hook Form con la configuración del formulario de receta.
-   *
-   * @type {import("react-hook-form").UseFormReturn<FormValues>}
-   */
   const {
     control,
     handleSubmit,
@@ -62,6 +54,7 @@ const AddRecipe = () => {
       nombre: "",
       descripcion: "",
       tiempo: "",
+      comensales: "",
       categoriasSeleccionadas: [],
       foto: null,
       ingredients: [{ name: "", quantity: "", type: "", unit: "" }],
@@ -69,7 +62,6 @@ const AddRecipe = () => {
     },
   });
 
-  // Field arrays para ingredientes y pasos
   const {
     fields: ingredientFields,
     append: appendIngredient,
@@ -86,29 +78,38 @@ const AddRecipe = () => {
     name: "steps",
   });
 
-  // Cargar categorías desde la API o usar mock
-  useEffect(() => {
-    fetch("http://localhost:8000/api/categories/")
-      .then((res) => res.json())
-      .then((data) => setCategorias(data))
-      .catch(() => setCategorias([]));
-  }, []);
+ useEffect(() => {
+  categoryService.getAllCategories()
+    .then((data) => {
+      console.log("Respuesta de categorías:", data);
+      // Si la respuesta es { results: [...] }
+      const categoriasArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.results)
+          ? data.results
+          : [];
+      // Agrupa por nombre único de categoría
+      const uniqueMap = new Map();
+      categoriasArray.forEach(cat => {
+        const key = (cat.name || "").trim().toLowerCase();
+        if (key && !uniqueMap.has(key)) {
+          uniqueMap.set(key, cat);
+        }
+      });
+      setCategorias(Array.from(uniqueMap.values()));
+    })
+    .catch(() => setCategorias([]));
+}, []);
 
-  // Adaptar estructura de categorías para mostrar el label de mockCategories si existe
-  const categoriasToShow = categorias.length > 0
-    ? categorias.map(cat => ({
-        id: cat.id || cat.label || cat.name,
-        name: cat.label || cat.name || cat.id
-      }))
-    : (mockCategories || []).map(cat => ({
-        id: cat.id,
-        name: cat.label
-      }));
+const categoriasToShow = categorias.length > 0
+  ? categorias.map(cat => ({
+      id: cat.id,
+      name: cat.name
+    }))
+  : [];
 
-  // Imagen principal
   const foto = watch("foto");
 
-  // Vista previa de imagen principal
   useEffect(() => {
     if (foto && foto instanceof File) {
       const url = URL.createObjectURL(foto);
@@ -119,60 +120,46 @@ const AddRecipe = () => {
     }
   }, [foto]);
 
-  /**
-   * Procesa y valida la imagen principal.
-   * @param {File} file
-   */
-  const processImageFile = (file) => {
-    if (!file) return;
+  // Validación de imágenes (receta y pasos)
+  const validateImageFile = (file) => {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
     if (!tiposPermitidos.includes(file.type)) {
       setMensaje("Solo se permiten imágenes JPEG, PNG o WebP");
       setTimeout(() => setMensaje(""), 3000);
-      return;
+      return false;
     }
     if (file.size > maxSize) {
       setMensaje("La imagen no puede superar los 2MB");
       setTimeout(() => setMensaje(""), 3000);
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const processImageFile = (file) => {
+    if (!file) return;
+    if (!validateImageFile(file)) return;
     setValue("foto", file);
   };
 
-  /**
-   * Maneja el cambio de archivo de imagen principal.
-   * @param {Event} e
-   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     processImageFile(file);
   };
 
-  /**
-   * Maneja el evento de arrastrar encima (dragover) en el área de la imagen principal.
-   * @param {DragEvent} e
-   */
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(true);
   };
 
-  /**
-   * Maneja el evento de abandonar el área de arrastre (dragleave) en el área de la imagen principal.
-   * @param {DragEvent} e
-   */
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   };
 
-  /**
-   * Maneja el evento de soltar un archivo (drop) en el área de la imagen principal.
-   * @param {DragEvent} e
-   */
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -184,20 +171,12 @@ const AddRecipe = () => {
     }
   };
 
-  /**
-   * Elimina la imagen principal.
-   */
   const deleteImg = () => {
     setValue("foto", null);
     setPreview(null);
   };
 
-  // Manejo de selección de categorías
   const categoriasSeleccionadas = watch("categoriasSeleccionadas");
-  /**
-   * Alterna la selección de una categoría en react-hook-form.
-   * @param {{ id: number | string }} categoria
-   */
   const handleCategoriaChange = (categoria) => {
     const seleccionadas = categoriasSeleccionadas || [];
     if (seleccionadas.includes(categoria.id)) {
@@ -210,38 +189,29 @@ const AddRecipe = () => {
     }
   };
 
-  /**
-   * Envía el formulario de receta y muestra los mensajes en el campo "mensaje".
-   * @param {Object} data
-   */
-  const onSubmit = (data) => {
-    const recipe = {
-      nombre: data.nombre,
-      descripcion: data.descripcion,
-      categorias: data.categoriasSeleccionadas,
-      tiempo: data.tiempo,
-      ingredients: data.ingredients,
-      pasos: data.steps.map((step) => ({
-        texto: step.text,
-        imagen: step.image ? step.image.name : null,
-      })),
-      imagen: data.foto ? data.foto.name : null,
-    };
-
-    setMensaje(`Receta enviada con éxito: ${JSON.stringify(recipe, null, 2)}`);
-
-    setTimeout(() => {
-      if (data.foto) {
-        setMensaje((prev) => prev + "\nSimulando subida de imagen...");
-        setTimeout(() => {
-          setMensaje((prev) => prev + `\nImagen "${data.foto.name}" subida y procesada correctamente.`);
-          setTimeout(() => setMensaje(""), 3000);
-        }, 3000);
-      } else {
-        setMensaje("");
-      }
-    }, 3000);
-    reset();
+  const onSubmit = async (data) => {
+    try {
+      const recipePayload = {
+        name: data.nombre,
+        description: data.descripcion,
+        duration_minutes: parseInt(data.tiempo, 10),
+        commensals: parseInt(data.comensales, 10),
+        categories: data.categoriasSeleccionadas,
+        ingredients: data.ingredients.map(i => ({
+          name: i.name,
+          quantity: i.quantity,
+          type: i.type,
+          unit: i.unit,
+        })),
+      };
+      await recipeService.createRecipe(recipePayload);
+      setMensaje("Receta guardada correctamente");
+      setTimeout(() => setMensaje(""), 2000);
+      reset();
+    } catch (error) {
+      setMensaje("Error al guardar la receta");
+      setTimeout(() => setMensaje(""), 3000);
+    }
   };
 
   return (
@@ -254,7 +224,6 @@ const AddRecipe = () => {
           Añadir receta
         </h1>
 
-        {/* Campo para mostrar mensajes tipo consola */}
         {mensaje && (
           <div
             className="mb-4 px-3 py-4 rounded-lg text-lg font-semibold text-white bg-footer text-center transition-all duration-300"
@@ -313,9 +282,9 @@ const AddRecipe = () => {
           )}
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
+            {/* Nombre y descripción */}
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="nombre-receta">
               Nombre de la receta
             </label>
@@ -350,43 +319,46 @@ const AddRecipe = () => {
               )}
             />
 
-            <div className="flex gap-4">
-              <div className="flex-1 relative" data-testid="category-input-wrapper">
-                <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                <div
-                  className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                  {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
-                    ? categoriasToShow
-                        .filter((cat) => categoriasSeleccionadas.includes(cat.id))
-                        .map((cat) => cat.name)
-                        .join(", ")
-                    : (
-                      <span className="text-gray-700">Selecciona categorías</span>
-                    )
-                  }
-                </div>
-                {dropdownOpen && (
-                  <div className="absolute left-0 w-full border border-gray-300 rounded-lg bg-white mt-2 p-2 shadow-lg z-10">
-                    {categoriasToShow.map((categoria) => (
-                      <div
-                        key={categoria.id}
-                        className={`p-2 hover:bg-gray-200 cursor-pointer ${
-                          categoriasSeleccionadas && categoriasSeleccionadas.includes(categoria.id)
-                            ? "bg-gray-300"
-                            : ""
-                        }`}
-                        onClick={() => handleCategoriaChange(categoria)}
-                      >
-                        {categoria.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+            <div className="relative" data-testid="category-input-wrapper">
+              <label className="block text-sm font-medium text-gray-700">Categoría</label>
+              <div
+                className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
+                  ? categoriasToShow
+                      .filter((cat) => categoriasSeleccionadas.includes(cat.id))
+                      .map((cat) => cat.name)
+                      .join(", ")
+                  : (
+                    <span className="text-gray-700">Selecciona categorías</span>
+                  )
+                }
               </div>
+              {dropdownOpen && (
+                <div
+                  className="absolute left-0 w-full border border-gray-300 rounded-lg bg-white mt-2 p-2 shadow-lg z-10"
+                  style={{ maxHeight: "12rem", overflowY: "auto" }} // 5 items aprox (5 x 2.4rem)
+                >
+                  {categoriasToShow.map((categoria) => (
+                    <div
+                      key={categoria.id}
+                      className={`p-2 hover:bg-gray-200 cursor-pointer ${
+                        categoriasSeleccionadas && categoriasSeleccionadas.includes(categoria.id)
+                          ? "bg-gray-300"
+                          : ""
+                      }`}
+                      onClick={() => handleCategoriaChange(categoria)}
+                    >
+                      {categoria.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-              <div className="flex-[0.6]">
+            <div className="flex gap-4">
+              <div className="flex-1">
                 <label
                   className="block text-sm font-medium text-gray-700 mb-1"
                   htmlFor="tiempo-preparacion"
@@ -411,6 +383,28 @@ const AddRecipe = () => {
                         min
                       </span>
                     </div>
+                  )}
+                />
+              </div>
+              <div className="flex-1">
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="comensales"
+                >
+                  Comensales
+                </label>
+                <Controller
+                  control={control}
+                  name="comensales"
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="comensales"
+                      type="number"
+                      placeholder="Ej: 4"
+                      className="w-full"
+                      data-testid="commensals-input"
+                    />
                   )}
                 />
               </div>
@@ -446,7 +440,6 @@ const AddRecipe = () => {
                           />
                         )}
                       />
-                      {/* Nuevo input para tipo de unidad */}
                       <Controller
                         control={control}
                         name={`ingredients.${index}.type`}
@@ -532,8 +525,12 @@ const AddRecipe = () => {
                             const files = e.dataTransfer.files;
                             let imagePreview = field.value?.imagePreview;
                             if (files.length > 0) {
-                              if (imagePreview) URL.revokeObjectURL(imagePreview);
                               const file = files[0];
+                              if (!validateImageFile(file)) {
+                                field.onChange({ ...field.value, isDragOver: false });
+                                return;
+                              }
+                              if (imagePreview) URL.revokeObjectURL(imagePreview);
                               const url = URL.createObjectURL(file);
                               field.onChange({ ...field.value, image: file, imagePreview: url, isDragOver: false });
                             } else {
@@ -575,11 +572,11 @@ const AddRecipe = () => {
                                   className="hidden"
                                   onChange={e => {
                                     const file = e.target.files[0];
-                                    if (file) {
-                                      if (field.value?.imagePreview) URL.revokeObjectURL(field.value.imagePreview);
-                                      const url = URL.createObjectURL(file);
-                                      field.onChange({ ...field.value, image: file, imagePreview: url });
-                                    }
+                                    if (!file) return;
+                                    if (!validateImageFile(file)) return;
+                                    if (field.value?.imagePreview) URL.revokeObjectURL(field.value.imagePreview);
+                                    const url = URL.createObjectURL(file);
+                                    field.onChange({ ...field.value, image: file, imagePreview: url });
                                   }}
                                   data-testid={`step-image-input-${index}`}
                                 />

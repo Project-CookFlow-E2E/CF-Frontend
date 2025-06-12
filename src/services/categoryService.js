@@ -15,8 +15,10 @@ import api from "./api";
  * Base URL for general recipe category API endpoints.
  * Corresponds to `/api/categories/` in the backend.
  * @type {string}
- */
-const BASE_URL = "/categories";
+ * @modified by Rafael
+ * @description /recipes/categories
+ *  */
+const BASE_URL = "/recipes/categories";
 
 /**
  * Service for interacting with recipe category API endpoints.
