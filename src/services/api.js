@@ -16,7 +16,7 @@
  * @modified by Saturnino Méndez
  */
 import axios from "axios";
-import { getToken, refreshAuthToken, logout } from "../services/authService"
+import { getToken, refreshAuthToken, isTokenValid, logout } from "../services/authService"
 import { globalNavigate } from '../main';
 
 /**
@@ -60,7 +60,7 @@ const processQueue = (error, token = null) => {
 api.interceptors.request.use(
   (config) => {
     const token = getToken();
-    if (token && !config.headers.Authorization) {
+    if (token && isTokenValid()) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -80,7 +80,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response ? error.response.status : null;
-    if (status === 401 && originalRequest.url !== "/token/refresh/" && !originalRequest._retry) {
+    if (status === 401 && originalRequest.url.includes("/token/refresh/") === false && !originalRequest._retry) {
       originalRequest._retry = true;
 
       if (!isRefreshing) {
