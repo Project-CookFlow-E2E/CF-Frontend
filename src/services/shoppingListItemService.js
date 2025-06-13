@@ -13,12 +13,12 @@ import api from "./api";
 
 /**
  * Base URL for ShoppingListItem API endpoints.
- * Corresponds to `/api/items/` based on your Django REST Framework router configuration.
+ * Corresponds to `/api/shopping/items/` based on your Django REST Framework router configuration.
  * This endpoint handles both standard user and admin access based on backend permissions and serializer logic.
  * 
  * @type {string}
  */
-const BASE_URL = '/items';
+const BASE_URL = '/shopping/items';
 
 /**
  * Service for interacting with ShoppingListItem API endpoints.
@@ -30,7 +30,7 @@ export const shoppingListItemService = {
     /**
     * Fetches the details of a specific shopping list item by its ID.
     * Standard users can only fetch their own items. Administrators can fetch any item.
-    * GET /api/items/<int:pk>/
+    * GET /api/shopping/items/<int:pk>/
     * 
     * @param {number} itemId - The ID of the shopping list item to fetch.
     * @returns {Promise<object>} A promise that resolves with the item's data.
@@ -45,7 +45,7 @@ export const shoppingListItemService = {
     * Fetches a list of shopping list items.
     * For standard users, this returns only their own shopping list items.
     * For administrators, this returns all shopping list items in the system.
-    * GET /api/items/
+    * GET /api/shopping/items/
     * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of ShoppingListItem objects.
     * @throws {Error} If the API request fails (e.g., 401 Unauthorized if not logged in).
@@ -58,7 +58,7 @@ export const shoppingListItemService = {
     /**
     * Creates a new shopping list item.
     * The backend will automatically assign the `user_id` to the authenticated user.
-    * POST /api/items/
+    * POST /api/shopping/items/
     * 
     * @param {object} itemData - An object containing the data for the new item.
     * Must include `ingredient_id` (int ID of the ingredient), `quantity_needed` (int), `unit` (str), and `is_purchased` (bool).
@@ -74,7 +74,7 @@ export const shoppingListItemService = {
    * Updates an existing shopping list item by its ID.
    * Users can only update their own items. Administrators can update any item.
    * Uses PATCH for partial updates.
-   * PATCH /api/items/<int:pk>/
+   * PATCH /api/shopping/items/<int:pk>/
    * 
    * @param {number} itemId - The ID of the shopping list item to update.
    * @param {object} itemData - An object containing the data to update.
@@ -90,7 +90,7 @@ export const shoppingListItemService = {
     /**
     * Deletes a shopping list item by its ID.
     * Users can only delete their own items. Administrators can delete any item.
-    * DELETE /api/items/<int:pk>/
+    * DELETE /api/shopping/items/<int:pk>/
     * 
     * @param {number} itemId - The ID of the shopping list item to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the item is successfully deleted.

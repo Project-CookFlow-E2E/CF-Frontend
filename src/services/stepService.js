@@ -16,14 +16,14 @@ import api from "./api";
  * Corresponds to `/api/steps/` in the backend.
  * @type {string}
  */
-const BASE_URL = "/steps";
+const BASE_URL = "/recipes/steps";
 
 /**
  * Base URL for administrator-specific recipe step API endpoints.
  * Corresponds to `/api/admin/steps/` in the backend.
  * @type {string}
  */
-const ADMIN_BASE_URL = "/admin/steps";
+const ADMIN_BASE_URL = "/recipes/admin/steps";
 
 /**
  * Service for interacting with recipe step API endpoints.
@@ -47,7 +47,7 @@ export const stepService = {
 
     /**
     * Fetches the details of a specific recipe step by its ID.
-    * GET /api/steps/<int:pk>/
+    * GET /api/recipes/steps/<int:pk>/
     * 
     * @param {number} stepId - The ID of the step to fetch.
     * @returns {Promise<object>} A promise that resolves with the step's data.
@@ -60,7 +60,7 @@ export const stepService = {
 
     /**
     * Creates a new recipe step. Requires user authentication.
-    * POST /api/steps/
+    * POST /api/recipes/steps/
     * 
     * @param {object} stepData - An object containing the data for the new step.
     * Must include `order` (int), `description` (string), and `recipe` (int, the ID of the parent recipe).
@@ -75,7 +75,7 @@ export const stepService = {
     /**
     * Updates an existing recipe step by its ID. Requires user authentication.
     * Uses PATCH for partial updates.
-    * PATCH /api/steps/<int:pk>/
+    * PATCH /api/recipes/steps/<int:pk>/
     * 
     * @param {number} stepId - The ID of the step to update.
     * @param {object} stepData - An object containing the step data to update.
@@ -90,7 +90,7 @@ export const stepService = {
 
     /**
     * Deletes a recipe step by its ID. Requires user authentication.
-    * DELETE /api/steps/<int:pk>/
+    * DELETE /api/recipes/steps/<int:pk>/
     * 
     * @param {number} stepId - The ID of the step to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the step is successfully deleted.
@@ -105,7 +105,7 @@ export const stepService = {
 
     /**
     * Fetches a list of all recipe steps (for administrators). Requires admin authentication.
-    * GET /api/admin/steps/
+    * GET /api/recipes/admin/steps/
     * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of step objects.
     * @throws {Error} If the API request fails (e.g., 403 Forbidden).
@@ -117,7 +117,7 @@ export const stepService = {
 
     /**
     * Fetches the details of a specific recipe step by its ID (for administrators). Requires admin authentication.
-    * GET /api/admin/steps/<int:pk>/
+    * GET /api/recipes/admin/steps/<int:pk>/
     * 
     * @param {number} stepId - The ID of the step to fetch.
     * @returns {Promise<object>} A promise that resolves with the step's data.
@@ -131,7 +131,8 @@ export const stepService = {
     /**
     * Updates an existing recipe step by its ID (for administrators). Requires admin authentication.
     * Uses PATCH for partial updates.
-    * PATCH /api/admin/steps/<int:pk>/
+    * PATCH /api/recipes/admin/steps/<int:pk>/
+    * 
     * @param {number} stepId - The ID of the step to update.
     * @param {object} stepData - An object containing the step data to update.
     * Can include `order` (int), `description` (string), and `recipe` (int, the ID of the parent recipe).
@@ -145,7 +146,8 @@ export const stepService = {
 
     /**
     * Deletes a recipe step by its ID (for administrators). Requires admin authentication.
-    * DELETE /api/admin/steps/<int:pk>/
+    * DELETE /api/recipes/admin/steps/<int:pk>/
+    * 
     * @param {number} stepId - The ID of the step to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the step is successfully deleted.
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).

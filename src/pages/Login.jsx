@@ -20,10 +20,11 @@ import React, { useState } from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { Mail, Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { getToken } from "../services/authService";
+import SuccessMsg from "../components/SuccessMsg";
 
 /**
  * Página de inicio de sesión para acceder a la app.
@@ -36,7 +37,8 @@ import { getToken } from "../services/authService";
  */
 const Login = () => {
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const [successMsg] = useState(location.state?.successMsg || "");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -99,6 +101,7 @@ const Login = () => {
           >
             ¡Bienvenido de nuevo!
           </h2>
+          {successMsg && <SuccessMsg>{successMsg}</SuccessMsg>}
           <h4
             className="text-sm mb-12 text-black"
             data-testid="login-subtitle"
@@ -127,7 +130,7 @@ const Login = () => {
                 data-testid="email-input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                />     
+              />
             </div>
           </div>
 
@@ -149,9 +152,9 @@ const Login = () => {
                 icon={Lock}
                 id="password-input"
                 data-testid="password-input"
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                />
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
           </div>
 
