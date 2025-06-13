@@ -30,7 +30,7 @@
  * navegar entre páginas y gestionar la información de usuarios de forma sencilla.
  *
  * @author
- * Lorena Martínez
+ * Lorena Martínez, Noemi Casaprima
  */
 
 import { useState, useEffect } from "react";

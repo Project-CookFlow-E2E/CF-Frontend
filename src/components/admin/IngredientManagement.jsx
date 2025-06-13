@@ -32,7 +32,7 @@
  * Permite gestionar ingredientes y su estado de aprobación de forma sencilla.
  *
  * @author
- * Noemi Casaprima
+ * Noemi Casaprima, Lorena Martínez
  */
 
 import React, { useState, useEffect } from "react";

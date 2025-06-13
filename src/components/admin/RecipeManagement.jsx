@@ -31,7 +31,7 @@
  * navegar entre páginas y ver las recetas ordenadas por fecha de creación.
  *
  * @author
- * Lorena Martínez
+ * Lorena Martínez, Noemi Casaprima
  */
 
 import { useEffect, useState } from "react";

@@ -31,7 +31,7 @@
  * navegar entre páginas y ver las categorías ordenadas por fecha de creación.
  *
  * @author
- * Lorena Martínez
+ * Lorena Martínez, Noemi Casaprima
  */
 
 import { useState, useEffect } from "react";
