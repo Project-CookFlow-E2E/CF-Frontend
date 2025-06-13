@@ -11,7 +11,7 @@ vi.mock('react-icons/md', () => ({
 }));
 
 const MockLeftIcon = vi.fn((props) => (
-    <svg data-testid={props['data-testId']} className={props.className} />
+    <svg {...props} className={props.className} />
 ));
 
 describe("Input Component", () => {
@@ -19,7 +19,8 @@ describe("Input Component", () => {
         type: "text",
         onChange: vi.fn(),
         placeholder: "Introduce texto aquí",
-        value: "valor inicial"
+        value: "valor inicial",
+        icon: MockLeftIcon
     };
 
     beforeEach(() => {
@@ -101,9 +102,17 @@ describe("Input Component", () => {
 
     it("Does not display the error message or icon when error prop is not provided", () => {
         render(<Input {...defaultProps} error={undefined} />);
-        const inputElement = screen.getByPlaceholderText(defaultProps.placeholder);
 
         expect(screen.queryByTestId('input-error')).not.toBeInTheDocument();
         expect(screen.queryByTestId('mock-error-icon')).not.toBeInTheDocument();
     });
+
+    it("Spreads additional props onto the input element", () => {
+        render(<Input {...defaultProps} disabled readOnly data-custom-attr="test-value" />);
+        const inputElement = screen.getByPlaceholderText(defaultProps.placeholder);
+
+        expect(inputElement).toBeDisabled();
+        expect(inputElement).toHaveAttribute("readOnly");
+        expect(inputElement).toHaveAttribute("data-custom-attr", "test-value");
+    })
 });
