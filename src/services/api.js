@@ -16,8 +16,7 @@
  * @modified by Saturnino Méndez
  */
 import axios from "axios";
-import { getToken, refreshAuthToken, isTokenValid, logout } from "../services/authService"
-import { globalNavigate } from '../main';
+import { getToken, refreshAuthToken, logout } from "../services/authService"
 
 /**
  * The base URL for the API, obtained from environment variables.
@@ -60,7 +59,7 @@ const processQueue = (error, token = null) => {
 api.interceptors.request.use(
   (config) => {
     const token = getToken();
-    if (token && isTokenValid()) {
+    if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -80,7 +79,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response ? error.response.status : null;
-    if (status === 401 && originalRequest.url.includes("/token/refresh/") === false && !originalRequest._retry) {
+    if (status === 401 && originalRequest.url !== "/token/refresh/" && !originalRequest._retry) {
       originalRequest._retry = true;
 
       if (!isRefreshing) {
@@ -92,7 +91,6 @@ api.interceptors.response.use(
           if (newAccessToken === false){
             console.error("Refresh token not available (refreshAuthToken returned false). Logging out.");
             logout();
-            globalNavigate("/");
             isRefreshing = false;
             processQueue(new Error("No refresh token available."), null);
             return Promise.reject(new Error("No refresh token available."));
@@ -111,7 +109,6 @@ api.interceptors.response.use(
 
           console.error("Failed to refresh token. Logging out.", refreshError);
           logout(); // Deletes stored tokens
-          globalNavigate('/');
           return Promise.reject(refreshError); // Rejects original promse with refreshError
         };
       };
