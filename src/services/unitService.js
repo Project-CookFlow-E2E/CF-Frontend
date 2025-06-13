@@ -57,7 +57,7 @@ export const unitService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getUnitByUnitTypeId: async (unitTypeId) => {
-        const response =  await api.get(`${BASE_URL}?unit_type_id=${unitTypeId}`);
+        const response =  await api.get(`${BASE_URL}?unit_type=${unitTypeId}`);
         return response.data;
     },
 
