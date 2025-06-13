@@ -48,6 +48,19 @@ export const unitService = {
         return response.data;
     },
 
+    /**
+    * Fetches the details of all units by its unit_type_id.
+    * GET /api/measurements/units/<int:pk>/
+    * 
+    * @param {number} unitTypeId - The ID of the unit_type_id to fetch.
+    * @returns {Promise<object>} A promise that resolves with the Unit's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found).
+    */
+    getUnitByUnitTypeId: async (unitTypeId) => {
+        const response =  await api.get(`${BASE_URL}?unit_type_id=${unitTypeId}`);
+        return response.data;
+    },
+
     // --- Admin-specific methods ---
 
     /**
