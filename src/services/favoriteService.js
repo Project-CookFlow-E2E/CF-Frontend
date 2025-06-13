@@ -51,6 +51,7 @@ export const favoriteService = {
     /**
     * Adds a recipe to the authenticated user's favorite list.
     * POST /api/favorites/
+    * 
     * @param {object} favoriteData - The data required to add a favorite. Typically `{ recipe: number }`
     * where `recipe` is the ID of the recipe to favorite.
     * @returns {Promise<object>} A promise that resolves with the newly created favorite object.
@@ -64,6 +65,7 @@ export const favoriteService = {
     /**
     * Removes a favorite from the authenticated user's list by its favorite ID.
     * DELETE /api/favorites/<int:pk>/
+    * 
     * @param {number} favoriteId - The ID of the favorite entry to remove (not the recipe ID).
     * @returns {Promise<void>} A promise that resolves when the favorite is successfully removed.
     * No data is typically returned for a successful DELETE.
@@ -80,6 +82,7 @@ export const favoriteService = {
     * Fetches a list of all favorite entries across all users.
     * This method requires administrator privileges.
     * GET /api/admin/favorites
+    * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of all favorite objects.
     * @throws {Error} If the API request fails (e.g., 403 Forbidden for non-admins).
     */
@@ -92,6 +95,7 @@ export const favoriteService = {
     * Creates a new favorite entry for a specific user.
     * This method requires administrator privileges and allows an admin to assign a favorite to any user.
     * POST /api/admin/favorites
+    * 
     * @param {object} favoriteData - The data for the new favorite. Typically `{ user: number, recipe: number }`
     * where `user` is the ID of the user and `recipe` is the ID of the recipe.
     * @returns {Promise<object>} A promise that resolves with the newly created favorite object.
@@ -106,6 +110,7 @@ export const favoriteService = {
     * Fetches the details of a specific favorite entry by its ID.
     * This method requires administrator privileges.
     * GET /api/admin/favorites/<int:pk>/
+    * 
     * @param {number} favoriteId - The ID of the favorite entry to fetch.
     * @returns {Promise<object>} A promise that resolves with the details of the favorite entry.
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
@@ -119,6 +124,7 @@ export const favoriteService = {
     * Updates an existing favorite entry by its ID.
     * This method requires administrator privileges and allows an admin to modify a favorite.
     * PATCH /api/admin/favorites/<int:pk>/ (or PUT, depending on backend implementation)
+    * 
     * @param {number} favoriteId - The ID of the favorite entry to update.
     * @param {object} favoriteData - The data to update (e.g., `{ user: newUserId, recipe: newRecipeId }`).
     * @returns {Promise<object>} A promise that resolves with the updated favorite object.
@@ -133,6 +139,7 @@ export const favoriteService = {
     * Deletes a favorite entry by its ID.
     * This method requires administrator privileges.
     * DELETE /api/admin/favorites/<int:pk>/
+    * 
     * @param {number} favoriteId - The ID of the favorite entry to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the favorite is successfully deleted.
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
