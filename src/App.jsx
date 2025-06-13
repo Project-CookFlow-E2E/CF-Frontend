@@ -11,21 +11,10 @@ import {
   ShoppingList,
   Landing,
 } from "./pages";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import { setGlobalNavigateFunction } from "./main";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { Footer } from "./components";
 import { Header } from "./components";
-import { useEffect } from "react";
-
-const NavigationSetter = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    setGlobalNavigateFunction(navigate);
-  }, [navigate]);
-
-  return null;
-};
 
 function App() {
   return (
