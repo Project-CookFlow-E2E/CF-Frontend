@@ -84,7 +84,10 @@ export const login = async (username, password) => {
         error.response.data
       );
       console.error("Status code:", error.response.status);
-      throw error.response.data;
+      const errorMessage = error.response.data.detail || JSON.stringify(error.response.data) || "Authentication failed.";
+      const customError = new Error(errorMessage);
+      customError.response = error.response;
+      throw customError;
     } else if (error.request) {
       console.error("No response received from the server:", error.request);
       throw new Error(
