@@ -92,7 +92,7 @@ api.interceptors.response.use(
           if (newAccessToken === false){
             console.error("Refresh token not available (refreshAuthToken returned false). Logging out.");
             logout();
-            globalNavigate("/");
+           //globalNavigate("/");
             isRefreshing = false;
             processQueue(new Error("No refresh token available."), null);
             return Promise.reject(new Error("No refresh token available."));
@@ -111,7 +111,7 @@ api.interceptors.response.use(
 
           console.error("Failed to refresh token. Logging out.", refreshError);
           logout(); // Deletes stored tokens
-          globalNavigate('/');
+          //globalNavigate('/');
           return Promise.reject(refreshError); // Rejects original promse with refreshError
         };
       };
