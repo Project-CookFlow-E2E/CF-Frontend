@@ -138,8 +138,22 @@ export const isTokenValid = () => {
  * @returns {void} 
  */
 export const logout = async () => {
+  const refreshToken = getRefreshToken();
+
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+
+  if (refreshToken){
+    try {
+      await api.post("/logout/", { refresh: refreshToken});
+    }
+    catch (err){
+      console.error("Error blacklisting refresh token on the server:", err);
+    }
+  } 
+  else {
+    console.warn("No refresh token found for server-side logout.");
+  }
 };
 
 /**
