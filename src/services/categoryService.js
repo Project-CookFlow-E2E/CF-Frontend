@@ -58,7 +58,7 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getAllParentCategories: async () => {
-        const response = await api.get(`${BASE_URL}/?parent_category_id__isnull=True`);
+        const response = await api.get(`${BASE_URL}/?parent_category_id=0`);
         return response.data;
     },
 
