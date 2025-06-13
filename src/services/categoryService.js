@@ -70,7 +70,7 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getChildCategoriesOfSpecificParent: async (parentCategoryId) => {
-        if (typeof parentId !== 'number' || isNaN(parentId)) {
+        if (typeof parentCategoryId !== 'number' || isNaN(parentCategoryId)) {
             return Promise.reject(new Error("parent_category_id not valid."));
         }
         const response = await api.get(`${BASE_URL}/?parent_category_id=${parentCategoryId}`);
