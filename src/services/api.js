@@ -16,7 +16,7 @@
  * @modified by Saturnino Méndez
  */
 import axios from "axios";
-import { getToken, refreshAuthToken, logout } from "../services/authService"
+import { getToken, refreshAuthToken, isTokenValid, logout } from "../services/authService"
 import { globalNavigate } from '../main';
 
 /**
@@ -33,7 +33,25 @@ const apiUrl = import.meta.env.VITE_API_URL || "";
  */
 const api = axios.create({
   baseURL: apiUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    }
+    else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+}
 
 /**
  * Request Interceptor:
@@ -42,7 +60,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = getToken();
-    if (token) {
+    if (token && isTokenValid()) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -62,30 +80,56 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response ? error.response.status : null;
+    if (status === 401 && originalRequest.url.includes("/token/refresh/") === false && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-    // Check if the error is 401 Unauthorized, not for the token refresh endpoint itself,
-    // and if it hasn't been retried already.
-    if (status === 401 && originalRequest.url !== "/token/refresh/" && !originalRequest._retry){
-      originalRequest._retry = true; // Mark the request as retried to prevent infinite loops
-      try {
-        console.warn("Access token expired or unauthorized, attempting to refresh token...");
-        const newAccessToken = await refreshAuthToken(); // Attempt to get a new access token
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          console.warn("Access token expired or unauthorized. Attempting to refresh token...");
+          const newAccessToken = await refreshAuthToken(); 
+          
+          if (newAccessToken === false){
+            console.error("Refresh token not available (refreshAuthToken returned false). Logging out.");
+            logout();
+            globalNavigate("/");
+            isRefreshing = false;
+            processQueue(new Error("No refresh token available."), null);
+            return Promise.reject(new Error("No refresh token available."));
+          };
 
-        if (newAccessToken) {
+          isRefreshing = false; // Unlocks the refresh
+          processQueue(null, newAccessToken); 
+
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // If refreshing fails (e.g., refresh token is also invalid/expired), log the user out
-        console.error("Failed to refresh token. Logging out.", refreshError);
-        logout(); // Clean un tokens from localStorage
-        globalNavigate('/'); // Redirect to the home page
-      }
+          return api(originalRequest); // Resends the original
+
+        } 
+        catch (refreshError) {
+          isRefreshing = false;
+          processQueue(refreshError, null); 
+
+          console.error("Failed to refresh token. Logging out.", refreshError);
+          logout(); // Deletes stored tokens
+          globalNavigate('/');
+          return Promise.reject(refreshError); // Rejects original promse with refreshError
+        };
+      };
+
+      // If a refresh request is already in progress, the current request is added to the queue.
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then(token => {
+        // When the refresh is complete, this promise will be called with the new token
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api(originalRequest);
+      }).catch(err => {
+        // Promise reject if refresh fails
+        return Promise.reject(err);
+      });
+    }
+    return Promise.reject(error);
   }
-  // For any other errors, or if the refresh attempt failed, or if it's already retried,
-  // or if the original error was not 401, simply reject the promise.
-  return Promise.reject(error);
-  } 
 );
 
 export default api;

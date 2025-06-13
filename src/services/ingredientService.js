@@ -18,7 +18,7 @@ import api from "./api";
  * 
  * @type {string}
  */
-const BASE_URL = "/ingredients";
+const BASE_URL = "/recipes/ingredients";
 
 /**
  * Base URL for administrator-specific ingredient API endpoints.
@@ -27,7 +27,7 @@ const BASE_URL = "/ingredients";
  * 
  * @type {string}
  */
-const ADMIN_BASE_URL = "/admin/ingredients";
+const ADMIN_BASE_URL = "/recipes/admin/ingredients";
 
 /**
  * Service for interacting with ingredient API endpoints.
@@ -38,7 +38,7 @@ export const ingredientService = {
 
     /**
     * Fetches a list of all APPROVED ingredients.
-    * GET /api/ingredients/
+    * GET /api/recipes/ingredients/
     * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of approved ingredient objects.
     * @throws {Error} If the API request fails.
@@ -50,7 +50,7 @@ export const ingredientService = {
 
     /**
     * Fetches the details of a specific APPROVED ingredient by its ID.
-    * GET /api/ingredients/<int:pk>/
+    * GET /api/recipes/ingredients/<int:pk>/
     * 
     * @param {number} ingredientId - The ID of the ingredient to fetch.
     * @returns {Promise<object>} A promise that resolves with the ingredient's data.
@@ -66,7 +66,7 @@ export const ingredientService = {
     /**
     * Fetches the details of a specific ingredient by its ID (for administrators).
     * This can fetch any ingredient, regardless of its approval status.
-    * GET /api/admin/ingredients/<int:pk>/
+    * GET /api/recipes/admin/ingredients/<int:pk>/
     * 
     * @param {number} ingredientId - The ID of the ingredient to fetch.
     * @returns {Promise<object>} A promise that resolves with the ingredient's data.
@@ -79,7 +79,7 @@ export const ingredientService = {
 
     /**
     * Fetches a list of ALL ingredients (approved and unapproved) for administrators.
-    * GET /api/admin/ingredients/
+    * GET /api/recipes/admin/ingredients/
     * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of all ingredient objects.
     * @throws {Error} If the API request fails (e.g., 403 Forbidden for non-admins).
@@ -91,7 +91,7 @@ export const ingredientService = {
 
     /**
     * Creates a new ingredient (for administrators).
-    * POST /api/admin/ingredients/
+    * POST /api/recipes/admin/ingredients/
     * 
     * @param {object} ingredientData - An object containing the data for the new ingredient.
     * Expected fields: `name` (str), `description` (str), `quantity` (int), `unit` (str), `is_checked` (bool), `is_approved` (bool, if applicable).
@@ -106,7 +106,7 @@ export const ingredientService = {
     /**
     * Updates an existing ingredient by its ID (for administrators).
     * Uses PATCH for partial updates.
-    * PATCH /api/admin/ingredients/<int:pk>/
+    * PATCH /api/recipes/admin/ingredients/<int:pk>/
     * 
     * @param {number} ingredientId - The ID of the ingredient to update.
     * @param {object} ingredientData - An object containing the ingredient data to update.
@@ -121,7 +121,7 @@ export const ingredientService = {
 
     /**
     * Deletes an ingredient by its ID (for administrators).
-    * DELETE /api/admin/ingredients/<int:pk>/
+    * DELETE /api/recipes/admin/ingredients/<int:pk>/
     * 
     * @param {number} ingredientId - The ID of the ingredient to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the ingredient is successfully deleted.

@@ -12,11 +12,11 @@ import api from './api';
 
 /**
  * Base URL for Unit API endpoints.
- * Corresponds to `/api/units/` in the backend router.
+ * Corresponds to `/api/measurements/units/` in the backend router.
  * 
  * @type {string}
  */
-const BASE_URL = "/units";
+const BASE_URL = "/measurements/units";
 
 /**
  * Service for interacting with Unit API endpoints.
@@ -25,7 +25,7 @@ export const unitService = {
 
      /**
     * Fetches a list of all measurement units.
-    * GET /api/units/
+    * GET /api/measurements/units/
     * 
     * @returns {Promise<Array<object>>} A promise that resolves with an array of Unit objects.
     * @throws {Error} If the API request fails.
@@ -37,7 +37,7 @@ export const unitService = {
 
     /**
     * Fetches the details of a specific measurement unit by its ID.
-    * GET /api/units/<int:pk>/
+    * GET /api/measurements/units/<int:pk>/
     * 
     * @param {number} unitId - The ID of the unit to fetch.
     * @returns {Promise<object>} A promise that resolves with the Unit's data.
@@ -52,7 +52,7 @@ export const unitService = {
 
     /**
     * Creates a new measurement unit (for administrators).
-    * POST /api/units/
+    * POST /api/measurements/units/
     * 
     * @param {object} unitData - An object containing the data for the new unit.
     * Expected fields for Unit: `name` (str), `abbreviation` (str), `unit_type` (int ID of UnitType).
@@ -67,7 +67,7 @@ export const unitService = {
     /**
     * Updates an existing measurement unit by its ID (for administrators).
     * Uses PATCH for partial updates.
-    * PATCH /api/units/<int:pk>/
+    * PATCH /api/measurements/units/<int:pk>/
     * 
     * @param {number} unitId - The ID of the unit to update.
     * @param {object} unitData - An object containing the data to update.
@@ -82,7 +82,7 @@ export const unitService = {
 
     /**
     * Deletes a measurement unit by its ID (for administrators).
-    * DELETE /api/units/<int:pk>/
+    * DELETE /api/measurements/units/<int:pk>/
     * @param {number} unitId - The ID of the unit to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the unit is successfully deleted.
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
