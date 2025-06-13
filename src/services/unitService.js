@@ -56,6 +56,7 @@ export const unitService = {
     * @returns {Promise<object>} A promise that resolves with the Unit's data.
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
+    //Not implemented in backend
     getUnitByUnitTypeId: async (unitTypeId) => {
         const response =  await api.get(`${BASE_URL}?unit_type=${unitTypeId}`);
         return response.data;
