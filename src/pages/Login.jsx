@@ -16,15 +16,16 @@
  * @module pages/Login
  */
 
-import React, { useState } from "react";
+import React from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
-import { Mail, Lock } from "lucide-react";
+import { Lock, PersonStanding } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { login, getToken } from "../services/authService";
 import SuccessMsg from "../components/SuccessMsg";
+import ErrorMsg from "../components/ErrorMsg";
 
 /**
  * Página de inicio de sesión para acceder a la app.
@@ -41,19 +42,15 @@ const Login = () => {
   const [apiError, setApiError] = React.useState("");
   const [successMsg] = React.useState(location.state?.successMsg || "");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm();
+  const { register, handleSubmit, setError } = useForm();
 
   const onSubmit = async (data) => {
+    console.log("🔍 Datos del formulario:", data);
     setApiError("");
     try {
       await login(data.username, data.password);
       console.log("✅ Token guardado:", getToken());
-      //navigate("/main");
+      navigate("/main");
       // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setApiError("Credenciales inválidas");
@@ -102,6 +99,7 @@ const Login = () => {
             ¡Bienvenido de nuevo!
           </h2>
           {successMsg && <SuccessMsg>{successMsg}</SuccessMsg>}
+          {apiError && <ErrorMsg>{apiError}</ErrorMsg>}
           <h4
             className="text-sm mb-12 text-black"
             data-testid="login-subtitle"
@@ -109,38 +107,27 @@ const Login = () => {
           >
             Introduce tu información
           </h4>
-
-          {apiError && (
-            <div
-              className="text-red-500 text-sm mb-4"
-              data-testid="login-api-error"
-            >
-              {apiError}
-            </div>
-          )}
-
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="email-input-group"
-            id="email-input-group"
+            data-testid="username-input-group"
+            id="username-input-group"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
-              htmlFor="email-input"
+              htmlFor="username-input"
             >
-              Correo electrónico o nombre de usuario
+              Nombre de usuario
             </label>
-            <div className="peer border border-black rounded-md">
+            <div className="peer border rounded-md">
               <Input
-                placeholder="Correo electrónico"
+                placeholder="Nombre de usuario"
                 type="text"
-                icon={Mail}
-                id="email-input"
-                data-testid="email-input"
+                icon={PersonStanding}
+                id="username-input"
+                data-testid="username-input"
                 {...register("username", {
                   required: "Este campo es obligatorio",
                 })}
-                error={errors.username?.message}
               />
             </div>
           </div>
@@ -156,7 +143,7 @@ const Login = () => {
             >
               Contraseña
             </label>
-            <div className="peer border border-black rounded-md">
+            <div className="peer border rounded-md">
               <Input
                 placeholder="Contraseña"
                 type="password"
@@ -166,7 +153,6 @@ const Login = () => {
                 {...register("password", {
                   required: "La contraseña es obligatoria",
                 })}
-                error={errors.password?.message}
               />
             </div>
           </div>
