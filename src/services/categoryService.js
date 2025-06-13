@@ -15,13 +15,7 @@ import api from "./api";
  * Base URL for general recipe category API endpoints.
  * Corresponds to `/api/recipes/categories/` in the backend.
  * @type {string}
-<<<<<<< HEAD
- * @modified by Rafael
- * @description /recipes/categories
- *  */
-=======
  */
->>>>>>> dev
 const BASE_URL = "/recipes/categories";
 
 /**
