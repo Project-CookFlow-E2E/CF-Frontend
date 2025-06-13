@@ -19,68 +19,45 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge, Button, Card } from "../components";
-import { mockRecipes } from "../data/mockData";
 import useFavorites from "../hooks/useFavorites";
+import useCategories from "../hooks/useCategories";
+import useLatestRecipes from "../hooks/useLatestRecipes";
 
-// Mapeo de categorías legibles a slugs de URL
-const categoryMap = {
-  Desayuno: "desayuno",
-  Brunch: "brunch",
-  Comida: "comida",
-  Cena: "cena",
-  Postre: "postre",
-  Merienda: "merienda",
-  Snack: "snack",
-};
 
-// Lista visible de categorías (labels legibles)
-const categories = Object.keys(categoryMap);
 
-/**
- * Página principal de la app.
- * Presenta un buscador por categorías, últimas recetas y un botón de inspiración.
- */
 const Home = () => {
+
   const navigate = useNavigate();
+  const { categories } = useCategories();
+  const { recipes: latestRecipes } = useLatestRecipes();
+  const { favorites, toggleFavorite } = useFavorites();
   const [selectedCategories, setSelectedCategories] = React.useState([]);
 
-  /**
-   * Alterna una categoría seleccionada en la lista de búsqueda.
-   *
-   * @param {string} category - Nombre de la categoría seleccionada.
-   */
-  const toggleCategory = (category) => {
+
+  const toggleCategory = (categoryName) => {
     setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
+      prev.includes(categoryName)
+        ? prev.filter((c) => c !== categoryName)
+        : [...prev, categoryName]
     );
   };
 
-  /**
-   * Redirige a la página de búsqueda con las categorías seleccionadas.
-   */
   const handleSearchClick = () => {
     if (selectedCategories.length === 0) return;
 
-    const mapped = selectedCategories.map((c) => categoryMap[c]);
-    const uniqueMapped = Array.from(new Set(mapped));
+    const mapped = selectedCategories.map((selectedName) => {
+      const matched = categories.find((cat) => cat.name === selectedName);
+      return matched?.slug || selectedName.toLowerCase(); 
+    });
 
+    const uniqueMapped = [...new Set(mapped)];
     navigate(`/search?category=${uniqueMapped.join(",")}`);
   };
 
-  /**
-   * Redirige a una página con recetas aleatorias para inspiración.
-   */
   const handleInspireClick = () => {
     navigate("/inspire-me");
   };
-
-  const latestRecipes = [...mockRecipes]
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 3);
-  const { favorites, toggleFavorite } = useFavorites();
-
+  
   return (
     <div className="min-h-screen bg-background w-full" data-testid="home-page">
       <div
@@ -103,19 +80,19 @@ const Home = () => {
               data-testid="category-list"
             >
               {categories.map((category) => {
-                const isSelected = selectedCategories.includes(category);
+                const isSelected = selectedCategories.includes(category.name);
                 return (
                   <Badge
-                    key={category}
-                    data-testid={`category-badge-${category}`}
+                    key={category.id}
+                    data-testid={`category-badge-${category.name}`}
                     className={`cursor-pointer ${
                       isSelected
                         ? "bg-pink-500 text-white"
                         : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
-                    onClick={() => toggleCategory(category)}
+                    onClick={() => toggleCategory(category.name)}
                   >
-                    {category}
+                    {category.name}
                   </Badge>
                 );
               })}

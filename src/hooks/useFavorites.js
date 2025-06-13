@@ -1,56 +1,69 @@
 /**
  * @file useFavorites.js
- * @description Hook personalizado para gestionar recetas favoritas del usuario.
- * Utiliza `localStorage` para persistir los favoritos entre sesiones.
+ * @description Hook conectado al backend para gestionar recetas favoritas del usuario autenticado.
  *
- * Funcionalidades:
- * - Carga los favoritos desde `localStorage` al iniciar.
- * - Guarda automáticamente los cambios en `localStorage` cuando la lista de favoritos cambia.
- * - Permite alternar el estado de favorito en una receta.
+ * @function useFavorites
+ * @returns {Object} Objeto con:
+ *  - `favorites` {Array<number>}: Lista de IDs de recetas favoritas.
+ *  - `toggleFavorite` {Function}: Marca o desmarca una receta como favorita en la BBDD.
+ *  - `loading` {boolean}: Estado de carga inicial.
+ *  - `error` {Error|null}: Error en caso de fallo de la API.
  *
- * @module hooks/useFavorites
+ * @example
+ * const { favorites, toggleFavorite } = useFavorites();
+ * toggleFavorite(12);
+ *
  * @author Ana Castro
  */
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { favoriteService } from "../services/favoriteService";
 
-/**
- * Hook para manejar los favoritos del usuario.
- *
- * @returns {Object} Estado y función para gestionar favoritos.
- */
 export default function useFavorites() {
-  const [favorites, setFavorites] = useState(() => {
-    /**
-     * Carga los favoritos almacenados en `localStorage`.
-     * Si no hay datos previos, retorna un array vacío.
-     *
-     * @returns {string[]} Lista de IDs de recetas marcadas como favoritas.
-     */
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+ 
   useEffect(() => {
-    /**
-     * Guarda la lista de favoritos en `localStorage` cada vez que cambia.
-     */
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites]);
+    const fetchFavorites = async () => {
+      try {
+        const data = await favoriteService.getUserFavorites();
+        const recipeIds = data.map((fav) => fav.recipe?.id); 
+        setFavorites(recipeIds.filter(Boolean)); 
+      } catch (err) {
+        console.error("Error cargando favoritos:", err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
 
   /**
    * Alterna el estado de favorito de una receta.
+   * Si ya es favorita, la elimina. Si no, la añade.
    *
-   * @param {number|string} id - ID de la receta a modificar.
+   * @param {number} recipeId 
    */
-  const toggleFavorite = (id) => {
-    const idStr = String(id);
-    setFavorites((prev) =>
-      prev.includes(idStr)
-        ? prev.filter((fav) => fav !== idStr)
-        : [...prev, idStr]
-    );
+  const toggleFavorite = async (recipeId) => {
+    const isFav = favorites.includes(recipeId);
+
+    try {
+      if (isFav) {
+        await favoriteService.removeFavorite(recipeId);
+        setFavorites((prev) => prev.filter((id) => id !== recipeId));
+      } else {
+        await favoriteService.addFavorite(recipeId);
+        setFavorites((prev) => [...prev, recipeId]);
+      }
+    } catch (err) {
+      console.error("Error al actualizar favoritos:", err);
+      setError(err);
+    }
   };
 
-  return { favorites, toggleFavorite };
+  return { favorites, toggleFavorite, loading, error };
 }
