@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Button from "./Button";
 import LogoTitle from "./LogoTitle";
-import { isTokenValid } from "../services/authService";
+import { isTokenValid, logout } from "../services/authService";
 
 /**
  * Header es el encabezado principal de la aplicación.
@@ -18,22 +18,46 @@ import { isTokenValid } from "../services/authService";
  */
 
 const Header = () => {
-   const isLoggedIn = isTokenValid();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkLogin = () => setIsLoggedIn(isTokenValid());
+    checkLogin();
+
+    window.addEventListener("storage", checkLogin);
+    window.addEventListener("authchange", checkLogin); // Escucha cambios locales
+
+    return () => {
+      window.removeEventListener("storage", checkLogin);
+      window.removeEventListener("authchange", checkLogin);
+    };
+  }, []);
   return (
-     <header className="bg-background px-4 py-3" data-testid="header">
+    <header className="bg-background px-4 py-3" data-testid="header">
       <div className="flex justify-between items-center mx-auto max-w-6xl">
         <LogoTitle />
         {isLoggedIn ? (
-          <Link to="/profile" data-testid="profile-link">
-            <Button
-              className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
-              data-testid="profile-button"
-            >
-              Mi Perfil
-            </Button>
-          </Link>
+          <div className="flex gap-4">
+            <Link to="/profile" data-testid="profile-link">
+              <Button
+                className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                data-testid="profile-button"
+              >
+                Mi Perfil
+              </Button>
+            </Link>
+            <Link to="/" data-testid="logout-link">
+              <Button
+                className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                data-testid="logout-button"
+                onClick={logout}
+              >
+                Cerrar Sesión
+              </Button>
+            </Link>
+          </div>
         ) : (
-        <div className="flex gap-4">
+          <div className="flex gap-4">
             <Link to="/login" data-testid="login-link">
               <Button
                 className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"

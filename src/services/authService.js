@@ -34,7 +34,7 @@
  * @requires jwt-decode
  * @author Nico
  * @modified by Saturnino
- * 
+ *
  */
 import api from "./api";
 import { jwtDecode } from "jwt-decode";
@@ -74,29 +74,33 @@ export const login = async (username, password) => {
     if (res.status === 200 && accessToken) {
       localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-    };
+      window.dispatchEvent(new Event("authchange"));
+    }
     return res.data;
   } catch (error) {
-    if (error.response){
-      console.error("Authentication error or backend validation failed:", error.response.data);
+    if (error.response) {
+      console.error(
+        "Authentication error or backend validation failed:",
+        error.response.data
+      );
       console.error("Status code:", error.response.status);
       throw error.response.data;
-    }
-    else if (error.request) {
+    } else if (error.request) {
       console.error("No response received from the server:", error.request);
-      throw new Error("No response received from the server. Please check your network connection.");
-    }  
-    else {
+      throw new Error(
+        "No response received from the server. Please check your network connection."
+      );
+    } else {
       console.error("Error during authentication request:", error.message);
       throw new Error("An error occurred during the authentication request.");
-    };
+    }
   }
 };
 
 /**
  * Retrieves the JWT access token from localStorage.
  *
- * @returns {string | null} The access token if it exists, otherwise null. 
+ * @returns {string | null} The access token if it exists, otherwise null.
  */
 export const getToken = () => {
   return localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -105,11 +109,11 @@ export const getToken = () => {
 /**
  * Retrieves the JWT refresh token from localStorage.
  *
- * @returns {string | null} The refresh token if it exists, otherwise null. 
+ * @returns {string | null} The refresh token if it exists, otherwise null.
  */
 export const getRefreshToken = () => {
   return localStorage.getItem(REFRESH_TOKEN_KEY);
-}
+};
 
 /**
  * Checks if the stored JWT access token is valid and has not expired.
@@ -122,7 +126,7 @@ export const isTokenValid = () => {
   try {
     const { exp } = jwtDecode(token);
     return Date.now() < exp * 1000;
-  } catch (error){
+  } catch (error) {
     console.error("Error decoding or validating token:", error);
     return false;
   }
@@ -135,23 +139,22 @@ export const isTokenValid = () => {
  * for enhanced security (e.g., refresh token blocklisting).
  *
  * @async
- * @returns {void} 
+ * @returns {void}
  */
 export const logout = async () => {
   const refreshToken = getRefreshToken();
 
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+  window.dispatchEvent(new Event("authchange"));
 
-  if (refreshToken){
+  if (refreshToken) {
     try {
-      await api.post("/logout/", { refresh: refreshToken});
-    }
-    catch (err){
+      await api.post("/logout/", { refresh: refreshToken });
+    } catch (err) {
       console.error("Error blacklisting refresh token on the server:", err);
     }
-  } 
-  else {
+  } else {
     console.warn("No refresh token found for server-side logout.");
   }
 };
@@ -173,12 +176,11 @@ export const refreshAuthToken = async () => {
       console.warn("No refresh token available.");
       return false;
     }
-    const res = await api.post("/token/refresh/", { refresh: refreshToken});
+    const res = await api.post("/token/refresh/", { refresh: refreshToken });
     const newAccessToken = res.data.access;
     localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
     return newAccessToken;
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error refreshing token:", error);
     logout();
     throw error;
