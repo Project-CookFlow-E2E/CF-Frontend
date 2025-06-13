@@ -32,7 +32,7 @@
  * Permite gestionar ingredientes y su estado de aprobación de forma sencilla.
  *
  * @author
- * Noemi Casaprima
+ * Noemi Casaprima, Lorena Martínez
  */
 
 import React, { useState, useEffect } from "react";
@@ -119,7 +119,6 @@ const IngredientManagement = () => {
     closeEditModal();
   };
 
-  // Filtros y paginación
   const filteredIngredients = ingredients
     .filter((ing) => {
       if (activeTab === "pending") return !ing.is_approved;
@@ -144,7 +143,7 @@ const IngredientManagement = () => {
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-800">
-          Ingredient Management
+          Administrador de Ingredientes
         </h2>
         <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center">
           <svg
@@ -159,14 +158,14 @@ const IngredientManagement = () => {
               clipRule="evenodd"
             />
           </svg>
-          Add Ingredient
+          Añadir Ingrediente(s)
         </button>
       </div>
 
       <div className="mb-4">
         <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
-          {pendingCount} ingredient{pendingCount !== 1 ? "s" : ""} pending
-          approval
+          {pendingCount} ingrediente{pendingCount !== 1 ? "s" : ""} pendiente de
+          aprobación
         </span>
       </div>
 
@@ -183,7 +182,7 @@ const IngredientManagement = () => {
               setPage(1);
             }}
           >
-            All Ingredients ({ingredients.length})
+            Todos los Ingredientes ({ingredients.length})
           </button>
           <button
             className={`${
@@ -196,7 +195,7 @@ const IngredientManagement = () => {
               setPage(1);
             }}
           >
-            Pending Approval ({pendingCount})
+            Pendiente de probación
           </button>
           <button
             className={`${
@@ -209,7 +208,7 @@ const IngredientManagement = () => {
               setPage(1);
             }}
           >
-            Approved ({approvedCount})
+            Aprobado ({approvedCount})
           </button>
         </nav>
       </div>
@@ -217,7 +216,7 @@ const IngredientManagement = () => {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Search ingredients..."
+          placeholder="Buscando Ingredientes..."
           className="border px-3 py-2 rounded w-full max-w-xs"
           value={search}
           onChange={(e) => {
@@ -232,22 +231,22 @@ const IngredientManagement = () => {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Ingredient Name
+                Nombre de Ingrediente
               </th>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Categories
+                Categoria
               </th>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Unit
+                Unidad
               </th>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Added By
+                Añadido por...
               </th>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Status
+                Estado
               </th>
               <th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
-                Actions
+                Acciones
               </th>
             </tr>
           </thead>
@@ -261,7 +260,7 @@ const IngredientManagement = () => {
             ) : paginatedIngredients.length === 0 ? (
               <tr>
                 <td colSpan="6" className="text-center py-4">
-                  No ingredients found.
+                  No se han encontrado ingredientes.
                 </td>
               </tr>
             ) : (
