@@ -16,15 +16,16 @@
  * @module pages/Login
  */
 
-import React, { useState } from "react";
+import React from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
-import { Mail, Lock } from "lucide-react";
+import { Lock, PersonStanding } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import api from "../services/api";
-import { getToken } from "../services/authService";
+import { useForm } from "react-hook-form";
+import { login, getToken } from "../services/authService";
 import SuccessMsg from "../components/SuccessMsg";
+import ErrorMsg from "../components/ErrorMsg";
 
 /**
  * Página de inicio de sesión para acceder a la app.
@@ -33,34 +34,28 @@ import SuccessMsg from "../components/SuccessMsg";
  *
  * @returns {JSX.Element} Vista de login
  * @modifiedby Ángel Aragón
- * @modified Arreglado componente Button
+ * @modified Arreglado componente Button, añadido SuccessMsg, usamos login de authService para manejar el inicio de sesión.
  */
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [successMsg] = useState(location.state?.successMsg || "");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [apiError, setApiError] = React.useState("");
+  const [successMsg] = React.useState(location.state?.successMsg || "");
 
-  const handleLogin = async () => {
+  const { register, handleSubmit, setError } = useForm();
+
+  const onSubmit = async (data) => {
+    console.log("🔍 Datos del formulario:", data);
+    setApiError("");
     try {
-      const response = await api.post("/token/", {
-        username: username,
-        password: password,
-      });
-
-      const { access, refresh } = response.data;
-
-      // Guarda en localStorage
-      localStorage.setItem("cookflow_accessToken", access);
-      localStorage.setItem("cookflow_refreshToken", refresh);
-
+      await login(data.username, data.password);
       console.log("✅ Token guardado:", getToken());
-
       navigate("/main");
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      console.error("❌ Error al iniciar sesión:", error);
-      alert("Credenciales inválidas");
+      setApiError("Credenciales inválidas");
+      setError("username", { type: "manual", message: " " });
+      setError("password", { type: "manual", message: " " });
     }
   };
 
@@ -89,10 +84,12 @@ const Login = () => {
         data-testid="login-form-container"
         id="login-form-container"
       >
-        <div
+        <form
           className="w-[320px] flex flex-col items-center px-4"
           data-testid="login-form"
           id="login-form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
         >
           <h2
             className="text-3xl font-bold mb-2 text-black whitespace-nowrap"
@@ -102,6 +99,7 @@ const Login = () => {
             ¡Bienvenido de nuevo!
           </h2>
           {successMsg && <SuccessMsg>{successMsg}</SuccessMsg>}
+          {apiError && <ErrorMsg>{apiError}</ErrorMsg>}
           <h4
             className="text-sm mb-12 text-black"
             data-testid="login-subtitle"
@@ -109,27 +107,27 @@ const Login = () => {
           >
             Introduce tu información
           </h4>
-
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="email-input-group"
-            id="email-input-group"
+            data-testid="username-input-group"
+            id="username-input-group"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
-              htmlFor="email-input"
+              htmlFor="username-input"
             >
-              Correo electrónico o nombre de usuario
+              Nombre de usuario
             </label>
-            <div className="peer border border-black rounded-md">
+            <div className="peer border rounded-md">
               <Input
-                placeholder="Correo electrónico"
-                type="email"
-                icon={Mail}
-                id="email-input"
-                data-testid="email-input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Nombre de usuario"
+                type="text"
+                icon={PersonStanding}
+                id="username-input"
+                data-testid="username-input"
+                {...register("username", {
+                  required: "Este campo es obligatorio",
+                })}
               />
             </div>
           </div>
@@ -145,22 +143,23 @@ const Login = () => {
             >
               Contraseña
             </label>
-            <div className="peer border border-black rounded-md">
+            <div className="peer border rounded-md">
               <Input
                 placeholder="Contraseña"
                 type="password"
                 icon={Lock}
                 id="password-input"
                 data-testid="password-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password", {
+                  required: "La contraseña es obligatoria",
+                })}
               />
             </div>
           </div>
 
           <div data-testid="login-button-container" id="login-button-container">
             <Button
-              onClick={handleLogin}
+              type="submit"
               className="mb-3 w-40 py-2 rounded-xl"
               data-testid="login-button"
               id="login-button"
@@ -184,7 +183,7 @@ const Login = () => {
               Sign Up
             </Link>
           </h4>
-        </div>
+        </form>
       </div>
     </div>
   );
