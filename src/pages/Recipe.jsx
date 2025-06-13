@@ -1,6 +1,7 @@
-import React, { useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { RecipeIngredientsChecklist, Button } from '../components';
+import React, { useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { RecipeIngredientsChecklist, Button } from "../components";
+import TimerBadge from "../components/TimerBadge";
 
 // ========================================================================
 // ✅ SECCIÓN TEMPORAL DE MOCK:
@@ -11,42 +12,42 @@ import { RecipeIngredientsChecklist, Button } from '../components';
 const recetasOrdenadas = [
   {
     id: 1,
-    titulo: 'Tarta de queso',
+    titulo: "Tarta de queso",
     tiempo: 35,
-    imagen: '/tarta-queso.jpeg',
+    imagen: "/tarta-queso.jpeg",
     ingredientes: [
-      { id: 1, name: 'Queso crema', quantity: 300, unit: 'g' },
-      { id: 2, name: 'Galletas', quantity: 150, unit: 'g' },
-      { id: 3, name: 'Mantequilla', quantity: 100, unit: 'g' },
-      { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
-      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
+      { id: 1, name: "Queso crema", quantity: 300, unit: "g" },
+      { id: 2, name: "Galletas", quantity: 150, unit: "g" },
+      { id: 3, name: "Mantequilla", quantity: 100, unit: "g" },
+      { id: 4, name: "Azucar", quantity: 200, unit: "g" },
+      { id: 5, name: "Leche", quantity: 200, unit: "ml" },
     ],
     pasos: [
-      { descripcion: 'Precalentar horno', imagen: '/huevos.jpeg' },
-      { descripcion: 'Machacar galletas', imagen: '/harina.jpeg' },
-      { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
-      { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
-    ]
+      { descripcion: "Precalentar horno", imagen: "/huevos.jpeg" },
+      { descripcion: "Machacar galletas", imagen: "/harina.jpeg" },
+      { descripcion: "Mezclar todo", imagen: "/mezclar-queso.jpeg" },
+      { descripcion: "Hornear 40 min", imagen: "/hornear.jpeg" },
+    ],
   },
   {
     id: 2,
-    titulo: 'Pan de plátano',
+    titulo: "Pan de plátano",
     tiempo: 20,
-    imagen: '/panplatano.jpeg',
+    imagen: "/panplatano.jpeg",
     ingredientes: [
-      { id: 1, name: 'Plátano', quantity: 3, unit: 'ud' },
-      { id: 2, name: 'Huevos', quantity: 2, unit: 'ud' },
-      { id: 3, name: 'Harina', quantity: 200, unit: 'g' },
-      { id: 4, name: 'Azucar', quantity: 200, unit: 'g' },
-      { id: 5, name: 'Leche', quantity: 200, unit: 'ml' }
+      { id: 1, name: "Plátano", quantity: 3, unit: "ud" },
+      { id: 2, name: "Huevos", quantity: 2, unit: "ud" },
+      { id: 3, name: "Harina", quantity: 200, unit: "g" },
+      { id: 4, name: "Azucar", quantity: 200, unit: "g" },
+      { id: 5, name: "Leche", quantity: 200, unit: "ml" },
     ],
     pasos: [
-      { descripcion: 'Precalentar horno', imagen: '/huevos.jpeg' },
-      { descripcion: 'Machacar plátanos', imagen: '/harina.jpeg' },
-      { descripcion: 'Mezclar todo', imagen: '/mezclar-queso.jpeg' },
-      { descripcion: 'Hornear 40 min', imagen: '/hornear.jpeg' }
-    ]
-  }
+      { descripcion: "Precalentar horno", imagen: "/huevos.jpeg" },
+      { descripcion: "Machacar plátanos", imagen: "/harina.jpeg" },
+      { descripcion: "Mezclar todo", imagen: "/mezclar-queso.jpeg" },
+      { descripcion: "Hornear 40 min", imagen: "/hornear.jpeg" },
+    ],
+  },
 ];
 
 /**
@@ -70,13 +71,17 @@ const Recipe = () => {
   // - useEffect(() => { fetch(`/api/recipes/${id}`)... }, [id])
   // - Y estados tipo: const [receta, setReceta] = useState(null);
   // ==================================================================================
-  const currentIndex = recetasOrdenadas.findIndex(r => r.id === currentId);
+  const currentIndex = recetasOrdenadas.findIndex((r) => r.id === currentId);
   const receta = recetasOrdenadas[currentIndex];
 
   const [checkedItems, setCheckedItems] = useState({});
 
   if (!receta) {
-    return <div data-testid="no-recipe-found" className="text-center p-6">Receta no encontrada</div>;
+    return (
+      <div data-testid="no-recipe-found" className="text-center p-6">
+        Receta no encontrada
+      </div>
+    );
   }
 
   /**
@@ -84,13 +89,15 @@ const Recipe = () => {
    * @param {number} id - ID del ingrediente.
    */
   const handleToggleCheck = (id) => {
-    setCheckedItems(prev => ({
+    setCheckedItems((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
-  const areAllChecked = receta.ingredientes.every(item => checkedItems[item.id]);
+  const areAllChecked = receta.ingredientes.every(
+    (item) => checkedItems[item.id]
+  );
   const isAnyChecked = Object.values(checkedItems).some(Boolean);
 
   /**
@@ -98,23 +105,25 @@ const Recipe = () => {
    */
   const handleStartCooking = () => {
     if (pasosRef.current) {
-      pasosRef.current.scrollIntoView({ behavior: 'smooth' });
+      pasosRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
- /**
- * Reemplaza completamente la lista de la compra en localStorage
- * con los ingredientes no seleccionados (no checkeados).
- */
-const handleAddToShoppingList = () => {
-  const noSeleccionados = receta.ingredientes.filter(
-    (item) => !checkedItems[item.id]
-  );
+  /**
+   * Reemplaza completamente la lista de la compra en localStorage
+   * con los ingredientes no seleccionados (no checkeados).
+   */
+  const handleAddToShoppingList = () => {
+    const noSeleccionados = receta.ingredientes.filter(
+      (item) => !checkedItems[item.id]
+    );
 
-  localStorage.setItem("shoppingList", JSON.stringify(noSeleccionados));
+    localStorage.setItem("shoppingList", JSON.stringify(noSeleccionados));
 
-  alert(`${noSeleccionados.length} ingrediente(s) añadidos a la lista de la compra.`);
-};
+    alert(
+      `${noSeleccionados.length} ingrediente(s) añadidos a la lista de la compra.`
+    );
+  };
 
   /**
    * Navega a la receta anterior según orden visual (no ID numérico).
@@ -139,7 +148,10 @@ const handleAddToShoppingList = () => {
   };
 
   return (
-    <div data-testid="recipe-screen" className="flex flex-col min-h-screen bg-background text-center">
+    <div
+      data-testid="recipe-screen"
+      className="flex flex-col min-h-screen bg-background text-center"
+    >
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
         {/* Navegación entre recetas */}
         <div className="flex items-center justify-between mb-4">
@@ -151,9 +163,19 @@ const handleAddToShoppingList = () => {
           >
             &lt;
           </button>
-          <div data-testid="recipe-title-container" className="text-center flex-1">
-            <h1 data-testid="recipe-title" className="text-3xl font-bold">{receta.titulo}</h1>
-            <p data-testid="recipe-time" className="text-gray-500">⏱️ {receta.tiempo} min</p>
+          <div
+            data-testid="recipe-title-container"
+            className="text-center flex-1"
+          >
+            <h1 data-testid="recipe-title" className="text-3xl font-bold">
+              {receta.titulo}
+            </h1>
+            {console.log(receta.tiempo, typeof receta.tiempo)}
+            <TimerBadge
+              data-testid="recipe-time"
+              minutes={receta.tiempo}
+              className="mt-2 flex justify-center"
+            />
           </div>
           <button
             data-testid="btn-siguiente"
@@ -189,8 +211,8 @@ const handleAddToShoppingList = () => {
             disabled={!isAnyChecked}
             className={`py-3 rounded-lg font-medium transition duration-300 ${
               isAnyChecked
-                ? 'bg-accent text-white hover:bg-accent/90'
-                : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
+                ? "bg-accent text-white hover:bg-accent/90"
+                : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
             }`}
           >
             ¡A comprar!
@@ -201,8 +223,8 @@ const handleAddToShoppingList = () => {
             disabled={!areAllChecked}
             className={`py-3 rounded-lg font-medium transition duration-300 ${
               areAllChecked
-                ? 'bg-accent text-white hover:bg-accent/90'
-                : 'bg-background !text-accent border-2 border-accent cursor-not-allowed'
+                ? "bg-accent text-white hover:bg-accent/90"
+                : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
             }`}
           >
             ¡A cocinar!
@@ -211,7 +233,12 @@ const handleAddToShoppingList = () => {
 
         {/* Pasos de la receta */}
         <div data-testid="steps-section" ref={pasosRef} className="mt-16">
-          <h2 data-testid="steps-title" className="text-2xl font-semibold mb-6 text-center">Pasos de la receta</h2>
+          <h2
+            data-testid="steps-title"
+            className="text-2xl font-semibold mb-6 text-center"
+          >
+            Pasos de la receta
+          </h2>
           <ol className="space-y-12">
             {receta.pasos.map((paso, index) => (
               <li
@@ -219,14 +246,22 @@ const handleAddToShoppingList = () => {
                 data-testid={`step-${index + 1}`}
                 className="flex flex-col items-center bg-background rounded-xl shadow-md p-6 max-w-2xl mx-auto"
               >
-                <span data-testid={`step-number-${index + 1}`} className="text-xl font-bold text-black mb-4">Paso {index + 1}</span>
+                <span
+                  data-testid={`step-number-${index + 1}`}
+                  className="text-xl font-bold text-black mb-4"
+                >
+                  Paso {index + 1}
+                </span>
                 <img
                   data-testid={`step-image-${index + 1}`}
                   src={paso.imagen}
                   alt={`Paso ${index + 1}`}
                   className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
                 />
-                <p data-testid={`step-desc-${index + 1}`} className="text-gray-700 text-center text-base sm:text-lg font-medium">
+                <p
+                  data-testid={`step-desc-${index + 1}`}
+                  className="text-gray-700 text-center text-base sm:text-lg font-medium"
+                >
                   {paso.descripcion}
                 </p>
               </li>
