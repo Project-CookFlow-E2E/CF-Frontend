@@ -9,103 +9,71 @@
  *
  * Usa `useNavigate` para la navegación entre páginas.
  * Usa `useFavorites` para gestionar las recetas favoritas del usuario
- *
+ * 
+ * @author Yuliia Martynovych 
  * @module Home
  * @modifiedby Ana Castro
- * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites
- *  y seleccion de las tres ultimas recetas creadas.
+ * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites,
+ * gestion de categorias a través del hook useCategories,
+ *  y añadir la sección de inspiración con un botón que redirige a /inspire-me.
+ *  Seleccion de las tres ultimas recetas creadas en la db.
  */
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
+
 import { Badge, Button, Card } from "../components";
 import useFavorites from "../hooks/useFavorites";
 import useCategories from "../hooks/useCategories";
 import useLatestRecipes from "../hooks/useLatestRecipes";
+import { useNavigate } from "react-router-dom";
 
 
+const Home = () => {    
+    
+    const { latestRecipes } = useLatestRecipes();
+    const { favorites, toggleFavorite } = useFavorites();    
+    const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(1); 
+   
+    const navigate = useNavigate();
 
-const Home = () => {
+    return (
+        <div className="min-h-screen bg-background w-full" data-testid="home-page">
+            <div className="w-full bg-background pt-7 pb-12 px-4 sm:px-6 lg:px-20" id="home-header">
+                <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div className="flex flex-col ml-12 justify-center items-center lg:items-start text-center lg:text-left">
+                        <p className="text-gray-600 mb-8" data-testid="prompt-text" >
+                            ¿No sabes que elegir?
+                        </p>
+                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-10" data-testid="main-title">
+                            ¿Qué te apetece?
+                        </h1>
+                        <div
+                            className="flex flex-wrap gap-2 justify-center lg:justify-start mb-14"
+                            data-testid="category-list"
+                        >
+                            {categories.map((category) => {
+                                const isSelected = selectedCategories.includes(category.name);
+                                return (
+                                    <Badge
+                                        key={category.id}
+                                        data-testid={`category-badge-${category.name}`}
+                                        className={`cursor-pointer ${
+                                            isSelected
+                                                ? "bg-pink-500 text-white"
+                                                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                                        }`}
+                                        onClick={() => toggleCategory(category.name)}
+                                    >
+                                        {category.name}
+                                    </Badge>
+                                );
+                            })}
+                        </div>
+                        <Button onClick={handleSearchClick} data-testid="search-button">
+                            Buscar
+                        </Button>
+                    </div>
 
-  const navigate = useNavigate();
-  const { categories } = useCategories();
-  const { recipes: latestRecipes } = useLatestRecipes();
-  const { favorites, toggleFavorite } = useFavorites();
-    const [selectedCategories, setSelectedCategories] = React.useState([]);
-
-
-  const toggleCategory = (categoryName) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryName)
-        ? prev.filter((c) => c !== categoryName)
-        : [...prev, categoryName]
-    );
-  };
-
-  const handleSearchClick = () => {
-    if (selectedCategories.length === 0) return;
-
-    const mapped = selectedCategories.map((selectedName) => {
-      const matched = categories.find((cat) => cat.name === selectedName);
-      return matched?.slug || selectedName.toLowerCase(); 
-    });
-
-    const uniqueMapped = [...new Set(mapped)];
-    navigate(`/search?category=${uniqueMapped.join(",")}`);
-    };
-
-    const handleInspireClick = () => {
-        navigate("/inspire-me");
-    };
-  
-  return (
-    <div className="min-h-screen bg-background w-full" data-testid="home-page">
-      <div
-        className="w-full bg-background pt-16 pb-12 px-4 sm:px-6 lg:px-8"
-        id="home-header"
-      >
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
-            <p className="text-gray-600 mb-2" data-testid="prompt-text">
-              ¿No sabes que elegir?
-            </p>
-            <h1
-              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
-              data-testid="main-title"
-            >
-              ¿Qué te apetece?
-            </h1>
-            <div
-              className="flex flex-wrap gap-2 justify-center lg:justify-start mb-4"
-              data-testid="category-list"
-            >
-              {categories.map((category) => {
-                const isSelected = selectedCategories.includes(category.name);
-                return (
-                  <Badge
-                    key={category.id}
-                    data-testid={`category-badge-${category.name}`}
-                    className={`cursor-pointer ${
-                      isSelected
-                        ? "bg-pink-500 text-white"
-                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                    }`}
-                    onClick={() => toggleCategory(category.name)}
-                  >
-                    {category.name}
-                  </Badge>
-                );
-              })}
-            </div>
-            <Button onClick={handleSearchClick} data-testid="search-button">
-              Buscar
-            </Button>
-          </div>
-
-          <div
-            className="flex justify-center lg:justify-end"
-            data-testid="home-image-container"
-          >
+                    <div className="flex justify-center lg:justify-end" data-testid="home-image-container">
                         <img
                             src="/home-page.jpeg"
                             alt="Delicious food"
@@ -117,10 +85,7 @@ const Home = () => {
                 </div>
             </div>
 
-      <div
-        className="w-full bg-primary py-12 px-4 sm:px-6 lg:px-8"
-        data-testid="latest-recipes-section"
-      >
+            <div className="w-full bg-primary py-12 px-4 sm:px-6 lg:px-8" data-testid="latest-recipes-section">
                 <div className="max-w-7xl mx-auto">
                     <h2
                         className="text-3xl font-bold text-center text-gray-900 mb-8"
@@ -156,18 +121,13 @@ const Home = () => {
                     <h2 className="text-3xl font-bold text-gray-900 mb-12" data-testid="inspire-title">
                         ¿Aún no sabes que hacer?
                     </h2>
-                    <div
-                        onClick={handleInspireClick}
-                        className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition cursor-pointer"
-                        data-testid="inspire-button"
-                        role="button"
-                        tabIndex={0}
-                        onKeyPress={(e) => {
-                            if (e.key === "Enter" || e.key === " ") handleInspireClick();
-                        }}
-                    >
+                    <Button
+                        onClick={() => navigate("/inspire-me")}
+                        ariaLabel="Inspire me"
+                        className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition"
+                        >
                         <span className="text-white font-semibold text-lg">Inspire me</span>
-                    </div>
+                    </Button>
                 </div>
             </div>
         </div>
