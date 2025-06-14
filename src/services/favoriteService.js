@@ -1,4 +1,5 @@
 import api from './api';
+import { getUserIdFromToken } from './authService';
 
 /**
 * src/services/favoriteService.js
@@ -10,6 +11,8 @@ import api from './api';
 * @module favoriteService
 * @requires ./api - The configured Axios instance for making API requests.
 * @author Saturnino Mendez
+* @modified by Ana Castro
+* @description This service provides methods to manage user favorites and administrative operations on favorites.
 */
 
 /**
@@ -18,7 +21,7 @@ import api from './api';
 * 
 * @type {string}
 */
-const BASE_URL = '/favorites';
+const BASE_URL = '/favorites/';
 
 /**
  * Base URL for administrator-specific favorite API endpoints.
@@ -31,7 +34,7 @@ const ADMIN_BASE_URL = '/admin/favorites';
 /**
  * Description placeholder
  *
- * @type {{ getUserFavorites: () => unknown; addFavorite: (favoriteId: any) => unknown; removeFavorite: (favoriteId: any) => unknown; getAllFavoritesAdmin: () => unknown; createFavoriteAdmin: (favoriteData: any) => unknown; getFavoriteByIdAdmin: (favoriteId: any) => unknown; updateFavoriteAdmin: (favoriteId: any, favoriteData...}
+ * @type { getUserFavorites: () => unknown; addFavorite: (favoriteId: any) => unknown; removeFavorite: (favoriteId: any) => unknown; getAllFavoritesAdmin: () => unknown; createFavoriteAdmin: (favoriteData: any) => unknown; getFavoriteByIdAdmin: (favoriteId: any) => unknown; updateFavoriteAdmin: (favoriteId: any, favoriteData...}
  */
 export const favoriteService = {
 
@@ -57,10 +60,19 @@ export const favoriteService = {
     * @returns {Promise<object>} A promise that resolves with the newly created favorite object.
     * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized, 400 Bad Request if recipe already favorited).
     */
-    addFavorite: async (favoriteId) => {
-        const response = await api.post(`${BASE_URL}/${favoriteId}/`);
+    addFavorite: async (recipeId) => {
+        const userId = getUserIdFromToken(); // Obtienes el ID del usuario desde el token
+        const data = {
+            user_id: userId,  // Agregamos el ID del usuario
+            recipe_id: recipeId  // Agregamos el ID de la receta
+        };
+        
+        // Realizamos la solicitud POST con el objeto `data`
+        const response = await api.post(`${BASE_URL}`, data); 
         return response.data;
     },
+
+
 
     /**
     * Removes a favorite from the authenticated user's list by its favorite ID.
@@ -72,9 +84,14 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found if favorite doesn't exist, 401 Unauthorized).
     */
     removeFavorite: async (favoriteId) => {
-        const response = await api.delete(`${BASE_URL}/${favoriteId}/`);
-        return true;
-    },
+        try {
+            const response = await api.delete(`${BASE_URL}${favoriteId}/`);
+            return response.data; // Confirma si el servidor retorna algún dato después de eliminar
+        } catch (error) {
+            console.error("Error removing favorite:", error);
+            throw error;
+        }
+        },
 
     // --- Admin-specific methods ---
 
