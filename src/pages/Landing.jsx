@@ -21,7 +21,6 @@
 import React from "react";
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
-import useFavorites from "../hooks/useFavorites";
 import { mockRecipes } from "../data/mockData";
 import { FaGear } from "react-icons/fa6";
 
@@ -47,8 +46,7 @@ import { FaGear } from "react-icons/fa6";
  *
  * @returns {JSX.Element}
  */
-const Landing = () => {
-  const { favorites } = useFavorites();
+const Landing = () => {  
   const featuredRecipes = mockRecipes.slice(0, 3);
   const navigate = useNavigate();
 
@@ -165,8 +163,7 @@ const Landing = () => {
               image={recipe.image_url}
               name={recipe.name}
               category={recipe.category}
-              time={`${recipe.duration_minutes}`}
-              isFavorite={favorites.includes(String(recipe.id))}
+              time={`${recipe.duration_minutes}`}              
               onToggleFavorite={() => navigate("/signup")}
               onClick={() => navigate(`/recipe/${recipe.id}`)}
             />

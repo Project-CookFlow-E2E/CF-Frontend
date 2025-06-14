@@ -1,50 +1,46 @@
 /**
- * Hook personalizado para obtener las recetas más recientes desde la API.
+ * Custom hook to fetch the latest recipes from the API, sort them by creation date, and return them.
  *
- * Este hook se conecta al servicio `recipeService` y realiza una consulta GET
- * con orden descendente por fecha de creación (`ordering=-created_at`). Permite
- * opcionalmente limitar la cantidad de recetas devueltas.
- *
- * @function useLatestRecipes
- * @param {number} [limit=3] - Número de recetas a obtener (por defecto 3).
- * @returns {Object} Objeto con los siguientes campos:
- * - `recipes` {Array<object>}: Lista de recetas ordenadas por fecha.
- * - `loading` {boolean}: Estado de carga mientras se realiza la petición.
- * - `error` {Error|null}: Error en caso de fallo en la petición.
- *
- * @example
- * const { recipes, loading, error } = useLatestRecipes(5);
- *
+ * @module useLatestRecipes
  * @author Ana Castro
+ *
+ * @returns {Object} The object containing:
+ * - `latestRecipes` {Array}: Sorted list of the latest recipes (up to 3).
+ * - `loading` {boolean}: Flag indicating whether the data is still being fetched.
  */
 
 import { useEffect, useState } from "react";
-import { recipeService } from "../services/recipeService";
+import api from "../services/api";
 
-const useLatestRecipes = (limit = 3) => {
-    const [recipes, setRecipes] = useState([]);
+const useLatestRecipes = () => {
+    const [latestRecipes, setLatestRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const TakeLatest = async () => {
+        const fetchRecipes = async () => {
             try {
-                const data = await recipeService.getAllRecipes({
-                    ordering: "-created_at",
-                    limit: limit,
-                });
-                setRecipes(data.results || data);
-            } catch (err) {
-                setError(err);
+                const { data } = await api.get("/recipes/recipes/");
+                const recipes = Array.isArray(data.results) ? data.results : data;
+
+                if (recipes.length) {
+                    const sortedRecipes = recipes
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                        .slice(0, 3);
+                    setLatestRecipes(sortedRecipes);
+                } else {
+                    console.warn("⚠️ No recipes available");
+                }
+            } catch (error) {
+                console.error("🚨 Error fetching recipes:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        TakeLatest();
-    }, [limit]);
+        fetchRecipes();
+    }, []);
 
-    return { recipes, loading, error };
+    return { latestRecipes, loading };
 };
 
 export default useLatestRecipes;

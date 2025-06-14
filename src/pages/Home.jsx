@@ -31,7 +31,7 @@ const Home = () => {
   const { categories } = useCategories();
   const { recipes: latestRecipes } = useLatestRecipes();
   const { favorites, toggleFavorite } = useFavorites();
-  const [selectedCategories, setSelectedCategories] = React.useState([]);
+    const [selectedCategories, setSelectedCategories] = React.useState([]);
 
 
   const toggleCategory = (categoryName) => {
@@ -52,11 +52,11 @@ const Home = () => {
 
     const uniqueMapped = [...new Set(mapped)];
     navigate(`/search?category=${uniqueMapped.join(",")}`);
-  };
+    };
 
-  const handleInspireClick = () => {
-    navigate("/inspire-me");
-  };
+    const handleInspireClick = () => {
+        navigate("/inspire-me");
+    };
   
   return (
     <div className="min-h-screen bg-background w-full" data-testid="home-page">
@@ -106,76 +106,72 @@ const Home = () => {
             className="flex justify-center lg:justify-end"
             data-testid="home-image-container"
           >
-            <img
-              src="/home-page.jpeg"
-              alt="Delicious food"
-              className="w-full max-w-lg xl:max-w-2xl h-auto rounded-lg shadow-lg"
-              data-testid="home-image"
-              id="home-image"
-            />
-          </div>
-        </div>
-      </div>
+                        <img
+                            src="/home-page.jpeg"
+                            alt="Delicious food"
+                            className="w-full max-w-lg xl:max-w-2xl h-auto rounded-lg shadow-lg"
+                            data-testid="home-image"
+                            id="home-image"
+                        />
+                    </div>
+                </div>
+            </div>
 
       <div
         className="w-full bg-primary py-12 px-4 sm:px-6 lg:px-8"
         data-testid="latest-recipes-section"
       >
-        <div className="max-w-7xl mx-auto">
-          <h2
-            className="text-3xl font-bold text-center text-gray-900 mb-8"
-            data-testid="latest-recipes-title"
-          >
-            Últimas recetas
-          </h2>
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
-            data-testid="latest-recipes-list"
-          >
-            {latestRecipes.map((recipe) => (
-              <Card
-                key={recipe.id}
-                id={`recipe-card-${recipe.id}`}
-                image={recipe.image_url}
-                name={recipe.name}
-                category={recipe.category}
-                time={`${recipe.duration_minutes}`}
-                isFavorite={favorites.includes(String(recipe.id))}
-                onToggleFavorite={() => toggleFavorite(recipe.id)}
-                onClick={() => navigate(`/recipe/${recipe.id}`)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+                <div className="max-w-7xl mx-auto">
+                    <h2
+                        className="text-3xl font-bold text-center text-gray-900 mb-8"
+                        data-testid="latest-recipes-title"
+                    >
+                        Últimas recetas
+                    </h2>
+                    <div
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
+                        data-testid="latest-recipes-list"
+                    >
+                        {latestRecipes.map((recipe) => (
+                            <Card
+                                key={recipe.id}
+                                id={`recipe-card-${recipe.id}`}
+                                image={recipe.image_url}
+                                name={recipe.name}
+                                category={recipe.category}
+                                time={`${recipe.duration_minutes}`}
+                                isFavorite={
+                                    Array.isArray(favorites) && favorites.some((fav) => fav?.recipe_id === recipe.id)
+                                }
+                                onToggleFavorite={() => toggleFavorite(recipe.id)} // Asegúrate de que pasas correctamente el id aquí
+                                onClick={() => navigate(`/recipe/${recipe.id}`)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-      <div
-        className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8"
-        data-testid="inspire-section"
-      >
-        <div className="max-w-7xl mx-auto text-center">
-          <h2
-            className="text-3xl font-bold text-gray-900 mb-12"
-            data-testid="inspire-title"
-          >
-            ¿Aún no sabes que hacer?
-          </h2>
-          <div
-            onClick={handleInspireClick}
-            className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition cursor-pointer"
-            data-testid="inspire-button"
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
-              if (e.key === "Enter" || e.key === " ") handleInspireClick();
-            }}
-          >
-            <span className="text-white font-semibold text-lg">Inspire me</span>
-          </div>
+            <div className="w-full bg-background pt-16 pb-28 px-4 sm:px-6 lg:px-8" data-testid="inspire-section">
+                <div className="max-w-7xl mx-auto text-center">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-12" data-testid="inspire-title">
+                        ¿Aún no sabes que hacer?
+                    </h2>
+                    <div
+                        onClick={handleInspireClick}
+                        className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition cursor-pointer"
+                        data-testid="inspire-button"
+                        role="button"
+                        tabIndex={0}
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter" || e.key === " ") handleInspireClick();
+                        }}
+                    >
+                        <span className="text-white font-semibold text-lg">Inspire me</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Home;
