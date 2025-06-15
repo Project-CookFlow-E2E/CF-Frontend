@@ -16,10 +16,8 @@
  *  - `filteredRecipes` {Array<object>}: Recetas filtradas por la pestaña activa.
  *  - `paginatedRecipes` {Array<object>}: Recetas mostradas en la página actual.
  *
- * @example
- * const { activeTab, paginatedRecipes, toggleFavorite } = useProfileRecipes();
- *
- * @author Ana Castro
+ * 
+ * @author Ana Castro basado en el código de Yuliia Martynovych en Profile.jsx.
  */
 
 import { useState, useEffect, useMemo } from "react";

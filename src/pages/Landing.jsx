@@ -30,7 +30,7 @@ import { FaGear } from "react-icons/fa6";
  *
  * @param {Object} props
  * @param {number} props.id - ID de la receta
- *
+ * @author Yuliia Martynovych
  * @modifiedby Ána Castro, Ángel Aragón
  * @modified - Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
  * - Agregado el icono de engranaje para representar la receta y arreglado tiempo en card.
@@ -46,6 +46,8 @@ import { FaGear } from "react-icons/fa6";
  *
  * @returns {JSX.Element}
  */
+
+
 const Landing = () => {  
   const featuredRecipes = mockRecipes.slice(0, 3);
   const navigate = useNavigate();

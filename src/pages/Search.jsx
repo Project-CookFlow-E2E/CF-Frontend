@@ -4,6 +4,8 @@
  * Permite búsqueda por nombre y visualización de recetas populares. Incluye control de scroll horizontal
  * en vista móvil y persistencia de parámetros por URL.
  * @author Saray
+ * @modified by Ana Castro
+ * @modified refactorizado en hooks y componentes reutilizables, para poder obtener las recetas y categorías desde la db.
  */
 
 import { useState, useRef, useEffect } from "react";
@@ -13,6 +15,11 @@ import Card from "../components/Card";
 import Button from "../components/Button";
 import { useLocation } from "react-router-dom";
 import AutocompleteInput from "../components/AutocompleteInput";
+import useRecipeFilters from "../hooks/useRecipeFilters";
+import useCategories from "../hooks/useCategories";
+import RecipeFiltersPanel from "../components/RecipeFiltersPanel";
+
+
 
 /**
  * Arreglo de recetas populares utilizadas como fuente principal para los filtros y resultados.

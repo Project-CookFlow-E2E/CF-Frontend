@@ -1,3 +1,22 @@
+/**
+ * @file useCategories.js
+ * @description Hook personalizado para obtener y gestionar categorías desde la API, incluyendo carga por categoría padre, selección y navegación.
+ *
+ * @function useCategories
+ * @param {number} parentCategoryId - ID de la categoría padre. Si es `0`, trae las categorías principales; si no, las subcategorías.
+ *
+ * @returns {Object} Objeto con:
+ *  - `categories` {Array<Object>}: Categorías obtenidas desde la API.
+ *  - `selectedCategories` {Array<string>}: Categorías seleccionadas por el usuario.
+ *  - `toggleCategory` {Function}: Alterna selección de una categoría (añadir o quitar).
+ *  - `loading` {boolean}: Indica si se están cargando las categorías.
+ *  - `error` {any}: Error capturado al hacer la petición (si existe).
+ *  - `handleSearchClick` {Function}: Ejecuta navegación a `/search?category=` con las categorías seleccionadas.
+ *
+ * @author Ana Castro basado en el codigo de yuliia Martynovych en Home.jsx.
+ */
+
+
 import { useState, useEffect } from "react";
 import { categoryService } from "../services/categoryService"; // Servicio para obtener categorías
 import { useNavigate } from "react-router-dom";

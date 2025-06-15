@@ -1,3 +1,19 @@
+/**
+ * @file LogoTitle.jsx
+ * @description Componente visual del logo y nombre de la app CookFlow. Redirige a la página principal correspondiente
+ * dependiendo de si el usuario está autenticado.
+ *
+ * Utiliza el hook `useLocation` para detectar cambios en la ruta y comprobar la validez del token con `isTokenValid`.
+ * Si el usuario está logueado, el logo redirige a `/main`; si no, a `/`.
+ *
+ * @component
+ * @returns {JSX.Element} Enlace con logo e identificador visual de la app CookFlow.
+ *
+ * @author Ana Castro
+ */
+
+
+
 import React, { useEffect, useState } from "react";
 import logo from "../assets/logo.svg";
 import { Link, useLocation } from "react-router-dom";

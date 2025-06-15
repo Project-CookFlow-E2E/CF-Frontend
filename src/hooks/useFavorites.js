@@ -1,17 +1,18 @@
 /**
- * Custom hook to manage the authenticated user's favorites.
- * This hook handles the fetching, adding, and removing of favorite recipes.
- * It also manages the state of the favorites list and provides the `toggleFavorite`
- * function to add or remove a recipe from the favorites.
+ * Hook personalizado para gestionar los favoritos del usuario autenticado.
+ * Este hook se encarga de obtener, añadir y eliminar recetas favoritas.
+ * También gestiona el estado de la lista de favoritos y expone la función `toggleFavorite`
+ * para alternar entre marcar o desmarcar una receta como favorita.
  *
  * @module useFavorites
- * @author Ana Castro
+ * @author Ana Castro basado en el código de Yuliia Martynovych en Home.jsx
  *
- * @returns {Object} The object containing the following properties:
- * - `favorites` {Array}: The list of favorite recipes for the authenticated user.
- * - `loading` {boolean}: A flag indicating if the favorites data is being fetched.
- * - `toggleFavorite` {function}: A function that toggles a recipe between being a favorite and not a favorite.
+ * @returns {Object} Objeto que contiene las siguientes propiedades:
+ * - `favorites` {Array}: Lista de recetas favoritas del usuario autenticado.
+ * - `loading` {boolean}: Indicador de si se están cargando los datos de favoritos.
+ * - `toggleFavorite` {function}: Función que añade o elimina una receta de la lista de favoritos.
  */
+
 
 import { useState, useEffect } from "react";
 import { favoriteService } from "../services/favoriteService";

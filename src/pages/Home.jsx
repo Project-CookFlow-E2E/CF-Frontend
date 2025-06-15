@@ -12,6 +12,7 @@
  * 
  * @author Yuliia Martynovych 
  * @module Home
+ * @author Yuliia Martynovych
  * @modifiedby Ana Castro
  * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites,
  * gestion de categorias a través del hook useCategories,
