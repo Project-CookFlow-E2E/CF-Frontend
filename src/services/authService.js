@@ -192,6 +192,12 @@ export const refreshAuthToken = async () => {
   }
 };
 
+/**
+ * Decodes the stored access token to extract and return the user's ID.
+ *
+ * @returns {number} The user ID from the token.
+ * @throws {Error} If no token is found in localStorage.
+ */
 export const getUserIdFromToken = () => {
   const token = localStorage.getItem("cookflow_accessToken");
   if (!token) {
@@ -200,4 +206,4 @@ export const getUserIdFromToken = () => {
 
   const decoded = jwtDecode(token); 
   return decoded.user_id;
-}
+};
