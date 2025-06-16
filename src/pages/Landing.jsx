@@ -78,7 +78,7 @@ const Landing = () => {
         >
           Redescubre el placer de cocinar
         </p>
-        <Link to="/signup" data-testid="hero-signup-link" id="hero-signup-link">
+        <Link to="/login" data-testid="hero-signup-link" id="hero-signup-link">
           <Button>Empezar →</Button>
         </Link>
       </div>
@@ -166,7 +166,7 @@ const Landing = () => {
               name={recipe.name}
               category={recipe.category}
               time={`${recipe.duration_minutes}`}              
-              onToggleFavorite={() => navigate("/signup")}
+              onToggleFavorite={() => navigate("/login")}
               onClick={() => navigate(`/recipe/${recipe.id}`)}
             />
           ))}
@@ -176,7 +176,7 @@ const Landing = () => {
           data-testid="signup-button-container"
           id="signup-button-container"
         >
-          <Link to="/signup" data-testid="signup-link" id="signup-link">
+          <Link to="/login" data-testid="signup-link" id="signup-link">
             <Button>A cocinar</Button>
           </Link>
         </div>
