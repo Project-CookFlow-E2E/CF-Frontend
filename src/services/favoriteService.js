@@ -57,7 +57,7 @@ export const favoriteService = {
     * @async
     * @param {number} recipeId - The unique identifier of the recipe to be added to favorites.
     * @returns {Promise<object>} A promise that resolves to the data returned by the API after successfully adding the favorite.
-    * @throws {Error} If the API request fails (e.g., network error, server error, or issues with token retrieval).
+    * @throws {Error} If the API request fails (e.g., network error, server error, or issues with token retrieval) or recipe id not valid.
     */
     addFavorite: async (recipeId) => {
         const userId = getUserIdFromToken();
@@ -77,7 +77,7 @@ export const favoriteService = {
     * @param {number} favoriteId - The ID of the favorite entry to remove (not the recipe ID).
     * @returns {Promise<void>} A promise that resolves when the favorite is successfully removed.
     * No data is typically returned for a successful DELETE.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found if favorite doesn't exist, 401 Unauthorized).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found if favorite doesn't exist, 401 Unauthorized) or favorite id not valid.
     */
     removeFavorite: async (favoriteId) => {
         if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
@@ -124,7 +124,7 @@ export const favoriteService = {
     * 
     * @param {number} favoriteId - The ID of the favorite entry to fetch.
     * @returns {Promise<object>} A promise that resolves with the details of the favorite entry.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or favorite id not valid.
     */
     getFavoriteByIdAdmin: async (favoriteId) => {
         if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
@@ -142,7 +142,7 @@ export const favoriteService = {
     * @param {number} favoriteId - The ID of the favorite entry to update.
     * @param {object} favoriteData - The data to update (e.g., `{ user: newUserId, recipe: newRecipeId }`).
     * @returns {Promise<object>} A promise that resolves with the updated favorite object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or favorite id not valid.
     */
     updateFavoriteAdmin: async (favoriteId, favoriteData) => {
         if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
@@ -159,7 +159,7 @@ export const favoriteService = {
     * 
     * @param {number} favoriteId - The ID of the favorite entry to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the favorite is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or favorite id not valid.
     */
     deleteFavoriteAdmin: async (favoriteId) => {
         if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {

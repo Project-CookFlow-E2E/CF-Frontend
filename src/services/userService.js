@@ -66,7 +66,7 @@ export const userService = {
     * 
     * @param {number} userId - The ID of the user to fetch.
     * @returns {Promise<object>} A promise that resolves with the user's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
     */
     getUserById: async (userId) => {
         if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
@@ -102,7 +102,7 @@ export const userService = {
     * 
     * @param {number} userId - The ID of the user to fetch.
     * @returns {Promise<object>} A promise that resolves with the user's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
     */
     getUserByIdAdmin: async (userId) => {
         if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
@@ -148,7 +148,7 @@ export const userService = {
     * @param {number} userId - The ID of the user to update.
     * @param {object} userData - An object containing the user data to update.
     * @returns {Promise<object>} A promise that resolves with the updated user object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
     */
     updateUserAdmin: async (userId, userData) => {
         if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
@@ -166,7 +166,7 @@ export const userService = {
     * @param {number} userId - The ID of the user to delete.
     * @returns {Promise<void>} A promise that resolves when the user is successfully deleted.
     * No data is typically returned for a successful DELETE.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
     */
     deleteUserAdmin: async (userId) => {
         if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {

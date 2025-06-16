@@ -34,7 +34,7 @@ export const shoppingListItemService = {
     * 
     * @param {number} itemId - The ID of the shopping list item to fetch.
     * @returns {Promise<object>} A promise that resolves with the item's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found if item doesn't exist or doesn't belong to the user/admin, 401 Unauthorized).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found if item doesn't exist or doesn't belong to the user/admin, 401 Unauthorized) or item id not valid.
     */
     getShoppingListItemById: async (itemId) => {
         if (typeof itemId !== 'number' || isNaN(itemId) || itemId < 1) {
@@ -74,16 +74,16 @@ export const shoppingListItemService = {
     },
 
     /**
-   * Updates an existing shopping list item by its ID.
-   * Users can only update their own items. Administrators can update any item.
-   * Uses PATCH for partial updates.
-   * PATCH /api/shopping/items/<int:pk>/
-   * 
-   * @param {number} itemId - The ID of the shopping list item to update.
-   * @param {object} itemData - An object containing the data to update.
-   * Can include `ingredient_id` (int ID), `quantity_needed` (int), `unit` (str), `is_purchased` (bool).
+    * Updates an existing shopping list item by its ID.
+    * Users can only update their own items. Administrators can update any item.
+    * Uses PATCH for partial updates.
+    * PATCH /api/shopping/items/<int:pk>/
+    * 
+    * @param {number} itemId - The ID of the shopping list item to update.
+    * @param {object} itemData - An object containing the data to update.
+    * Can include `ingredient_id` (int ID), `quantity_needed` (int), `unit` (str), `is_purchased` (bool).
     * @returns {Promise<object>} A promise that resolves with the updated ShoppingListItem object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 401 Unauthorized, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 401 Unauthorized, 403 Forbidden) or item id not valid.
     */
     updateShoppingListItem: async (itemId, itemData) => {
         if (typeof itemId !== 'number' || isNaN(itemId) || itemId < 1) {
@@ -100,7 +100,7 @@ export const shoppingListItemService = {
     * 
     * @param {number} itemId - The ID of the shopping list item to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the item is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 401 Unauthorized, 403 Forbidden) or item id not valid.
     */
     deleteShoppingListItem: async (itemId) => {
         if (typeof itemId !== 'number' || isNaN(itemId) || itemId < 1) {

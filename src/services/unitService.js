@@ -41,7 +41,7 @@ export const unitService = {
     * 
     * @param {number} unitId - The ID of the unit to fetch.
     * @returns {Promise<object>} A promise that resolves with the Unit's data.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unitId is not valid.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unit id is not valid.
     */
     getUnitById: async (unitId) => {
         if (typeof unitId !== 'number' || isNaN(unitId) || unitTypeId < 1) {
@@ -57,7 +57,7 @@ export const unitService = {
     * 
     * @param {number} unitTypeId - The ID of the unit_type_id to fetch.
     * @returns {Promise<object>} A promise that resolves with the Unit's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found) or unitTypeId is not valid.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found) or unit_type id is not valid.
     */
     getUnitByUnitTypeId: async (unitTypeId) => {
         if (typeof unitTypeId !== 'number' || isNaN(unitTypeId) || unitTypeId < 1) {
@@ -107,7 +107,7 @@ export const unitService = {
     * DELETE /api/measurements/units/<int:pk>/
     * @param {number} unitId - The ID of the unit to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the unit is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unitId is not valid.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unit id is not valid.
     */
     deleteUnit: async (unitId) => {
         if (typeof unitId !== 'number' || isNaN(unitId) || unitTypeId < 1) {

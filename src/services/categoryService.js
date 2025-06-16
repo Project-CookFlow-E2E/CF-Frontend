@@ -30,7 +30,7 @@ export const categoryService = {
     * 
     * @param {number} categoryId - The ID of the category to fetch.
     * @returns {Promise<object>} A promise that resolves with the category's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found) or category id not valid.
     */
     getCategoryById: async (categoryId) => {
         if (typeof categoryId !== 'number' || isNaN(unitTypeId) || unitTypeId < 1) {
@@ -70,7 +70,7 @@ export const categoryService = {
     * GET /api/recipes/categories/?parent_category_id=<int:parent_category_id>/
     * 
     * @returns {Promise<object>} A promise that resolves with the category's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found) or parent_category id not valid.
     */
     getChildCategoriesOfSpecificParent: async (parentCategoryId) => {
         if (typeof parentCategoryId !== 'number' || isNaN(parentCategoryId || parentCategoryId < 2)) {
@@ -105,7 +105,7 @@ export const categoryService = {
     * @param {object} categoryData - An object containing the category data to update.
     * Can include `name` (str), `user_id` (int), and `parent_category_id` (int).
     * @returns {Promise<object>} A promise that resolves with the updated category object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or category id not valid.
     */
     updateCategoryAdmin: async (categoryId, categoryData) => {
         if (typeof categoryId !== 'number' || isNaN(categoryId) || categoryId < 1) {
@@ -121,7 +121,7 @@ export const categoryService = {
     * 
     * @param {number} categoryId - The ID of the category to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the category is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or category id not valid.
     */
     deleteCategoryAdmin: async (categoryId) => {
         if (typeof categoryId !== 'number' || isNaN(categoryId) || categoryId < 1) {

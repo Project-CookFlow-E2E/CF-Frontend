@@ -81,7 +81,7 @@ export const stepService = {
     * @param {object} stepData - An object containing the step data to update.
     * Can include `order` (int), `description` (string), and `recipe` (int, the ID of the parent recipe).
     * @returns {Promise<object>} A promise that resolves with the updated step object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or step id is not valid.
     */
     updateStep: async (stepId, stepData) => {
         if (typeof stepId !== 'number' || isNaN(stepId) || stepId < 1) {
@@ -97,7 +97,7 @@ export const stepService = {
     * 
     * @param {number} stepId - The ID of the step to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the step is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or step id is not valid.
     */
     deleteStep: async (stepId) => {
         if (typeof stepId !== 'number' || isNaN(stepId) || stepId < 1) {
@@ -127,7 +127,7 @@ export const stepService = {
     * 
     * @param {number} stepId - The ID of the step to fetch.
     * @returns {Promise<object>} A promise that resolves with the step's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or step id is not valid.
     */
     getStepByIdAdmin: async (stepId) => {
         if (typeof stepId !== 'number' || isNaN(stepId) || stepId < 1) {
@@ -146,7 +146,7 @@ export const stepService = {
     * @param {object} stepData - An object containing the step data to update.
     * Can include `order` (int), `description` (string), and `recipe` (int, the ID of the parent recipe).
     * @returns {Promise<object>} A promise that resolves with the updated step object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or step id is not valid.
     */
     updateStepAdmin: async (stepId, stepData) => {
         if (typeof stepId !== 'number' || isNaN(stepId) || stepId < 1) {
@@ -162,7 +162,7 @@ export const stepService = {
     * 
     * @param {number} stepId - The ID of the step to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the step is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or step id is not valid.
     */
     deleteStepAdmin: async (stepId) => {        
         if (typeof stepId !== 'number' || isNaN(stepId) || stepId < 1) {
