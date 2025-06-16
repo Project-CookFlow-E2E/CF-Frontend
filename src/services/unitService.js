@@ -107,5 +107,4 @@ export const unitService = {
         await api.delete(`${BASE_URL}/${unitId}/`);
         return true;
     }
-
 };

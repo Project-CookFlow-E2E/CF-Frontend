@@ -52,27 +52,23 @@ export const favoriteService = {
     },
 
     /**
-    * Adds a recipe to the authenticated user's favorite list.
-    * POST /api/favorites/
-    * 
-    * @param {object} favoriteData - The data required to add a favorite. Typically `{ recipe: number }`
-    * where `recipe` is the ID of the recipe to favorite.
-    * @returns {Promise<object>} A promise that resolves with the newly created favorite object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized, 400 Bad Request if recipe already favorited).
+    * Adds a recipe to a user's favorites.
+    * GET /api/favorites/
+    * @async
+    * @param {number} recipeId - The unique identifier of the recipe to be added to favorites.
+    * @returns {Promise<object>} A promise that resolves to the data returned by the API after successfully adding the favorite.
+    * @throws {Error} If the API request fails (e.g., network error, server error, or issues with token retrieval).
     */
     addFavorite: async (recipeId) => {
-        const userId = getUserIdFromToken(); // Obtienes el ID del usuario desde el token
+        const userId = getUserIdFromToken();
         const data = {
-            user_id: userId,  // Agregamos el ID del usuario
-            recipe_id: recipeId  // Agregamos el ID de la receta
+            user_id: userId,
+            recipe_id: recipeId  
         };
         
-        // Realizamos la solicitud POST con el objeto `data`
         const response = await api.post(`${BASE_URL}`, data); 
         return response.data;
     },
-
-
 
     /**
     * Removes a favorite from the authenticated user's list by its favorite ID.
@@ -84,14 +80,9 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found if favorite doesn't exist, 401 Unauthorized).
     */
     removeFavorite: async (favoriteId) => {
-        try {
-            const response = await api.delete(`${BASE_URL}${favoriteId}/`);
-            return response.data; // Confirma si el servidor retorna algún dato después de eliminar
-        } catch (error) {
-            console.error("Error removing favorite:", error);
-            throw error;
-        }
-        },
+        await api.delete(`${BASE_URL}${favoriteId}/`);
+        return true;
+    },
 
     // --- Admin-specific methods ---
 
