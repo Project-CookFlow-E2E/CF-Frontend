@@ -44,6 +44,9 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getRecipeById: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${recipeId}/`);
         return response.data;
     },
@@ -106,6 +109,9 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
     */
     updateRecipe: async (recipeId, recipeData) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         const response = await api.patch(`${BASE_URL}/${recipeId}/`, recipeData);
         return response.data; 
     },
@@ -119,6 +125,9 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     deleteRecipe: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         await api.delete(`${BASE_URL}/${recipeId}/`);
         return true;
     }

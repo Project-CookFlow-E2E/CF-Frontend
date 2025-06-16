@@ -80,6 +80,9 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found if favorite doesn't exist, 401 Unauthorized).
     */
     removeFavorite: async (favoriteId) => {
+        if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
+            return Promise.reject(new Error("favorite id not valid."));
+        };
         await api.delete(`${BASE_URL}${favoriteId}/`);
         return true;
     },
@@ -124,6 +127,9 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     getFavoriteByIdAdmin: async (favoriteId) => {
+        if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
+            return Promise.reject(new Error("favorite id not valid."));
+        };
         const response = await api.get(`${ADMIN_BASE_URL}/${favoriteId}/`);
         return response.data;
     },
@@ -139,6 +145,9 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
     */
     updateFavoriteAdmin: async (favoriteId, favoriteData) => {
+        if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
+            return Promise.reject(new Error("favorite id not valid."));
+        };
         const response = await api.patch(`${ADMIN_BASE_URL}/${favoriteId}/`, favoriteData);
         return response.data;
     },
@@ -153,6 +162,9 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     deleteFavoriteAdmin: async (favoriteId) => {
+        if (typeof favoriteId !== 'number' || isNaN(favoriteId) || favoriteId < 1) {
+            return Promise.reject(new Error("favorite id not valid."));
+        };
         const response = await api.delete(`${ADMIN_BASE_URL}/${favoriteId}/`);
         return true;
     }

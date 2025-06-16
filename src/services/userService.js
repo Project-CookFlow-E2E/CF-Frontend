@@ -69,6 +69,9 @@ export const userService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized).
     */
     getUserById: async (userId) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${userId}/`);
         return response.data;
     },
@@ -102,6 +105,9 @@ export const userService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     getUserByIdAdmin: async (userId) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
         const response = await api.get(`${ADMIN_BASE_URL}/${userId}/`);
         return response.data;
     },
@@ -145,6 +151,9 @@ export const userService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
     */
     updateUserAdmin: async (userId, userData) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
         const response = await api.patch(`${ADMIN_BASE_URL}/${userId}/`, userData);
         return response.data;
     }, 
@@ -160,6 +169,9 @@ export const userService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     deleteUserAdmin: async (userId) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId < 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
         await api.delete (`${ADMIN_BASE_URL}/${userId}/`);
         return true;
     }

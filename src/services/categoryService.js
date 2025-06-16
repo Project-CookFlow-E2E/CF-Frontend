@@ -33,6 +33,9 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getCategoryById: async (categoryId) => {
+        if (typeof categoryId !== 'number' || isNaN(unitTypeId) || unitTypeId < 1) {
+            return Promise.reject(new Error("unit_type_id not valid."));
+        }
         const response = await api.get(`${BASE_URL}/${categoryId}`);
         return response.data;
     },
@@ -105,6 +108,9 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
     */
     updateCategoryAdmin: async (categoryId, categoryData) => {
+        if (typeof categoryId !== 'number' || isNaN(categoryId) || categoryId < 1) {
+            return Promise.reject(new Error("unit_type_id not valid."));
+        };
         const response = await api.put(`${BASE_URL}/${categoryId}/`, categoryData);
         return response.data;
     },
@@ -118,8 +124,10 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     deleteCategoryAdmin: async (categoryId) => {
+        if (typeof categoryId !== 'number' || isNaN(categoryId) || categoryId < 1) {
+            return Promise.reject(new Error("unit_type_id not valid."));
+        };
         await api.delete(`${BASE_URL}/${categoryId}/`);
         return true;
     }
-    
 };

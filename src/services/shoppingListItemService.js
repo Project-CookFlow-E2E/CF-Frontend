@@ -37,6 +37,9 @@ export const shoppingListItemService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found if item doesn't exist or doesn't belong to the user/admin, 401 Unauthorized).
     */
     getShoppingListItemById: async (itemId) => {
+        if (typeof itemId !== 'number' || isNaN(itemId) || itemId < 1) {
+            return Promise.reject(new Error("item id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${itemId}`);
         return response.data;  
     },
@@ -83,6 +86,9 @@ export const shoppingListItemService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 401 Unauthorized, 403 Forbidden).
     */
     updateShoppingListItem: async (itemId, itemData) => {
+        if (typeof itemId !== 'number' || isNaN(itemId) || itemId < 1) {
+            return Promise.reject(new Error("item id not valid."));
+        };
         const response = await api.put(`${BASE_URL}/${itemId}/`, itemData);
         return response.data;
     },
@@ -97,6 +103,9 @@ export const shoppingListItemService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 401 Unauthorized, 403 Forbidden).
     */
     deleteShoppingListItem: async (itemId) => {
+        if (typeof itemId !== 'number' || isNaN(itemId) || itemId < 1) {
+            return Promise.reject(new Error("item id not valid."));
+        };
         await api.delete(`${BASE_URL}/${itemId}/`);
         return true;
     }

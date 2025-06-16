@@ -57,6 +57,9 @@ export const ingredientService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found if the ingredient is not found or not approved).
     */
     getIngredientById: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${ingredientId}/`);
         return response.data;
     },
@@ -73,6 +76,9 @@ export const ingredientService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     getIngredientByIdAdmin: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         const response = await api.get(`${ADMIN_BASE_URL}/${ingredientId}/`);
         return response.data;
     },
@@ -115,6 +121,9 @@ export const ingredientService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
     */
     updateIngredientAdmin: async (ingredientId, ingredientData) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         const response = await api.put(`${ADMIN_BASE_URL}/${ingredientId}/`, ingredientData);
         return response.data;
     },
@@ -128,6 +137,9 @@ export const ingredientService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
     */
     deleteIngredientAdmin: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         await api.delete(`${ADMIN_BASE_URL}/${ingredientId}/`);
         return true;
     }

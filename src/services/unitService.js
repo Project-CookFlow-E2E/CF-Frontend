@@ -41,9 +41,12 @@ export const unitService = {
     * 
     * @param {number} unitId - The ID of the unit to fetch.
     * @returns {Promise<object>} A promise that resolves with the Unit's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unitId is not valid.
     */
     getUnitById: async (unitId) => {
+        if (typeof unitId !== 'number' || isNaN(unitId) || unitTypeId < 1) {
+            return Promise.reject(new Error("unit id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${unitId}/`);
         return response.data;
     },
@@ -54,10 +57,10 @@ export const unitService = {
     * 
     * @param {number} unitTypeId - The ID of the unit_type_id to fetch.
     * @returns {Promise<object>} A promise that resolves with the Unit's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found) or unitTypeId is not valid.
     */
     getUnitByUnitTypeId: async (unitTypeId) => {
-        if (typeof unitTypeId !== 'number' || isNaN(unitTypeId)) {
+        if (typeof unitTypeId !== 'number' || isNaN(unitTypeId) || unitTypeId < 1) {
             return Promise.reject(new Error("unit_type_id not valid."));
         }
         const response =  await api.get(`${BASE_URL}?unit_type=${unitTypeId}`);
@@ -89,9 +92,12 @@ export const unitService = {
     * @param {object} unitData - An object containing the data to update.
     * Can include `name` (str), `abbreviation` (str), `unit_type` (int ID).
     * @returns {Promise<object>} A promise that resolves with the updated Unit object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unitId is not valid.
     */
     updateUnit: async (unitId, unitData) => {
+        if (typeof unitId !== 'number' || isNaN(unitId) || unitTypeId < 1) {
+            return Promise.reject(new Error("unit id not valid."));
+        };
         const response = await api.put(`${BASE_URL}/${unitId}/`, unitData);
         return response.data;
     },
@@ -101,9 +107,12 @@ export const unitService = {
     * DELETE /api/measurements/units/<int:pk>/
     * @param {number} unitId - The ID of the unit to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the unit is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unitId is not valid.
     */
     deleteUnit: async (unitId) => {
+        if (typeof unitId !== 'number' || isNaN(unitId) || unitTypeId < 1) {
+            return Promise.reject(new Error("unit id not valid."));
+        };
         await api.delete(`${BASE_URL}/${unitId}/`);
         return true;
     }
