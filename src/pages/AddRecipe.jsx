@@ -4,13 +4,13 @@
  * Utiliza React Hook Form para la gestión del formulario.
  * @modify Rafael Fernández
  */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
 import { Button, Input } from "../components/";
 import { recipeService } from "../services/recipeService";
-import {categoryService} from "../services/categoryService";
-
+import { categoryService } from "../services/categoryService";
+import { ingredientService } from "../services/ingredientService";
 
 const AddRecipe = () => {
   const [categorias, setCategorias] = useState([]);
@@ -18,30 +18,8 @@ const AddRecipe = () => {
   const [preview, setPreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [mensaje, setMensaje] = useState("");
-
-  /**
-   * @typedef {Object} Ingredient
-   * @property {string} name           Nombre del ingrediente.
-   * @property {string} quantity       Cantidad del ingrediente.
-   * @property {string} type           Tipo de unidad (ej. sólido, líquido).
-   * @property {string} unit           Unidad de medida (ej. g, ml, taza).
-   *
-   * @typedef {Object} Step
-   * @property {string}       text          Descripción del paso.
-   * @property {File|null}    image         Archivo de imagen asociado al paso o null.
-   * @property {string|null}  imagePreview  URL de vista previa de la imagen o null.
-   * @property {boolean}      isDragOver    Flag que indica si el área está en estado drag-over.
-   *
-   * @typedef {Object} FormValues
-   * @property {string}            nombre                    Nombre de la receta.
-   * @property {string}            descripcion               Descripción de la receta.
-   * @property {string}            tiempo                    Tiempo de preparación (minutos).
-   * @property {number[]}          categoriasSeleccionadas   IDs de las categorías seleccionadas.
-   * @property {number}            comensales                Número de comensales.
-   * @property {File|null}         foto                      Archivo de la foto principal o null.
-   * @property {Ingredient[]}      ingredients               Array de ingredientes.
-   * @property {Step[]}            steps                     Array de pasos de preparación.
-   */
+  const [allIngredients, setAllIngredients] = useState([]);
+  const dropdownRef = useRef(null);
 
   const {
     control,
@@ -57,7 +35,7 @@ const AddRecipe = () => {
       comensales: "",
       categoriasSeleccionadas: [],
       foto: null,
-      ingredients: [{ name: "", quantity: "", type: "", unit: "" }],
+      ingredients: [{ name: "", quantity: "", unit: "" }],
       steps: [{ text: "", image: null, imagePreview: null, isDragOver: false }],
     },
   });
@@ -78,35 +56,55 @@ const AddRecipe = () => {
     name: "steps",
   });
 
- useEffect(() => {
-  categoryService.getAllCategories()
-    .then((data) => {
-      console.log("Respuesta de categorías:", data);
-      // Si la respuesta es { results: [...] }
-      const categoriasArray = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.results)
-          ? data.results
-          : [];
-      // Agrupa por nombre único de categoría
-      const uniqueMap = new Map();
-      categoriasArray.forEach(cat => {
-        const key = (cat.name || "").trim().toLowerCase();
-        if (key && !uniqueMap.has(key)) {
-          uniqueMap.set(key, cat);
-        }
-      });
-      setCategorias(Array.from(uniqueMap.values()));
-    })
-    .catch(() => setCategorias([]));
-}, []);
+  // Cargar categorías agrupadas por nombre único
+  useEffect(() => {
+    categoryService.getAllCategories()
+      .then((data) => {
+        const categoriasArray = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.results)
+            ? data.results
+            : [];
+        const uniqueMap = new Map();
+        categoriasArray.forEach(cat => {
+          const key = (cat.name || "").trim().toLowerCase();
+          if (key && !uniqueMap.has(key)) {
+            uniqueMap.set(key, cat);
+          }
+        });
+        setCategorias(Array.from(uniqueMap.values()));
+      })
+      .catch(() => setCategorias([]));
+  }, []);
 
-const categoriasToShow = categorias.length > 0
-  ? categorias.map(cat => ({
-      id: cat.id,
-      name: cat.name
-    }))
-  : [];
+  // Cargar todos los ingredientes para autocompletar
+  useEffect(() => {
+    ingredientService.getAllIngredients()
+      .then((data) => setAllIngredients(Array.isArray(data) ? data : []))
+      .catch(() => setAllIngredients([]));
+  }, []);
+
+  // Cerrar el dropdown de categorías al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
+
+  const categoriasToShow = categorias.length > 0
+    ? categorias.map(cat => ({
+        id: cat.id,
+        name: cat.name
+      }))
+    : [];
 
   const foto = watch("foto");
 
@@ -190,25 +188,34 @@ const categoriasToShow = categorias.length > 0
   };
 
   const onSubmit = async (data) => {
+    setMensaje("Datos enviados: " + JSON.stringify(data, null, 2));
+    setTimeout(() => setMensaje(""), 5000);
     try {
-      const recipePayload = {
-        name: data.nombre,
-        description: data.descripcion,
-        duration_minutes: parseInt(data.tiempo, 10),
-        commensals: parseInt(data.comensales, 10),
-        categories: data.categoriasSeleccionadas,
-        ingredients: data.ingredients.map(i => ({
-          name: i.name,
-          quantity: i.quantity,
-          type: i.type,
-          unit: i.unit,
-        })),
-      };
-      await recipeService.createRecipe(recipePayload);
-      setMensaje("Receta guardada correctamente");
-      setTimeout(() => setMensaje(""), 2000);
+      const formData = new FormData();
+      formData.append("name", data.nombre);
+      formData.append("description", data.descripcion);
+      formData.append("duration_minutes", parseInt(data.tiempo, 10));
+      formData.append("commensals", parseInt(data.comensales, 10));
+      data.categoriasSeleccionadas.forEach((catId) =>
+        formData.append("categories", catId)
+      );
+      if (data.foto) {
+        formData.append("photo", data.foto);
+      }
+      data.ingredients.forEach((ing, i) => {
+        formData.append(`ingredients[${i}][name]`, ing.name);
+        formData.append(`ingredients[${i}][quantity]`, ing.quantity);
+        formData.append(`ingredients[${i}][unit]`, ing.unit);
+      });
+      data.steps.forEach((step, i) => {
+        formData.append(`steps[${i}][text]`, step.text);
+        if (step.image) {
+          formData.append(`steps[${i}][image]`, step.image);
+        }
+      });
+      await recipeService.createRecipe(formData);
       reset();
-    } catch (error) {
+    } catch {
       setMensaje("Error al guardar la receta");
       setTimeout(() => setMensaje(""), 3000);
     }
@@ -217,6 +224,7 @@ const categoriasToShow = categorias.length > 0
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
         <button className="mb-4" data-testid="back-button">
           <span className="text-2xl">←</span>
         </button>
@@ -228,6 +236,7 @@ const categoriasToShow = categorias.length > 0
           <div
             className="mb-4 px-3 py-4 rounded-lg text-lg font-semibold text-white bg-footer text-center transition-all duration-300"
             data-testid="console-message"
+            style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
           >
             {mensaje}
           </div>
@@ -298,6 +307,7 @@ const categoriasToShow = categorias.length > 0
                   label="Nombre de la receta"
                   placeholder="Ej: Huevos rancheros, fabada ..."
                   data-testid="recipe-name-input"
+                  className="focus:outline-none"
                 />
               )}
             />
@@ -319,11 +329,13 @@ const categoriasToShow = categorias.length > 0
               )}
             />
 
-            <div className="relative" data-testid="category-input-wrapper">
+            {/* Categoría con cierre automático al hacer clic fuera */}
+            <div className="relative" data-testid="category-input-wrapper" ref={dropdownRef}>
               <label className="block text-sm font-medium text-gray-700">Categoría</label>
               <div
-                className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center"
+                className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center focus:outline-none"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
+                tabIndex={0}
               >
                 {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
                   ? categoriasToShow
@@ -338,7 +350,7 @@ const categoriasToShow = categorias.length > 0
               {dropdownOpen && (
                 <div
                   className="absolute left-0 w-full border border-gray-300 rounded-lg bg-white mt-2 p-2 shadow-lg z-10"
-                  style={{ maxHeight: "12rem", overflowY: "auto" }} // 5 items aprox (5 x 2.4rem)
+                  style={{ maxHeight: "12rem", overflowY: "auto" }}
                 >
                   {categoriasToShow.map((categoria) => (
                     <div
@@ -376,7 +388,7 @@ const categoriasToShow = categorias.length > 0
                         label="Time"
                         type="number"
                         placeholder="15"
-                        className="pr-10"
+                        className="pr-10 focus:outline-none"
                         data-testid="time-input"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
@@ -402,7 +414,7 @@ const categoriasToShow = categorias.length > 0
                       id="comensales"
                       type="number"
                       placeholder="Ej: 4"
-                      className="w-full"
+                      className="w-full focus:outline-none"
                       data-testid="commensals-input"
                     />
                   )}
@@ -415,60 +427,84 @@ const categoriasToShow = categorias.length > 0
               <label className="block text-sm font-medium text-gray-700 mb-1">Ingredientes</label>
               <div className="flex flex-col gap-3 items-center">
                 {ingredientFields.map((ingredient, index) => (
-                  <div key={ingredient.id} className="flex flex-col w-full gap-2">
+                  <div key={ingredient.id || index} className="w-full">
+                    {/* Input de ingrediente en una sola línea */}
                     <Controller
                       control={control}
                       name={`ingredients.${index}.name`}
                       render={({ field }) => (
-                        <Input
-                          {...field}
-                          placeholder={`Ingrediente ${index + 1}`}
-                          className="w-full"
-                        />
+                        <>
+                          <Input
+                            {...field}
+                            id={`ingredient-name-${index}`}
+                            list={`ingredientes-list-${index}`}
+                            placeholder="Ej: Harina, Leche..."
+                            className="w-full focus:outline-none"
+                            onChange={e => {
+                              field.onChange(e);
+                              const found = allIngredients.find(i => i.name === e.target.value);
+                              if (found) {
+                                setValue(`ingredients.${index}.unit`, found.unit || "");
+                                setMensaje(found.unit ? `Unidad: ${found.unit}` : "Este ingrediente no tiene unidad definida.");
+                              } else {
+                                setValue(`ingredients.${index}.unit`, "");
+                                setMensaje("");
+                              }
+                            }}
+                          />
+                          <datalist id={`ingredientes-list-${index}`}>
+                            {allIngredients.map(i => (
+                              <option key={i.id} value={i.name} />
+                            ))}
+                          </datalist>
+                        </>
                       )}
                     />
-                    <div className="flex gap-4">
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.quantity`}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            type="number"
-                            placeholder="Cantidad"
-                            className="w-24"
-                          />
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.type`}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            placeholder="Tipo (ej. sólido, líquido)"
-                            className="w-28"
-                          />
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.unit`}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            placeholder="Unidad (ej. g, ml, taza)"
-                            className="w-28"
-                          />
-                        )}
-                      />
+                    {/* Cantidad y unidad en la línea siguiente */}
+                    <div className="flex gap-4 mt-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor={`ingredient-quantity-${index}`}>
+                          Cantidad
+                        </label>
+                        <Controller
+                          control={control}
+                          name={`ingredients.${index}.quantity`}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              id={`ingredient-quantity-${index}`}
+                              type="number"
+                              placeholder="Cantidad"
+                              className="w-full focus:outline-none"
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor={`ingredient-unit-${index}`}>
+                          Unidad
+                        </label>
+                        <Controller
+                          control={control}
+                          name={`ingredients.${index}.unit`}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              id={`ingredient-unit-${index}`}
+                              placeholder="Unidad"
+                              className="w-full focus:outline-none"
+                              readOnly
+                            />
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
                 <button
                   type="button"
-                  onClick={() => appendIngredient({ name: "", quantity: "", type: "", unit: "" })}
-                  className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
+                  onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
+                  className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center mt-2"
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
                 </button>
@@ -482,7 +518,7 @@ const categoriasToShow = categorias.length > 0
               </label>
               <div className="flex flex-col gap-6 items-center" data-testid="steps-list">
                 {stepFields.map((step, index) => (
-                  <div key={step.id} className="w-full space-y-3">
+                  <div key={step.id || index} className="w-full space-y-3">
                     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={`step-textarea-${index}`}>
                       Paso número {index + 1}
                     </label>
