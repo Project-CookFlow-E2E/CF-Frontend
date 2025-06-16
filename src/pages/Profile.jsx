@@ -19,139 +19,155 @@
  * @modified Adaptación del componente Card.jsx para usarlo directamente, gestión de favoritos y recetas propias a través del hook useProfileRecipes.
  * @modifiedby Ángel Aragón
  * @modified Agregado cursor-pointer a los botones de las pestañas.
+ * @modifiedby Lorena Martínez, Saray Miguel
+ * @modified Añadida funcionalidad de edición de biografía del usuario y petición al backend para obtener información del usuario autenticado.
  */
 
+import { useState, useEffect } from "react";
+import useFavorites from "../hooks/useFavorites";
 import useProfileRecipes from "../hooks/useProfileRecipes";
+import { userService } from "../services/userService";
 import { Card, Pagination } from "../components";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [bio, setBio] = useState("");
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioLoading, setBioLoading] = useState(false);
 
+  const { favorites, loading: favLoading } = useFavorites();
   const {
     activeTab,
     setActiveTab,
     currentPage,
     setCurrentPage,
-    favorites,
-    toggleFavorite,
-    createdRecipesCount,
-    totalPages,
     paginatedRecipes,
+    totalPages,
     filteredRecipes,
+    toggleFavorite,
   } = useProfileRecipes();
 
+  // Cargar datos del usuario
+  useEffect(() => {
+    const fetchUser = async () => {
+      const data = await userService.getMe();
+      setUser(data);
+      setBio(data.biography || "");
+    };
+    fetchUser();
+  }, []);
+
+  const handleBioSave = async () => {
+    setBioLoading(true);
+    await userService.updateMe({ biography: bio });
+    setEditingBio(false);
+    setBioLoading(false);
+  };
+
+  if (!user) return <div>Cargando perfil...</div>;
+
   return (
-    <div className="min-h-screen bg-background" data-testid="profile-page">
-      <div className="max-w-6xl mx-auto px-6 pt-6 pb-24">
-        <div className="mb-8" data-testid="profile-section">
-          <div className="flex items-center space-x-6 mb-4">
-            <div
-              className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center"
-              data-testid="profile-avatar"
-            >
-              <span className="text-3xl text-gray-500">👤</span>
-            </div>
-            <h2 className="text-3xl font-bold" data-testid="profile-name">
-              Emma González
-            </h2>
-          </div>
-          <div className="max-w-3xl" data-testid="profile-description">
-            <p className="text-gray-600">
-              Emma González es editora adjunta en Cheffly, y aporta su
-              experiencia como expeditora de cocina en The Los Angeles Times.
-              También es una autora reconocida, con contribuciones a numerosos
-              libros de cocina y publicaciones gastronómicas. Originaria del
-              Este de Los Angeles, Emma reside ahora en la ciudad de Nueva York,
-              donde explora una amplia variedad de delicias culinarias.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex space-x-4 mb-6" data-testid="profile-tabs">
-          <button
-            onClick={() => setActiveTab("saved")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
-              activeTab === "saved"
-                ? "bg-gray-800 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-            data-testid="tab-saved"
-            aria-selected={activeTab === "saved"}
-          >
-            Recetas guardadas ({favorites.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("created")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
-              activeTab === "created"
-                ? "bg-gray-800 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-            data-testid="tab-created"
-            aria-selected={activeTab === "created"}
-          >
-            Mis Recetas ({createdRecipesCount})
-          </button>
-        </div>
-
-        <div
-          className="flex justify-center"
-          data-testid="recipes-grid-container"
-        >
-          <div className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center">
-              <div
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[10px] gap-y-10"
-                data-testid="recipes-grid"
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">Perfil de {user.name}</h2>
+      <div className="mb-4">
+        <div><strong>Nombre de usuario:</strong> {user.username}</div>
+        <div><strong>Email:</strong> {user.email}</div>
+        <div className="mt-2">
+          <strong>Biografía:</strong>
+          {editingBio ? (
+            <div>
+              <textarea
+                className="border rounded w-full p-2 mt-1"
+                rows={3}
+                value={bio}
+                onChange={e => setBio(e.target.value)}
+              />
+              <button
+                className="bg-blue-500 text-white px-3 py-1 rounded mt-2 mr-2"
+                onClick={handleBioSave}
+                disabled={bioLoading}
               >
-                {paginatedRecipes.map((recipe) => (
-                  <Card
-                    key={recipe.id}
-                    id={recipe.id}
-                    image={recipe.image_url}
-                    name={recipe.name}
-                    category={recipe.category}
-                    time={`${recipe.duration_minutes}`}
-                    isFavorite={favorites.includes(String(recipe.id))}
-                    onToggleFavorite={() => toggleFavorite(recipe.id)}
-                    onClick={() => navigate(`/recipe/${recipe.id}`)}
-                  />
-                ))}
-              </div>
+                Guardar
+              </button>
+              <button
+                className="bg-gray-300 px-3 py-1 rounded mt-2"
+                onClick={() => setEditingBio(false)}
+              >
+                Cancelar
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center">
+              <span className="mr-2">{user.biography || "Sin biografía."}</span>
+              <button
+                className="text-blue-600 underline"
+                onClick={() => setEditingBio(true)}
+              >
+                Editar
+              </button>
+            </div>
+          )}
         </div>
+      </div>
 
-        {filteredRecipes.length === 0 && (
-          <div className="text-center py-12" data-testid="empty-state">
-            <div className="text-6xl mb-4" data-testid="empty-state-icon">
-              {activeTab === "saved" ? "🔖" : "👨‍🍳"}
-            </div>
-            <h3
-              className="text-xl font-semibold text-gray-700 mb-2"
-              data-testid="empty-state-title"
-            >
-              {activeTab === "saved"
-                ? "No tienes recetas guardadas"
-                : "No has creado recetas aún"}
-            </h3>
-            <p className="text-gray-500" data-testid="empty-state-description">
-              {activeTab === "saved"
-                ? "Guarda tus recetas favoritas haciendo clic en el marcador"
-                : "Comienza a crear tus propias recetas deliciosas"}
-            </p>
-          </div>
-        )}
+      <div className="mb-6">
+        <button
+          className={`mr-4 ${activeTab === "saved" ? "font-bold underline" : ""}`}
+          onClick={() => setActiveTab("saved")}
+        >
+          Recetas favoritas ({favorites.length})
+        </button>
+        <button
+          className={activeTab === "created" ? "font-bold underline" : ""}
+          onClick={() => setActiveTab("created")}
+        >
+          Recetas creadas ({filteredRecipes.length})
+        </button>
+      </div>
 
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            data-testid="pagination"
-          />
+      <div>
+        {favLoading ? (
+          <div>Cargando recetas...</div>
+        ) : paginatedRecipes.length === 0 ? (
+          <div>No hay recetas para mostrar.</div>
+        ) : (
+          <ul>
+            {paginatedRecipes.map((recipe) => (
+              <li key={recipe.id} className="mb-2 flex justify-between items-center border-b pb-2">
+                <span>{recipe.name}</span>
+                <button
+                  className={`ml-2 ${favorites.includes(String(recipe.id)) ? "text-yellow-500" : "text-gray-400"}`}
+                  onClick={() => toggleFavorite(recipe.id)}
+                  title="Favorito"
+                >
+                  ★
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
+      </div>
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="px-3 py-1 border rounded"
+          onClick={() => setCurrentPage(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Anterior
+        </button>
+        <span>
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          className="px-3 py-1 border rounded"
+          onClick={() => setCurrentPage(currentPage + 1)}
+          disabled={currentPage === totalPages || totalPages === 0}
+        >
+          Siguiente
+        </button>
       </div>
     </div>
   );
