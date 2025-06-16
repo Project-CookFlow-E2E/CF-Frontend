@@ -12,7 +12,7 @@ import {
   Landing,
 } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import ScrollToTop from "./components/ScrollToTop";
 import { Footer } from "./components";
 import { Header } from "./components";
 
@@ -20,6 +20,7 @@ function App() {
   return (
     <BrowserRouter data-testid="app-browser-router">
       <Header data-testid="app-header" />
+      <ScrollToTop />
       <Routes data-testid="app-routes">
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
