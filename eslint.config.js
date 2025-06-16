@@ -30,4 +30,20 @@ export default [
       ],
     },
   },
+  {
+    // --- Configuration for Cypress test files ---
+    files: ['cypress/**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      cypress: cypressPlugin,
+    },
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...cypressPlugin.configs.globals.globals,
+      },
+    },
+    rules: {
+      ...cypressPlugin.configs.recommended.rules,
+    },
+  },
 ]
