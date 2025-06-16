@@ -1,3 +1,11 @@
+/**
+ * Componente AddRecipe
+ * Permite crear una nueva receta con imagen, ingredientes, pasos y categorías.
+ * Utiliza React Hook Form para la gestión del formulario.
+ * created by Nico
+ * @modify Rafael Fernández
+ */
+
 import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
@@ -15,7 +23,6 @@ const AddRecipe = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [mensaje, setMensaje] = useState("");
   const [allIngredients, setAllIngredients] = useState([]);
   const [unitsByType, setUnitsByType] = useState({});
   const [unitTypeCache, setUnitTypeCache] = useState({});
@@ -113,13 +120,9 @@ const AddRecipe = () => {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
     if (!tiposPermitidos.includes(file.type)) {
-      setMensaje("Solo se permiten imágenes JPEG, PNG o WebP");
-      setTimeout(() => setMensaje(""), 3000);
       return false;
     }
     if (file.size > maxSize) {
-      setMensaje("La imagen no puede superar los 2MB");
-      setTimeout(() => setMensaje(""), 3000);
       return false;
     }
     return true;
@@ -180,24 +183,16 @@ const AddRecipe = () => {
   // Manejo de selección de ingrediente y unidades
   const handleIngredientChange = async (e, index) => {
     const value = e.target.value;
-    setMensaje(""); // Limpia mensaje anterior
     setValue(`ingredients.${index}.name`, value);
     const found = allIngredients.find(i => i.name === value);
     if (found && found.unit_type_id) {
-      // Primero, busca las unidades asociadas a ese unit_type_id
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
-          console.log("Unidades obtenidas:", units);
-          console.log("unit_type_id:", found.unit_type_id);
           setUnitsByType(prev => ({ ...prev, [found.unit_type_id]: units }));
           if (units && units.length > 0) {
             setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
-            setMensaje(
-              `unit_type_id: ${found.unit_type_id} - Unidades disponibles: ${units.map(u => u.name).join(", ")}`
-            );
           } else {
-            // Si no hay unidades, intenta mostrar el nombre del tipo de unidad
             let unitTypeName = "";
             if (unitTypeCache[found.unit_type_id]) {
               unitTypeName = unitTypeCache[found.unit_type_id].name;
@@ -211,23 +206,15 @@ const AddRecipe = () => {
               }
             }
             setValue(`ingredients.${index}.unit`, unitTypeName);
-            setMensaje(
-              `unit_type_id: ${found.unit_type_id} - Tipo de unidad: ${unitTypeName || "No definido"}`
-            );
           }
         } catch {
           setValue(`ingredients.${index}.unit`, "");
-          setMensaje(`Error al obtener unidades para unit_type_id ${found.unit_type_id}.`);
         }
       } else {
         const units = unitsByType[found.unit_type_id];
         if (units && units.length > 0) {
           setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
-          setMensaje(
-            `unit_type_id: ${found.unit_type_id} - Unidades disponibles: ${units.map(u => u.name).join(", ")}`
-          );
         } else {
-          // Si no hay unidades, intenta mostrar el nombre del tipo de unidad
           let unitTypeName = "";
           if (unitTypeCache[found.unit_type_id]) {
             unitTypeName = unitTypeCache[found.unit_type_id].name;
@@ -241,20 +228,14 @@ const AddRecipe = () => {
             }
           }
           setValue(`ingredients.${index}.unit`, unitTypeName);
-          setMensaje(
-            `unit_type_id: ${found.unit_type_id} - Tipo de unidad: ${unitTypeName || "No definido"}`
-          );
         }
       }
     } else {
       setValue(`ingredients.${index}.unit`, "");
-      setMensaje("Este ingrediente no tiene unit_type_id definido.");
     }
   };
 
   const onSubmit = async (data) => {
-    setMensaje("Datos enviados: " + JSON.stringify(data, null, 2));
-    setTimeout(() => setMensaje(""), 5000);
     try {
       const formData = new FormData();
       formData.append("name", data.nombre);
@@ -281,30 +262,20 @@ const AddRecipe = () => {
       await recipeService.createRecipe(formData);
       reset();
     } catch {
-      setMensaje("Error al guardar la receta");
-      setTimeout(() => setMensaje(""), 3000);
+      // Puedes mostrar un mensaje de error aquí si lo deseas
     }
   };
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
-          <button className="mb-4" data-testid="back-button">
+        <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
+        <button className="mb-4" data-testid="back-button">
           <span className="text-2xl">←</span>
         </button>
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
           Añadir receta
         </h1>
-
-        {mensaje && (
-          <div
-            className="mb-4 px-3 py-4 rounded-lg text-lg font-semibold text-white bg-footer text-center transition-all duration-300"
-            data-testid="console-message"
-            style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-          >
-            {mensaje}
-          </div>
-        )}
 
         {/* Imagen de la receta */}
         <div
@@ -397,7 +368,7 @@ const AddRecipe = () => {
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoría padre</label>
               <select
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"
+                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                 value={selectedParent || ""}
                 onChange={e => setSelectedParent(Number(e.target.value))}
               >
@@ -537,15 +508,34 @@ const AddRecipe = () => {
                         <Controller
                           control={control}
                           name={`ingredients.${index}.unit`}
-                          render={({ field }) => (
-                            <Input
-                              {...field}
-                              id={`ingredient-unit-${index}`}
-                              placeholder="Unidad"
-                              className="w-full focus:outline-none"
-                              readOnly
-                            />
-                          )}
+                          render={({ field }) => {
+                            const ingName = watch(`ingredients.${index}.name`);
+                            const found = allIngredients.find(i => i.name === ingName);
+                            const units = found && found.unit_type_id ? (unitsByType[found.unit_type_id] || []) : [];
+
+                            return units.length > 0 ? (
+                              <select
+                                {...field}
+                                id={`ingredient-unit-${index}`}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
+                              >
+                                <option value="">Selecciona unidad</option>
+                                {units.map(u => (
+                                  <option key={u.id} value={u.abbreviation || u.name}>
+                                    {u.name} {u.abbreviation && `(${u.abbreviation})`}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <Input
+                                {...field}
+                                id={`ingredient-unit-${index}`}
+                                placeholder="Unidad"
+                                className="w-full focus:outline-none"
+                                readOnly
+                              />
+                            );
+                          }}
                         />
                       </div>
                     </div>
@@ -626,8 +616,7 @@ const AddRecipe = () => {
                         >
                           {field.value?.imagePreview ? (
                             <>
-                              <img
-                                src={field.value.imagePreview}
+                              <img                                src={field.value.imagePreview}
                                 alt={`Imagen paso ${index + 1}`}
                                 className="object-contain w-full h-full"
                                 data-testid={`step-image-preview-${index}`}
