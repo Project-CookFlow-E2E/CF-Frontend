@@ -44,6 +44,9 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getRecipeById: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${recipeId}/`);
         return response.data;
     },
@@ -103,9 +106,12 @@ export const recipeService = {
     * Can include `name` (str), `description` (str), `duration_minutes` (int), `commensals` (int),
     * and `categories` (array of int IDs).
     * @returns {Promise<object>} A promise that resolves with the updated recipe object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
     */
     updateRecipe: async (recipeId, recipeData) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         const response = await api.patch(`${BASE_URL}/${recipeId}/`, recipeData);
         return response.data; 
     },
@@ -116,9 +122,12 @@ export const recipeService = {
     * 
     * @param {number} recipeId - The ID of the recipe to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the recipe is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
     */
     deleteRecipe: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         await api.delete(`${BASE_URL}/${recipeId}/`);
         return true;
     }
