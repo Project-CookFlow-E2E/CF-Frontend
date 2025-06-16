@@ -76,9 +76,9 @@ const Landing = () => {
           data-testid="hero-subtitle"
           id="hero-subtitle"
         >
-          Rediscover the pleasure of cooking
+          Redescubre el placer de cocinar
         </p>
-        <Link to="/signup" data-testid="hero-signup-link" id="hero-signup-link">
+        <Link to="/login" data-testid="hero-signup-link" id="hero-signup-link">
           <Button>Empezar →</Button>
         </Link>
       </div>
@@ -93,7 +93,7 @@ const Landing = () => {
           data-testid="problem-title"
           id="problem-title"
         >
-          From frustration to enjoyment
+          De la frustración a la diversión 
         </h2>
         <div
           className="flex flex-col md:flex-row justify-center gap-6 md:gap-4 px-4"
@@ -108,10 +108,10 @@ const Landing = () => {
             <div className="text-2xl mb-2 flex justify-center">
               <FaGear />
             </div>
-            <h3 className="font-semibold text-lg mb-2">What to cook today?</h3>
+            <h3 className="font-semibold text-lg mb-2">¿Que cocinamos hoy?</h3>
             <p className="text-gray-600 text-sm">
-              The daily decision fatigue that creates stress and frustration
-              when planning your meals
+              Despídete del estrés diario de decidir qué comer. 
+              Planifica tus comidas de forma fácil, rápida y sin frustraciones
             </p>
           </div>
           <div
@@ -123,11 +123,11 @@ const Landing = () => {
               <FaGear />
             </div>
             <h3 className="font-semibold text-lg mb-2">
-              No time or organization
+              No planifiques. Solo cocina.
             </h3>
             <p className="text-gray-600 text-sm">
-              Lost recipes, improvised shopping, and the stress of cooking
-              without a clear plan
+              Recetas que se pierden, compras a última hora y cenas caóticas.
+               ¿Te suena? Te ayudamos a recuperar el control.
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ const Landing = () => {
           data-testid="solution-title"
           id="solution-title"
         >
-          The CookFlow solution
+          La solución CookFlow 
         </h2>
         <p
           className="max-w-2xl mx-auto text-gray-700 mb-8 text-sm"
@@ -166,7 +166,7 @@ const Landing = () => {
               name={recipe.name}
               category={recipe.category}
               time={`${recipe.duration_minutes}`}              
-              onToggleFavorite={() => navigate("/signup")}
+              onToggleFavorite={() => navigate("/login")}
               onClick={() => navigate(`/recipe/${recipe.id}`)}
             />
           ))}
@@ -176,7 +176,7 @@ const Landing = () => {
           data-testid="signup-button-container"
           id="signup-button-container"
         >
-          <Link to="/signup" data-testid="signup-link" id="signup-link">
+          <Link to="/login" data-testid="signup-link" id="signup-link">
             <Button>A cocinar</Button>
           </Link>
         </div>

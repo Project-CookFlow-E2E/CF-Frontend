@@ -58,7 +58,7 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getAllParentCategories: async () => {
-        const response = await api.get(`${BASE_URL}/?parent_category_id=0`);
+        const response = await api.get(`${BASE_URL}/?parent_category_id=1`);
         return response.data;
     },
 
@@ -70,7 +70,7 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getChildCategoriesOfSpecificParent: async (parentCategoryId) => {
-        if (typeof parentCategoryId !== 'number' || isNaN(parentCategoryId)) {
+        if (typeof parentCategoryId !== 'number' || isNaN(parentCategoryId || parentCategoryId < 2)) {
             return Promise.reject(new Error("parent_category_id not valid."));
         }
         const response = await api.get(`${BASE_URL}/?parent_category_id=${parentCategoryId}`);
