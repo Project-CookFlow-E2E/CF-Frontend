@@ -188,6 +188,8 @@ const AddRecipe = () => {
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
+          console.log("Unidades obtenidas:", units);
+          console.log("unit_type_id:", found.unit_type_id);
           setUnitsByType(prev => ({ ...prev, [found.unit_type_id]: units }));
           if (units && units.length > 0) {
             setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
@@ -287,8 +289,7 @@ const AddRecipe = () => {
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
-        <button className="mb-4" data-testid="back-button">
+          <button className="mb-4" data-testid="back-button">
           <span className="text-2xl">←</span>
         </button>
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">

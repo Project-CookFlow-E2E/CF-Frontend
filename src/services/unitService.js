@@ -57,6 +57,8 @@ export const unitService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getUnitByUnitTypeId: async (unitTypeId) => {
+        console.log("unitTypeId", unitTypeId);
+        
         if (typeof unitTypeId !== 'number' || isNaN(unitTypeId)) {
             return Promise.reject(new Error("unit_type_id not valid."));
         }
