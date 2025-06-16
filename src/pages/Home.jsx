@@ -16,7 +16,7 @@
  * @modifiedby Ana Castro
  * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites,
  * gestion de categorias a través del hook useCategories,
- *  y añadir la sección de inspiración con un botón que redirige a /inspire-me.
+ *  añadida la sección de inspiración con un botón que redirige a /inspire-me.
  *  Seleccion de las tres ultimas recetas creadas en la db.
  */
 

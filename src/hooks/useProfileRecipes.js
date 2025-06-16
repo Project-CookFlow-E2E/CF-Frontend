@@ -14,8 +14,7 @@
  *  - `createdRecipesCount` {number}: Total de recetas creadas por el usuario.
  *  - `totalPages` {number}: Total de páginas para la paginación.
  *  - `filteredRecipes` {Array<object>}: Recetas filtradas por la pestaña activa.
- *  - `paginatedRecipes` {Array<object>}: Recetas mostradas en la página actual.
- *
+ *  - `paginatedRecipes` {Array<object>}: Recetas mostradas en la página actual. *
  * 
  * @author Ana Castro basado en el código de Yuliia Martynovych en Profile.jsx.
  */

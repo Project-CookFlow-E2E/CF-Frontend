@@ -25,6 +25,7 @@ import TimerBadge from "./TimerBadge";
  * @modifiedby Ana Castro
  * @modified Adaptado para que el componente Card pueda recibir props y así no tener que usar RecipeCard.jsx, cambios de estilos.
  */
+
 const Card = ({
   id,
   image,

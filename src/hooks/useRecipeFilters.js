@@ -1,48 +1,83 @@
 /**
  * @file useRecipeFilters.js
- * @description Hook personalizado para gestionar el filtrado de recetas según búsqueda por texto y filtros por categoría, tipo de cocina y origen.
+ * @description Hook personalizado para gestionar filtros de recetas por categoría, tipo, origen y texto.
+ * Si se selecciona una categoría padre, obtiene automáticamente las subcategorías asociadas desde el backend.
  *
- * @function useRecipeFilters
- * @param {Array<Object>} recipes - Lista de recetas a filtrar.
- * @returns {Object} Objeto con:
- *  - `filteredRecipes` {Array<Object>}: Lista de recetas que cumplen con los filtros activos.
- *  - `searchTerm` {string}: Término de búsqueda por texto.
- *  - `setSearchTerm` {Function}: Setter para actualizar el término de búsqueda.
- *  - `selectedCategory` {Array<string>}: Categorías seleccionadas (con prefijo "general-").
- *  - `setSelectedCategory` {Function}: Setter para actualizar las categorías seleccionadas.
- *  - `selectedOrigin` {Array<string>}: Orígenes seleccionados (con prefijo "origin-").
- *  - `setSelectedOrigin` {Function}: Setter para actualizar los orígenes seleccionados.
- *  - `selectedType` {Array<string>}: Tipos de cocina seleccionados (con prefijo "type-").
- *  - `setSelectedType` {Function}: Setter para actualizar los tipos de cocina seleccionados.
- *
- *  @author Ana Castro basado en el codigo de Saray en Search.jsx
+ * @author Saray
+ * @modified Ana Castro - Añadido filtrado dinámico por subcategorías y lógica de categoría inicial desde URL.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { categoryService } from "../services/categoryService";
 
-const useRecipeFilters = (recipes = []) => {
+const useRecipeFilters = (recipes) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState([]);
-  const [selectedOrigin, setSelectedOrigin] = useState([]);
   const [selectedType, setSelectedType] = useState([]);
+  const [selectedOrigin, setSelectedOrigin] = useState([]);
+  const [subcategoryIds, setSubcategoryIds] = useState([]);
 
-  const match = (selectedArray, value, prefix) => {
-    return (
-      selectedArray.length === 0 ||
-      selectedArray.map((id) => id.replace(`${prefix}-`, "")).includes(value)
+  /**
+   * Obtiene las subcategorías si hay una única categoría seleccionada (se asume que es una categoría padre).
+   */
+  
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (selectedCategory.length === 1) {
+        try {
+          const data = await categoryService.getChildCategoriesOfSpecificParent(selectedCategory[0]);
+          const subcategories = Array.isArray(data)
+            ? data
+            : Array.isArray(data.results)
+            ? data.results
+            : [];
+          setSubcategoryIds(subcategories.map((cat) => cat.id));
+        } catch (err) {
+          console.error("❌ Error fetching subcategories:", err);
+          setSubcategoryIds([]);
+        }
+      } else {
+        setSubcategoryIds([]);
+      }
+    };
+
+    fetchSubcategories();
+  }, [selectedCategory]);
+
+  /**
+   * Filtra las recetas según los filtros activos: subcategorías (si hay una categoría padre), tipo, origen y búsqueda.
+   */
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchCategory =
+      selectedCategory.length === 0 ||
+      recipe.categories?.some((id) => subcategoryIds.includes(id));
+
+    const matchType =
+      selectedType.length === 0 || selectedType.includes(recipe.type?.id);
+
+    const matchOrigin =
+      selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin?.id);
+
+    const matchSearch = recipe.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    return matchCategory && matchType && matchOrigin && matchSearch;
+  });
+
+  /**
+   * Aplica una categoría inicial (por nombre) desde la URL si coincide con alguna existente.
+   * @param {string} categoryName - Nombre de la categoría a buscar (ej: "Comida").
+   * @param {Array} categoriesList - Lista de categorías disponibles.
+   */
+  const applyCategoryFromURL = (categoryName, categoriesList) => {
+    const match = categoriesList.find(
+      (cat) => cat.name.toLowerCase() === categoryName.toLowerCase()
     );
+    if (match) {
+      setSelectedCategory([match.id]);
+    }
   };
-
-  const filteredRecipes = useMemo(() => {
-    return recipes.filter((recipe) => {
-      return (
-        match(selectedCategory, recipe.category, "general") &&
-        match(selectedOrigin, recipe.origin, "origin") &&
-        match(selectedType, recipe.type, "type") &&
-        recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    });
-  }, [recipes, selectedCategory, selectedOrigin, selectedType, searchTerm]);
 
   return {
     filteredRecipes,
@@ -50,10 +85,11 @@ const useRecipeFilters = (recipes = []) => {
     setSearchTerm,
     selectedCategory,
     setSelectedCategory,
+    selectedType,
+    setSelectedType,
     selectedOrigin,
     setSelectedOrigin,
-    selectedType,
-    setSelectedType
+    applyCategoryFromURL,
   };
 };
 

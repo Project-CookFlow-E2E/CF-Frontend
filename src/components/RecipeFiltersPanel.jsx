@@ -1,22 +1,13 @@
 /**
  * @file RecipeFiltersPanel.jsx
- * @description Componente que agrupa y renderiza los filtros de recetas por categoría, tipo de cocina y origen.
- * Permite seleccionar múltiples opciones por grupo y devuelve las selecciones al componente padre.
- *
- * @component RecipeFiltersPanel
- * @param {Object} props
- * @param {Array<Object>} props.general - Lista de categorías generales formateadas.
- * @param {Array<Object>} props.type - Lista de tipos de cocina formateadas.
- * @param {Array<Object>} props.origin - Lista de orígenes formateadas.
- * @param {Object} props.selected - Objeto con arrays de IDs seleccionados por grupo.
- * @param {Object} props.setSelected - Objeto con funciones setter para actualizar las selecciones.
- *
- * @returns {JSX.Element} Panel visual de filtros interactivos.
- *
- * @author Ana Castro basado en el codigo de Saray en Search.jsx
+ * @description Componente visual para seleccionar filtros de recetas: categoría general, tipo de cocina y origen.
+ * Muestra badges interactivos reutilizando el componente <Badge />, permitiendo seleccionar múltiples opciones por grupo.
+ * 
+ * @author Ana Castro basado en el código de Saray en Search.jsx.
  */
 
-import CategoryFilter from "../components/CategoryFilter";
+import React from "react";
+import Badge from "./Badge";
 
 const RecipeFiltersPanel = ({
   general = [],
@@ -27,32 +18,98 @@ const RecipeFiltersPanel = ({
 }) => {
   return (
     <div className="flex flex-col gap-6">
-      <CategoryFilter
-        categories={general}
-        initialSelected={selected.selectedCategory}
-        onSelectionChange={setSelected.setSelectedCategory}
-        title="Categorías"
-        maxRowsWhenCollapsed={4}
-        itemsPerRow={2}
-      />
+      {/* Categorías generales */}
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <h5 className="font-semibold mb-2">Categorías</h5>
+        <div className="flex flex-wrap gap-2">
+          {general.length === 0 ? (
+            <span className="text-gray-400">No categories available</span>
+          ) : (
+            general.map((cat) => (
+              <Badge
+                key={cat.id}
+                checked={selected.selectedCategory.includes(cat.id)}
+                onChange={() => {
+                  if (selected.selectedCategory.includes(cat.id)) {
+                    setSelected.setSelectedCategory(
+                      selected.selectedCategory.filter((id) => id !== cat.id)
+                    );
+                  } else {
+                    setSelected.setSelectedCategory([
+                      ...selected.selectedCategory,
+                      cat.id,
+                    ]);
+                  }
+                }}
+              >
+                {cat.name}
+              </Badge>
+            ))
+          )}
+        </div>
+      </div>
 
-      <CategoryFilter
-        categories={type}
-        initialSelected={selected.selectedType}
-        onSelectionChange={setSelected.setSelectedType}
-        title="Tipo de cocina"
-        maxRowsWhenCollapsed={4}
-        itemsPerRow={2}
-      />
+      {/* Tipos de cocina */}
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <h5 className="font-semibold mb-2">Tipo de cocina</h5>
+        <div className="flex flex-wrap gap-2">
+          {type.length === 0 ? (
+            <span className="text-gray-400">No categories available</span>
+          ) : (
+            type.map((cat) => (
+              <Badge
+                key={cat.id}
+                checked={selected.selectedType.includes(cat.id)}
+                onChange={() => {
+                  if (selected.selectedType.includes(cat.id)) {
+                    setSelected.setSelectedType(
+                      selected.selectedType.filter((id) => id !== cat.id)
+                    );
+                  } else {
+                    setSelected.setSelectedType([
+                      ...selected.selectedType,
+                      cat.id,
+                    ]);
+                  }
+                }}
+              >
+                {cat.name}
+              </Badge>
+            ))
+          )}
+        </div>
+      </div>
 
-      <CategoryFilter
-        categories={origin}
-        initialSelected={selected.selectedOrigin}
-        onSelectionChange={setSelected.setSelectedOrigin}
-        title="Origen"
-        maxRowsWhenCollapsed={4}
-        itemsPerRow={2}
-      />
+      {/* Origen */}
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <h5 className="font-semibold mb-2">Origen</h5>
+        <div className="flex flex-wrap gap-2">
+          {origin.length === 0 ? (
+            <span className="text-gray-400">No categories available</span>
+          ) : (
+            origin.map((cat) => (
+              <Badge
+                key={cat.id}
+                checked={selected.selectedOrigin.includes(cat.id)}
+                onChange={() => {
+                  if (selected.selectedOrigin.includes(cat.id)) {
+                    setSelected.setSelectedOrigin(
+                      selected.selectedOrigin.filter((id) => id !== cat.id)
+                    );
+                  } else {
+                    setSelected.setSelectedOrigin([
+                      ...selected.selectedOrigin,
+                      cat.id,
+                    ]);
+                  }
+                }}
+              >
+                {cat.name}
+              </Badge>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 };

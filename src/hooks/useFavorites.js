@@ -48,7 +48,7 @@ const useFavorites = () => {
                 setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== favorite.id));
             } else {
                 await favoriteService.addFavorite(recipeId);
-                getUserFavorites(); // Refresh favorites list after adding a favorite
+                getUserFavorites();
             }
         } catch (error) {
             console.error("Error toggling favorite:", error);
