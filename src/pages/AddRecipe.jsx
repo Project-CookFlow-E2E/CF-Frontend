@@ -1,9 +1,3 @@
-/**
- * Componente AddRecipe
- * Permite crear una nueva receta con imagen, ingredientes, pasos y categorías.
- * Utiliza React Hook Form para la gestión del formulario.
- * @modify Rafael Fernández
- */
 import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
@@ -11,14 +5,20 @@ import { Button, Input } from "../components/";
 import { recipeService } from "../services/recipeService";
 import { categoryService } from "../services/categoryService";
 import { ingredientService } from "../services/ingredientService";
+import { unitService } from "../services/unitService";
+import { unitTypeService } from "../services/unitTypeService";
 
 const AddRecipe = () => {
-  const [categorias, setCategorias] = useState([]);
+  const [parentCategories, setParentCategories] = useState([]);
+  const [childCategories, setChildCategories] = useState([]);
+  const [selectedParent, setSelectedParent] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [allIngredients, setAllIngredients] = useState([]);
+  const [unitsByType, setUnitsByType] = useState({});
+  const [unitTypeCache, setUnitTypeCache] = useState({});
   const dropdownRef = useRef(null);
 
   const {
@@ -56,26 +56,23 @@ const AddRecipe = () => {
     name: "steps",
   });
 
-  // Cargar categorías agrupadas por nombre único
+  // Cargar categorías padre al montar
   useEffect(() => {
-    categoryService.getAllCategories()
-      .then((data) => {
-        const categoriasArray = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.results)
-            ? data.results
-            : [];
-        const uniqueMap = new Map();
-        categoriasArray.forEach(cat => {
-          const key = (cat.name || "").trim().toLowerCase();
-          if (key && !uniqueMap.has(key)) {
-            uniqueMap.set(key, cat);
-          }
-        });
-        setCategorias(Array.from(uniqueMap.values()));
-      })
-      .catch(() => setCategorias([]));
+    categoryService.getAllParentCategories()
+      .then((data) => setParentCategories(Array.isArray(data) ? data : []))
+      .catch(() => setParentCategories([]));
   }, []);
+
+  // Cargar categorías hijas cuando cambia el padre seleccionado
+  useEffect(() => {
+    if (selectedParent) {
+      categoryService.getChildCategoriesOfSpecificParent(selectedParent)
+        .then((data) => setChildCategories(Array.isArray(data) ? data : []))
+        .catch(() => setChildCategories([]));
+    } else {
+      setChildCategories([]);
+    }
+  }, [selectedParent]);
 
   // Cargar todos los ingredientes para autocompletar
   useEffect(() => {
@@ -98,13 +95,6 @@ const AddRecipe = () => {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
-
-  const categoriasToShow = categorias.length > 0
-    ? categorias.map(cat => ({
-        id: cat.id,
-        name: cat.name
-      }))
-    : [];
 
   const foto = watch("foto");
 
@@ -184,6 +174,79 @@ const AddRecipe = () => {
       );
     } else {
       setValue("categoriasSeleccionadas", [...seleccionadas, categoria.id]);
+    }
+  };
+
+  // Manejo de selección de ingrediente y unidades
+  const handleIngredientChange = async (e, index) => {
+    const value = e.target.value;
+    setMensaje(""); // Limpia mensaje anterior
+    setValue(`ingredients.${index}.name`, value);
+    const found = allIngredients.find(i => i.name === value);
+    if (found && found.unit_type_id) {
+      // Primero, busca las unidades asociadas a ese unit_type_id
+      if (!unitsByType[found.unit_type_id]) {
+        try {
+          const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
+          setUnitsByType(prev => ({ ...prev, [found.unit_type_id]: units }));
+          if (units && units.length > 0) {
+            setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
+            setMensaje(
+              `unit_type_id: ${found.unit_type_id} - Unidades disponibles: ${units.map(u => u.name).join(", ")}`
+            );
+          } else {
+            // Si no hay unidades, intenta mostrar el nombre del tipo de unidad
+            let unitTypeName = "";
+            if (unitTypeCache[found.unit_type_id]) {
+              unitTypeName = unitTypeCache[found.unit_type_id].name;
+            } else {
+              try {
+                const unitType = await unitTypeService.getUnitTypeById(found.unit_type_id);
+                setUnitTypeCache(prev => ({ ...prev, [found.unit_type_id]: unitType }));
+                unitTypeName = unitType.name;
+              } catch {
+                unitTypeName = "";
+              }
+            }
+            setValue(`ingredients.${index}.unit`, unitTypeName);
+            setMensaje(
+              `unit_type_id: ${found.unit_type_id} - Tipo de unidad: ${unitTypeName || "No definido"}`
+            );
+          }
+        } catch {
+          setValue(`ingredients.${index}.unit`, "");
+          setMensaje(`Error al obtener unidades para unit_type_id ${found.unit_type_id}.`);
+        }
+      } else {
+        const units = unitsByType[found.unit_type_id];
+        if (units && units.length > 0) {
+          setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
+          setMensaje(
+            `unit_type_id: ${found.unit_type_id} - Unidades disponibles: ${units.map(u => u.name).join(", ")}`
+          );
+        } else {
+          // Si no hay unidades, intenta mostrar el nombre del tipo de unidad
+          let unitTypeName = "";
+          if (unitTypeCache[found.unit_type_id]) {
+            unitTypeName = unitTypeCache[found.unit_type_id].name;
+          } else {
+            try {
+              const unitType = await unitTypeService.getUnitTypeById(found.unit_type_id);
+              setUnitTypeCache(prev => ({ ...prev, [found.unit_type_id]: unitType }));
+              unitTypeName = unitType.name;
+            } catch {
+              unitTypeName = "";
+            }
+          }
+          setValue(`ingredients.${index}.unit`, unitTypeName);
+          setMensaje(
+            `unit_type_id: ${found.unit_type_id} - Tipo de unidad: ${unitTypeName || "No definido"}`
+          );
+        }
+      }
+    } else {
+      setValue(`ingredients.${index}.unit`, "");
+      setMensaje("Este ingrediente no tiene unit_type_id definido.");
     }
   };
 
@@ -329,43 +392,39 @@ const AddRecipe = () => {
               )}
             />
 
-            {/* Categoría con cierre automático al hacer clic fuera */}
-            <div className="relative" data-testid="category-input-wrapper" ref={dropdownRef}>
-              <label className="block text-sm font-medium text-gray-700">Categoría</label>
-              <div
-                className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center focus:outline-none"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                tabIndex={0}
+            {/* Selector de categorías padre e hijas */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría padre</label>
+              <select
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"
+                value={selectedParent || ""}
+                onChange={e => setSelectedParent(Number(e.target.value))}
               >
-                {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
-                  ? categoriasToShow
-                      .filter((cat) => categoriasSeleccionadas.includes(cat.id))
-                      .map((cat) => cat.name)
-                      .join(", ")
-                  : (
-                    <span className="text-gray-700">Selecciona categorías</span>
-                  )
-                }
-              </div>
-              {dropdownOpen && (
-                <div
-                  className="absolute left-0 w-full border border-gray-300 rounded-lg bg-white mt-2 p-2 shadow-lg z-10"
-                  style={{ maxHeight: "12rem", overflowY: "auto" }}
-                >
-                  {categoriasToShow.map((categoria) => (
-                    <div
-                      key={categoria.id}
-                      className={`p-2 hover:bg-gray-200 cursor-pointer ${
-                        categoriasSeleccionadas && categoriasSeleccionadas.includes(categoria.id)
-                          ? "bg-gray-300"
-                          : ""
-                      }`}
-                      onClick={() => handleCategoriaChange(categoria)}
-                    >
-                      {categoria.name}
-                    </div>
-                  ))}
-                </div>
+                <option value="">Selecciona una categoría padre</option>
+                {parentCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+              {childCategories.length > 0 && (
+                <>
+                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Categorías hijas</label>
+                  <div className="flex flex-wrap gap-2">
+                    {childCategories.map((categoria) => (
+                      <button
+                        type="button"
+                        key={categoria.id}
+                        className={`px-3 py-1 rounded-lg border ${
+                          (categoriasSeleccionadas || []).includes(categoria.id)
+                            ? "bg-accent text-white"
+                            : "bg-white text-gray-700"
+                        }`}
+                        onClick={() => handleCategoriaChange(categoria)}
+                      >
+                        {categoria.name}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 
@@ -440,17 +499,7 @@ const AddRecipe = () => {
                             list={`ingredientes-list-${index}`}
                             placeholder="Ej: Harina, Leche..."
                             className="w-full focus:outline-none"
-                            onChange={e => {
-                              field.onChange(e);
-                              const found = allIngredients.find(i => i.name === e.target.value);
-                              if (found) {
-                                setValue(`ingredients.${index}.unit`, found.unit || "");
-                                setMensaje(found.unit ? `Unidad: ${found.unit}` : "Este ingrediente no tiene unidad definida.");
-                              } else {
-                                setValue(`ingredients.${index}.unit`, "");
-                                setMensaje("");
-                              }
-                            }}
+                            onChange={e => handleIngredientChange(e, index)}
                           />
                           <datalist id={`ingredientes-list-${index}`}>
                             {allIngredients.map(i => (
