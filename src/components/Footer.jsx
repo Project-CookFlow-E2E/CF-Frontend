@@ -14,6 +14,9 @@ import { isTokenValid } from "../services/authService";
  *
  * @component
  * @returns {JSX.Element} Barra de navegación inferior fija con iconos.
+ * @author Nico
+ * @modified by Ana Castro
+ * @modified añadido condicional discriminando si el usuario está logueado o no.
  */
 
 const Footer = () => {

@@ -57,7 +57,10 @@ export const unitService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getUnitByUnitTypeId: async (unitTypeId) => {
-        const response =  await api.get(`${BASE_URL}?unit_type_id=${unitTypeId}`);
+        if (typeof unitTypeId !== 'number' || isNaN(unitTypeId)) {
+            return Promise.reject(new Error("unit_type_id not valid."));
+        }
+        const response =  await api.get(`${BASE_URL}?unit_type=${unitTypeId}`);
         return response.data;
     },
 
@@ -104,5 +107,4 @@ export const unitService = {
         await api.delete(`${BASE_URL}/${unitId}/`);
         return true;
     }
-
 };

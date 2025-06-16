@@ -1,4 +1,5 @@
 import api from './api';
+import { getUserIdFromToken } from './authService';
 
 /**
 * src/services/favoriteService.js
@@ -10,6 +11,8 @@ import api from './api';
 * @module favoriteService
 * @requires ./api - The configured Axios instance for making API requests.
 * @author Saturnino Mendez
+* @modified by Ana Castro
+* @description This service provides methods to manage user favorites and administrative operations on favorites.
 */
 
 /**
@@ -18,7 +21,7 @@ import api from './api';
 * 
 * @type {string}
 */
-const BASE_URL = '/favorites';
+const BASE_URL = '/favorites/';
 
 /**
  * Base URL for administrator-specific favorite API endpoints.
@@ -31,7 +34,7 @@ const ADMIN_BASE_URL = '/admin/favorites';
 /**
  * Description placeholder
  *
- * @type {{ getUserFavorites: () => unknown; addFavorite: (favoriteId: any) => unknown; removeFavorite: (favoriteId: any) => unknown; getAllFavoritesAdmin: () => unknown; createFavoriteAdmin: (favoriteData: any) => unknown; getFavoriteByIdAdmin: (favoriteId: any) => unknown; updateFavoriteAdmin: (favoriteId: any, favoriteData...}
+ * @type { getUserFavorites: () => unknown; addFavorite: (favoriteId: any) => unknown; removeFavorite: (favoriteId: any) => unknown; getAllFavoritesAdmin: () => unknown; createFavoriteAdmin: (favoriteData: any) => unknown; getFavoriteByIdAdmin: (favoriteId: any) => unknown; updateFavoriteAdmin: (favoriteId: any, favoriteData...}
  */
 export const favoriteService = {
 
@@ -49,16 +52,21 @@ export const favoriteService = {
     },
 
     /**
-    * Adds a recipe to the authenticated user's favorite list.
-    * POST /api/favorites/
-    * 
-    * @param {object} favoriteData - The data required to add a favorite. Typically `{ recipe: number }`
-    * where `recipe` is the ID of the recipe to favorite.
-    * @returns {Promise<object>} A promise that resolves with the newly created favorite object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized, 400 Bad Request if recipe already favorited).
+    * Adds a recipe to a user's favorites.
+    * GET /api/favorites/
+    * @async
+    * @param {number} recipeId - The unique identifier of the recipe to be added to favorites.
+    * @returns {Promise<object>} A promise that resolves to the data returned by the API after successfully adding the favorite.
+    * @throws {Error} If the API request fails (e.g., network error, server error, or issues with token retrieval).
     */
-    addFavorite: async (favoriteId) => {
-        const response = await api.post(`${BASE_URL}/${favoriteId}/`);
+    addFavorite: async (recipeId) => {
+        const userId = getUserIdFromToken();
+        const data = {
+            user_id: userId,
+            recipe_id: recipeId  
+        };
+        
+        const response = await api.post(`${BASE_URL}`, data); 
         return response.data;
     },
 
@@ -72,7 +80,7 @@ export const favoriteService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found if favorite doesn't exist, 401 Unauthorized).
     */
     removeFavorite: async (favoriteId) => {
-        const response = await api.delete(`${BASE_URL}/${favoriteId}/`);
+        await api.delete(`${BASE_URL}${favoriteId}/`);
         return true;
     },
 

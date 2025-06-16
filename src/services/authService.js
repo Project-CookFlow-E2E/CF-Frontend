@@ -34,6 +34,8 @@
  * @requires jwt-decode
  * @author Nico
  * @modified by Saturnino
+ * @modified by Ana Castro  
+ * @modified Added function getUserIdFromToken() to obtain user ID through token
  *
  */
 import api from "./api";
@@ -188,4 +190,20 @@ export const refreshAuthToken = async () => {
     logout();
     throw error;
   }
+};
+
+/**
+ * Decodes the stored access token to extract and return the user's ID.
+ *
+ * @returns {number} The user ID from the token.
+ * @throws {Error} If no token is found in localStorage.
+ */
+export const getUserIdFromToken = () => {
+  const token = localStorage.getItem("cookflow_accessToken");
+  if (!token) {
+    throw new Error("Token not found");
+  }
+
+  const decoded = jwtDecode(token); 
+  return decoded.user_id;
 };
