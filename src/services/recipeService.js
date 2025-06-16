@@ -77,6 +77,28 @@ export const recipeService = {
     },
 
     /**
+    * Fetches a list of recipes filtered by a specific user ID.
+    * This utilizes the backend's filtering capabilities on the recipes list endpoint.
+    * GET /api/recipes/?user_id={userId}
+     *
+    * @param {number} userId - The unique integer ID of the user whose recipes are to be fetched.
+    * Must be a positive integer.
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of recipe objects
+    * belonging to the specified user. Returns an empty array
+     * if no recipes are found for the given user ID.
+    * @throws {Error} If `userId` is not a valid positive integer, or if the API request fails
+    * (e.g., network error, server error).
+    */
+    getRecipeByUserId: async (userId) => {
+        if (typeof userId !== 'number' || !Number.isInteger(userId) || userId <= 0) {
+            throw new Error("user id is not valid.");
+        };
+
+        const response = await api.get(`${BASE_URL}/?user_id=${userId}`);
+        return response.data;
+    },
+
+    /**
     * Creates a new recipe.
     * This typically requires user authentication.
     * The `user` field for the recipe will be automatically assigned by the backend
