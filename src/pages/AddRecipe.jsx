@@ -325,6 +325,40 @@ for (const [key, value] of recipePayload.entries()) {
     console.log(`${key}: ${value}`);
   }
 }
+// Steps
+// Formatea los pasos para el backend
+  const formattedSteps = data.steps.map((step, idx) => ({
+  // 'description' es el texto del paso
+  description: step.text, // o step.description según tu formulario
+
+  // 'order' es el número de orden del paso
+  order: idx + 1
+}));
+console.log("Pasos formateados para el backend:", formattedSteps);
+
+for (const [idx, step] of data.steps.entries()) {
+  const stepPayload = new FormData();
+  // stepPayload.append("recipe", recetaId); // id de la receta recién creada
+  stepPayload.append("description", step.text); // o step.description según tu formulario
+  stepPayload.append("order", idx + 1);
+  // if (step.image) {
+  //   stepPayload.append("image", step.image); // step.image debe ser un File
+  // }
+
+  // Mostrar el contenido del FormData de cada paso
+  console.log(`Contenido de stepPayload para el paso ${idx + 1}:`);
+  for (const [key, value] of stepPayload.entries()) {
+    if (value instanceof File) {
+      console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
+    } else {
+      console.log(`${key}: ${value}`);
+    }
+  }
+
+  // Enviar el paso al backend
+  await stepService.createStep(stepPayload);
+}
+
 console.log("--- FIN de recipePayload ---");
 
     const recetaGuardada = await recipeService.createRecipe(recipePayload);
