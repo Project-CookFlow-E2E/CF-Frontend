@@ -291,43 +291,45 @@ const AddRecipe = () => {
     // ingredients.forEach((ingredient) => {
     //   recipePayload.append("ingredients[]", ingredient.name);
     // });
-    console.log(data.ingredients)
 
+  const formattedIngredients = data.ingredients.map(ing => ({
+  // 'ingredient' es el ID del ingrediente base (ej. el ID de 'Huevo')
+  // En tu ejemplo de consola, este es 'ing.id'
+  ingredient: parseInt(ing.id, 10),
+
+  // 'quantity' es la cantidad (asegúrate de que sea un número si el backend lo espera así)
+  quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+
+  // 'unit' es el ID de la unidad (ej. el ID de 'unidades' o 'gramos')
+  // En tu ejemplo de consola, este es 'ing.unit'
+  unit: parseInt(ing.unit, 10)
+  }));
+
+// Muestra el array formateado para verificar
+console.log("Ingredientes formateados para el backend:", formattedIngredients);
+
+// **Paso 2: Adjunta el array formateado al FormData como un string JSON**
+recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
 
     if (data.foto) {
       recipePayload.append("photo", data.foto);
     }
 
+    console.log("Contenido de recipePayload:");
+for (const [key, value] of recipePayload.entries()) {
+  if (value instanceof File) {
+    // Si es un archivo (como la foto), solo muestra su nombre y tipo
+    console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
+  } else {
+    // Para otros valores, muestra la clave y el valor
+    console.log(`${key}: ${value}`);
+  }
+}
+console.log("--- FIN de recipePayload ---");
+
     const recetaGuardada = await recipeService.createRecipe(recipePayload);
     const recetaId = recetaGuardada.id;
     console.log("Receta guardada con ID:", recetaId);
-    
-    // 2. Crear los ingredientes asociados a la receta
-    // Array de ingredientes del formulario
-    const ingredientesPayload = data.ingredients.map(ing => ({
-      recipe: recetaId, // id de la receta recién creada
-      ingredient: ing.id, // id del ingrediente
-      quantity: parseFloat(ing.quantity), // asegúrate de que sea número
-      unit: ing.unit // id de la unidad
-    }));
-
-    // Enviar al backend
-    // await recipeService.addIngredients(ingredientesPayload);
-
-
-    // 3. Crear los pasos asociados a la receta
-    // Si tienes imágenes de pasos, debes enviar cada paso como FormData individualmente
-    for (let idx = 0; idx < data.steps.length; idx++) {
-      const step = data.steps[idx];
-      const stepPayload = new FormData();
-      stepPayload.append("recipe", recetaId);
-      stepPayload.append("description", step.text);
-      stepPayload.append("order", idx + 1);
-      if (step.image) {
-        stepPayload.append("image", step.image);
-      }
-      await stepService.createStep(stepPayload);
-    }
 
     setRecipeId(recetaId);
     setMensaje("Receta guardada correctamente. ID: " + recetaId);
