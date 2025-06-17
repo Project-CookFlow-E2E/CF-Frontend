@@ -36,7 +36,12 @@ describe('Login Page Tests', () => {
     cy.get('body').should('not.contain.text', 'Credenciales inválidas');
     cy.getDataTest('username-input').type(invalidUser.username);
     cy.getDataTest('password-input').type(invalidUser.password);
-    cy.getDataTest('custom-button').contains('Iniciar sesión').click();
+    cy.getDataTest('login-button-container').should('be.visible')
+    cy.getDataTest('custom-button')
+      .contains('Iniciar sesión')
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
     cy.contains('Credenciales inválidas').should('be.visible');
     cy.url().should('include', '/login');
   });
@@ -44,14 +49,29 @@ describe('Login Page Tests', () => {
   it('5. Successfully logs in with valid credentials via UI', () => {
     const validUser = users.find(u => u.username === 'ana456');
     cy.loginUI(validUser.username, validUser.password, false);
-    cy.contains('¿Qué te apetece?').should('be.visible');
+    cy.getDataTest('main-title').should('be.visible').and('contain.text', '¿Qué te apetece?');
+    cy.get('header').should('contain.text', 'Mi Perfil', { timeout: 10000 });
   });
 
   it('6. Can access Home page after API login', () => {
     const validUser = users.find(u => u.username === 'ana456');
+    cy.intercept('GET', `${Cypress.env('API_URL')}/users/me/`, {
+      statusCode: 200,
+      body: {
+        id: 2,
+        username: validUser.username,
+        email: 'ana456@example.com',
+        first_name: 'Ana',
+        last_name: ''
+      },
+      delay: 50
+    }).as('getUserMeForLogin');
+
     cy.loginAPI(validUser.username, validUser.password);
     cy.visit('/main');
+    cy.wait('@getUserMeForLogin');
     cy.url().should('include', '/main');
-    cy.contains('¿Qué te apetece?').should('be.visible');
+    cy.getDataTest('main-title').should('be.visible').and('contain.text', '¿Qué te apetece?');
+    cy.get('header').should('contain.text', 'Mi Perfil', { timeout: 10000 });
   });
 });
