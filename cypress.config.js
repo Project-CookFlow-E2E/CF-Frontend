@@ -12,6 +12,9 @@ export default defineConfig({
     screenshotOnRunFailure: false,
     defaultCommandTimeout: 5000,
     requestTimeout: 10000,
+     env: {
+      API_URL: 'http://127.0.0.1:8000/api'
+    },
     setupNodeEvents(on, config) {
       return config;
     },

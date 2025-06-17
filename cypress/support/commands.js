@@ -39,7 +39,7 @@ Cypress.Commands.add('loginAPI', (username, password) => {
   cy.session([username, password], () => {
     cy.request({
       method: 'POST',
-      url: 'http://localhost:8000/api/auth/login/',
+      url: `${Cypress.env('API_URL')}/login/`,
       body: {
         username: username,
         password: password
