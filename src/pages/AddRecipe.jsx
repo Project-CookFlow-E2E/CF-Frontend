@@ -15,7 +15,6 @@ import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
 // import { getUserIdFromToken } from "../services/authService";
-import { stepService } from "../services/stepService";
 
 
 
@@ -316,6 +315,7 @@ recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
     }
 
     console.log("Contenido de recipePayload:");
+
 for (const [key, value] of recipePayload.entries()) {
   if (value instanceof File) {
     // Si es un archivo (como la foto), solo muestra su nombre y tipo
@@ -325,7 +325,7 @@ for (const [key, value] of recipePayload.entries()) {
     console.log(`${key}: ${value}`);
   }
 }
-// Steps
+  // Steps
 // Formatea los pasos para el backend
   const formattedSteps = data.steps.map((step, idx) => ({
   // 'description' es el texto del paso
@@ -334,35 +334,20 @@ for (const [key, value] of recipePayload.entries()) {
   // 'order' es el número de orden del paso
   order: idx + 1
 }));
+
 console.log("Pasos formateados para el backend:", formattedSteps);
+recipePayload.append("steps", JSON.stringify(formattedSteps));
 
-for (const [idx, step] of data.steps.entries()) {
-  const stepPayload = new FormData();
-  // stepPayload.append("recipe", recetaId); // id de la receta recién creada
-  stepPayload.append("description", step.text); // o step.description según tu formulario
-  stepPayload.append("order", idx + 1);
-  // if (step.image) {
-  //   stepPayload.append("image", step.image); // step.image debe ser un File
-  // }
 
-  // Mostrar el contenido del FormData de cada paso
-  console.log(`Contenido de stepPayload para el paso ${idx + 1}:`);
-  for (const [key, value] of stepPayload.entries()) {
-    if (value instanceof File) {
-      console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
-    } else {
-      console.log(`${key}: ${value}`);
-    }
-  }
 
-  // Enviar el paso al backend
-  await stepService.createStep(stepPayload);
-}
+
+
 
 console.log("--- FIN de recipePayload ---");
 
     const recetaGuardada = await recipeService.createRecipe(recipePayload);
     const recetaId = recetaGuardada.id;
+
     console.log("Receta guardada con ID:", recetaId);
 
     setRecipeId(recetaId);
@@ -631,7 +616,7 @@ console.log("--- FIN de recipePayload ---");
                               id={`ingredient-quantity-${index}`}
                               type="number"
                               placeholder="Cantidad"
-                              min={0.01}
+                              min={1}
                               step="any"
                               className="w-full focus:outline-none"
                               required
