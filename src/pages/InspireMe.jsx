@@ -58,7 +58,7 @@ const InspireMe = () => {
   const handleToggleFavorite = async (recipeId) => {
     const idNum = Number(recipeId);
     const favoriteEntry = userFavoriteEntries.find(entry => entry.recipe_id === idNum);
-    const isFavorite = !!favoriteEntry; // Convert to boolean
+    const isFavorite = !!favoriteEntry;
 
     try {
       if (isFavorite) {
