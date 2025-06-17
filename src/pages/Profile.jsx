@@ -296,21 +296,17 @@ const Profile = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {favoriteRecipes.map((recipe) => (
-                  <div
+                  <Card
                     key={recipe.id}
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/recetas/${recipe.id}`)}
-                  >
-                    <Card
-                      id={recipe.id}
-                      name={recipe.name}
-                      image={recipe.image}
-                      category={recipe.category}
-                      time={recipe.time}
-                      isFavorite={true}
-                      onToggleFavorite={() => toggleFavorite(recipe.id)}
-                    />
-                  </div>
+                    id={recipe.id}
+                    name={recipe.name}
+                    image={recipe.image}
+                    category={recipe.category}
+                    time={recipe.time}
+                    isFavorite={true}
+                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                     onClick={() => navigate(`/recipe/${recipe.id}`)}
+                  />
                 ))}
               </div>
             )}
@@ -320,17 +316,17 @@ const Profile = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {paginatedRecipes.map((recipe) => (
-              <div
+              <Card
                 key={recipe.id}
-                className="cursor-pointer"
-                onClick={() => navigate(`/recetas/${recipe.id}`)}
-              >
-                <Card
-                  recipe={recipe}
-                  isFavorite={favorites.includes(String(recipe.id))}
-                  onToggleFavorite={() => toggleFavorite(recipe.id)}
-                />
-              </div>
+                id={recipe.id}
+                name={recipe.name}
+                image={recipe.image}
+                category={recipe.category}
+                time={recipe.time}
+                isFavorite={favorites.includes(String(recipe.id))}
+                onToggleFavorite={() => toggleFavorite(recipe.id)}
+                 onClick={() => navigate(`/recipe/${recipe.id}`)}
+              />
             ))}
           </div>
         )}

@@ -30,29 +30,23 @@ const useFavorites = () => {
     };
 
     const toggleFavorite = async (recipeId) => {
-        const token = getToken();
-        if (!token) return;
+    const token = getToken();
+    if (!token) return;
 
-        const favorite = favorites.find((fav) => fav.recipe_id === recipeId);
+    const favorite = favorites.find((fav) => fav.recipe_id === recipeId);
 
-        try {
-            if (favorite) {
-                await favoriteService.removeFavorite(favorite.id);
-                setFavorites(prev => prev.filter(fav => fav.id !== favorite.id));
-                setFavoriteRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
-            } else {
-                await favoriteService.addFavorite(recipeId);
-                // Obtenemos los datos de la nueva receta favorita
-                const newRecipe = await recipeService.getRecipeById(recipeId);
-                if (newRecipe) {
-                    setFavoriteRecipes(prev => [...prev, newRecipe]);
-                }
-                getUserFavorites(); // Actualizamos la lista de IDs
-            }
-        } catch (error) {
-            console.error("Error toggling favorite:", error);
+    try {
+        if (favorite) {
+            await favoriteService.removeFavorite(favorite.id);
+        } else {
+            await favoriteService.addFavorite(recipeId);
         }
-    };
+        // Siempre refresca el estado después de cualquier cambio
+        await getUserFavorites();
+    } catch (error) {
+        console.error("Error toggling favorite:", error);
+    }
+};
 
     useEffect(() => {
         getUserFavorites();
