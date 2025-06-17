@@ -21,7 +21,7 @@
 import React from "react";
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
-import { useLatestRecipes } from "../hooks/useLatestRecipes";
+import useLatestRecipes from "../hooks/useLatestRecipes";
 import { FaGear } from "react-icons/fa6";
 
 /**
@@ -160,7 +160,7 @@ const Landing = () => {
         >
           {loading ? (
             <p>Cargando recetas...</p>
-          ) : (
+          ) : Array.isArray(latestRecipes) && latestRecipes.length > 0 ? (
             latestRecipes.map((recipe) => (
               <Card
                 key={recipe.id}
@@ -173,6 +173,8 @@ const Landing = () => {
                 onClick={() => navigate(`/recipe/${recipe.id}`)}
               />
             ))
+          ) : (
+            <p>No hay recetas disponibles.</p>
           )}
         </div>
         <div
