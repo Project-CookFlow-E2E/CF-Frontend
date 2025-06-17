@@ -14,6 +14,11 @@ import { categoryService } from "../services/categoryService";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
+// import { getUserIdFromToken } from "../services/authService";
+import { stepService } from "../services/stepService";
+
+
+
 
 const AddRecipe = () => {
   const [parentCategories, setParentCategories] = useState([]);
@@ -181,6 +186,7 @@ const AddRecipe = () => {
     setValue(`ingredients.${index}.name`, value);
     const found = allIngredients.find(i => i.name === value);
     if (found && found.unit_type_id) {
+      setValue(`ingredients.${index}.id`, found.id); 
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
@@ -272,35 +278,71 @@ const AddRecipe = () => {
     try {
       // Matriz única de categorías
       const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
+      
+// 1. Crear la receta (sin ingredientes ni pasos)
+    const recipePayload = new FormData();
+    recipePayload.append("name", data.nombre);
+    recipePayload.append("description", data.descripcion);
+    recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
+    recipePayload.append("commensals", parseInt(data.comensales, 10));
+    categoriasUnicas.forEach((category) => {
+      recipePayload.append("categories[]", parseInt(category, 10));
+    });
+    // ingredients.forEach((ingredient) => {
+    //   recipePayload.append("ingredients[]", ingredient.name);
+    // });
+    console.log(data.ingredients)
 
-      const recipePayload = new FormData();
-      recipePayload.append("name", data.nombre);
-      recipePayload.append("description", data.descripcion);
-      recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
-      recipePayload.append("commensals", parseInt(data.comensales, 10));
-      categoriasUnicas.forEach((category) => {
-        recipePayload.append("categories[]", parseInt(category,10));
-      });
-      if (data.foto) {
-        recipePayload.append("photo", data.foto);
-      }
 
-      const recetaGuardada = await recipeService.createRecipe(recipePayload);
-
-      setRecipeId(recetaGuardada.id);
-      setMensaje("Receta guardada correctamente. ID: " + recetaGuardada.id);
-      reset();
-      setValue("categoriasSeleccionadas", []);
-    } catch (error) {
-      let errorMsg = "Error al guardar la receta.";
-      if (error.response && error.response.data) {
-        errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
-      } else if (error.message) {
-        errorMsg += "\nDetalles: " + error.message;
-      }
-      setMensaje(errorMsg);
+    if (data.foto) {
+      recipePayload.append("photo", data.foto);
     }
-  };
+
+    const recetaGuardada = await recipeService.createRecipe(recipePayload);
+    const recetaId = recetaGuardada.id;
+    console.log("Receta guardada con ID:", recetaId);
+    
+    // 2. Crear los ingredientes asociados a la receta
+    // Array de ingredientes del formulario
+    const ingredientesPayload = data.ingredients.map(ing => ({
+      recipe: recetaId, // id de la receta recién creada
+      ingredient: ing.id, // id del ingrediente
+      quantity: parseFloat(ing.quantity), // asegúrate de que sea número
+      unit: ing.unit // id de la unidad
+    }));
+
+    // Enviar al backend
+    // await recipeService.addIngredients(ingredientesPayload);
+
+
+    // 3. Crear los pasos asociados a la receta
+    // Si tienes imágenes de pasos, debes enviar cada paso como FormData individualmente
+    for (let idx = 0; idx < data.steps.length; idx++) {
+      const step = data.steps[idx];
+      const stepPayload = new FormData();
+      stepPayload.append("recipe", recetaId);
+      stepPayload.append("description", step.text);
+      stepPayload.append("order", idx + 1);
+      if (step.image) {
+        stepPayload.append("image", step.image);
+      }
+      await stepService.createStep(stepPayload);
+    }
+
+    setRecipeId(recetaId);
+    setMensaje("Receta guardada correctamente. ID: " + recetaId);
+    reset();
+    setValue("categoriasSeleccionadas", []);
+  } catch (error) {
+    let errorMsg = "Error al guardar la receta.";
+    if (error.response && error.response.data) {
+      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+    } else if (error.message) {
+      errorMsg += "\nDetalles: " + error.message;
+    }
+    setMensaje(errorMsg);
+  }
+};
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
@@ -583,7 +625,7 @@ const AddRecipe = () => {
                               >
                                 <option value="">Selecciona unidad</option>
                                 {units.map(u => (
-                                  <option key={u.id} value={u.abbreviation || u.name}>
+                                  <option key={u.id} value={u.id}>
                                     {u.name} {u.abbreviation && `(${u.abbreviation})`}
                                   </option>
                                 ))}
