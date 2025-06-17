@@ -199,6 +199,8 @@ const Profile = () => {
         )}
       </div>
 
+      
+     
       {imgModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-0">
           <div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-2xl relative">
@@ -215,16 +217,14 @@ const Profile = () => {
             <div className="flex flex-col items-center">
               <img
                 src={
-                  profileImg?.url
-                    ? "http://localhost:8000/media/img/" +
-                      user.id +
-                      "/" +
-                      profileImg.url
-                    : "https://ui-avatars.com/api/?name=" +
-                      encodeURIComponent(user.name)
+                  imgFile
+                    ? URL.createObjectURL(imgFile)
+                    : profileImg?.url
+                    ? "http://localhost:8000/media/img/" + user.id + "/" + profileImg.url
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`
                 }
-                alt="Foto de perfil"
-                className="w-24 h-24 rounded-full object-cover border"
+                alt="Preview"
+                className="w-28 h-28 rounded-full object-cover border-2 border-blue-200 mb-5 shadow"
               />
               <label className="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-4 py-2 rounded-lg border border-blue-200 transition mb-4 flex items-center gap-2">
                 <svg

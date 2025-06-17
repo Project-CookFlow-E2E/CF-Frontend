@@ -2,41 +2,34 @@
 /**
  * @file ShoppingList.jsx
  * @description Página de Lista de la Compra. Permite visualizar, marcar, eliminar y limpiar productos de una lista.
- * Utiliza datos mock para simular los elementos de compra.
- *
- * Funcionalidades:
- * - Marcar elementos como completados (checkbox).
- * - Eliminar elementos individualmente.
- * - Vaciar completamente la lista.
- * - Renderizado condicional según si la lista está vacía o no.
- *
- * Componentes utilizados:
- * - HTML nativo + clases utilitarias de TailwindCSS.
- * - Icono SVG para el botón de eliminación.
- *
- * Datos usados:
- * - shoppingListItemsMock: datos simulados importados desde `../data/mockData`.
+ * Utiliza datos reales obtenidos desde el backend.
+ * @modifiedby Ána Castro
+ * @modified Recuperar la lista de la compra desde la base de datos, añadir funcionalidad para marcar productos como comprados,
+ * eliminar productos y limpiar la lista.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { shoppingListItemService } from "../services/shoppingListItemService";
 
-
-/**
- * Componente principal de la página de Lista de la Compra.
- *
- * @returns {JSX.Element} La interfaz completa para visualizar y gestionar la lista de la compra.
- */
 const ShoppingList = () => {
-  const [items, setItems] = useState(() => {
-  const saved = localStorage.getItem("shoppingList");
-  return saved ? JSON.parse(saved) : [];
-});
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState(null);
 
-  /**
-   * Alterna el estado de "checked" de un ítem (completado o no).
-   *
-   * @param {number} id - ID del ítem a actualizar.
-   */
+  useEffect(() => {
+    const fetchShoppingItems = async () => {
+      try {
+        const data = await shoppingListItemService.getAllShoppingListItems();
+        const withCheck = data.map((item) => ({ ...item, checked: false }));        
+        setItems(withCheck);
+      } catch (err) {
+        console.error("Error cargando lista de compra:", err);
+        setError("No se pudo cargar la lista de la compra.");
+      }
+    };
+
+    fetchShoppingItems();
+  }, []);
+
   const handleToggleCheck = (id) => {
     setItems((prevItems) =>
       prevItems.map((item) =>
@@ -45,21 +38,33 @@ const ShoppingList = () => {
     );
   };
 
-  /**
-   * Elimina un ítem de la lista por su ID.
-   *
-   * @param {number} id - ID del ítem a eliminar.
-   */
-  const handleDeleteItem = (id) => {
-    setItems(items.filter((item) => item.id !== id));
+
+  const handleDeleteItem = async (id) => {
+    try {
+      console.table([items])
+      console.log("Borrando item con ID:", id);
+      await shoppingListItemService.deleteShoppingListItem(Number(id));
+      setItems((prevItems) => prevItems.filter((item) => item.id !== id));    
+        
+    } catch (err) {
+      console.error("Error al eliminar el ítem:", err);
+      console.log("RESPUESTA ERROR:", err.response);
+      alert("No se pudo eliminar el ingrediente de la lista.");
+    }
   };
 
-  /**
-   * Elimina todos los ítems de la lista.
-   */
- const handleClearAll = () => {
-  setItems([]);
-  localStorage.removeItem("shoppingList");
+  const handleClearAll = async () => {
+  try {
+    await Promise.all(
+      items.map((item) =>
+        shoppingListItemService.deleteShoppingListItem(Number(item.id))
+      )
+    );
+    setItems([]);
+  } catch (err) {
+    console.error("Error al eliminar todos los ítems:", err);
+    alert("No se pudo eliminar toda la lista.");
+  }
 };
 
   return (
@@ -72,7 +77,10 @@ const ShoppingList = () => {
         data-testid="shoppinglist-header"
       ></header>
 
-      <div className="w-full max-w-md text-center mb-6" data-testid="shoppinglist-title-container">
+      <div
+        className="w-full max-w-md text-center mb-6"
+        data-testid="shoppinglist-title-container"
+      >
         <h1
           className="text-2xl sm:text-3xl font-semibold text-gray-800"
           data-testid="shoppinglist-title"
@@ -97,29 +105,31 @@ const ShoppingList = () => {
                   <div className="flex-grow flex items-center">
                     <input
                       type="checkbox"
-                      checked={item.checked}
+                      checked={!!item.checked}
                       onChange={() => handleToggleCheck(item.id)}
                       className="w-6 h-6 border-2 rounded cursor-pointer"
                       data-testid={`shoppinglist-checkbox-${item.id}`}
                     />
                     <span
                       className={`ml-3 text-lg ${
-                        item.checked
-                          ? "line-through text-gray-500"
-                          : "text-gray-800"
+                        item.checked ? "line-through text-gray-500" : "text-gray-800"
                       }`}
                       data-testid={`shoppinglist-item-name-${item.id}`}
                     >
-                      {item.name}
+                      {item.ingredient?.name || "Sin nombre"}{" "}
+                      <span className="text-sm text-gray-600">
+                        ({item.quantity_needed} {item.unit?.name || "unidad"})
+                      </span>
                     </span>
                   </div>
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteItem(item.id);
                     }}
                     className="ml-4 p-1 text-gray-500 hover:text-gray-700"
-                    aria-label={`Eliminar ${item.name}`}
+                    aria-label={`Eliminar ${item.ingredient?.name || "ítem"}`}
                     data-testid={`shoppinglist-delete-btn-${item.id}`}
                   >
                     <svg
@@ -140,7 +150,6 @@ const ShoppingList = () => {
                 </div>
               ))}
 
-              {/* Botón para eliminar todo */}
               <button
                 className="block mx-auto mt-6 py-2 px-6 border-2 border-gray-400 text-gray-700 font-semibold rounded-full hover:bg-gray-100 transition duration-200"
                 onClick={handleClearAll}
