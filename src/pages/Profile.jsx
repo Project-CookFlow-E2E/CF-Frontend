@@ -269,24 +269,30 @@ const Profile = () => {
         </div>
       )}
 
-      <div className="mb-6">
+      <div className="mb-6 flex gap-0">
         <button
-          className={`mr-4 ${
-            activeTab === "saved" ? "font-bold underline" : ""
+          className={`px-2 py-2 rounded font-semibold transition-colors ${
+            activeTab === "saved"
+              ? "bg-red-400 text-white scale-100"
+              : "bg-gray-200 text-gray-600 scale-90"
           }`}
           onClick={() => setActiveTab("saved")}
         >
           Recetas favoritas ({favoriteRecipes.length})
         </button>
         <button
-          className={activeTab === "created" ? "font-bold underline" : ""}
+          className={`px-2 py-2 rounded font-semibold transition-colors ${
+            activeTab === "created"
+              ? "bg-red-400 text-white scale-100"
+              : "bg-gray-200 text-gray-600 scale-90"
+          }`}
           onClick={() => setActiveTab("created")}
         >
           Recetas creadas ({filteredRecipes.length})
         </button>
       </div>
 
-      <div>
+      <div className="flex flex-col items-center gap-4 pb-20">
         {activeTab === "saved" ? (
           <>
             {loadingFavorites ? (
@@ -305,7 +311,7 @@ const Profile = () => {
                     time={recipe.time}
                     isFavorite={true}
                     onToggleFavorite={() => toggleFavorite(recipe.id)}
-                     onClick={() => navigate(`/recipe/${recipe.id}`)}
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
               </div>
@@ -325,31 +331,11 @@ const Profile = () => {
                 time={recipe.time}
                 isFavorite={favorites.includes(String(recipe.id))}
                 onToggleFavorite={() => toggleFavorite(recipe.id)}
-                 onClick={() => navigate(`/recipe/${recipe.id}`)}
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
               />
             ))}
           </div>
         )}
-      </div>
-
-      <div className="flex justify-between items-center mt-4">
-        <button
-          className="px-3 py-1 border rounded"
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          className="px-3 py-1 border rounded"
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages || totalPages === 0}
-        >
-          Siguiente
-        </button>
       </div>
     </div>
   );
