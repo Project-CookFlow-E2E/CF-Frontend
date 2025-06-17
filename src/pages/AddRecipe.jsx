@@ -2,46 +2,36 @@
  * Componente AddRecipe
  * Permite crear una nueva receta con imagen, ingredientes, pasos y categorías.
  * Utiliza React Hook Form para la gestión del formulario.
+ * created by Nico
  * @modify Rafael Fernández
  */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
 import { Button, Input } from "../components/";
 import { recipeService } from "../services/recipeService";
-import {categoryService} from "../services/categoryService";
+import { categoryService } from "../services/categoryService";
+import { ingredientService } from "../services/ingredientService";
+import { unitService } from "../services/unitService";
+import { unitTypeService } from "../services/unitTypeService";
+// import { getUserIdFromToken } from "../services/authService";
+
+
 
 
 const AddRecipe = () => {
-  const [categorias, setCategorias] = useState([]);
+  const [parentCategories, setParentCategories] = useState([]);
+  const [childCategories, setChildCategories] = useState([]);
+  const [selectedParent, setSelectedParent] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [allIngredients, setAllIngredients] = useState([]);
+  const [unitsByType, setUnitsByType] = useState({});
+  const [unitTypeCache, setUnitTypeCache] = useState({});
   const [mensaje, setMensaje] = useState("");
-
-  /**
-   * @typedef {Object} Ingredient
-   * @property {string} name           Nombre del ingrediente.
-   * @property {string} quantity       Cantidad del ingrediente.
-   * @property {string} type           Tipo de unidad (ej. sólido, líquido).
-   * @property {string} unit           Unidad de medida (ej. g, ml, taza).
-   *
-   * @typedef {Object} Step
-   * @property {string}       text          Descripción del paso.
-   * @property {File|null}    image         Archivo de imagen asociado al paso o null.
-   * @property {string|null}  imagePreview  URL de vista previa de la imagen o null.
-   * @property {boolean}      isDragOver    Flag que indica si el área está en estado drag-over.
-   *
-   * @typedef {Object} FormValues
-   * @property {string}            nombre                    Nombre de la receta.
-   * @property {string}            descripcion               Descripción de la receta.
-   * @property {string}            tiempo                    Tiempo de preparación (minutos).
-   * @property {number[]}          categoriasSeleccionadas   IDs de las categorías seleccionadas.
-   * @property {number}            comensales                Número de comensales.
-   * @property {File|null}         foto                      Archivo de la foto principal o null.
-   * @property {Ingredient[]}      ingredients               Array de ingredientes.
-   * @property {Step[]}            steps                     Array de pasos de preparación.
-   */
+  const [recipeId, setRecipeId] = useState(null);
+  const dropdownRef = useRef(null);
 
   const {
     control,
@@ -57,7 +47,7 @@ const AddRecipe = () => {
       comensales: "",
       categoriasSeleccionadas: [],
       foto: null,
-      ingredients: [{ name: "", quantity: "", type: "", unit: "" }],
+      ingredients: [{ name: "", quantity: "", unit: "" }],
       steps: [{ text: "", image: null, imagePreview: null, isDragOver: false }],
     },
   });
@@ -78,35 +68,41 @@ const AddRecipe = () => {
     name: "steps",
   });
 
- useEffect(() => {
-  categoryService.getAllCategories()
-    .then((data) => {
-      console.log("Respuesta de categorías:", data);
-      // Si la respuesta es { results: [...] }
-      const categoriasArray = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.results)
-          ? data.results
-          : [];
-      // Agrupa por nombre único de categoría
-      const uniqueMap = new Map();
-      categoriasArray.forEach(cat => {
-        const key = (cat.name || "").trim().toLowerCase();
-        if (key && !uniqueMap.has(key)) {
-          uniqueMap.set(key, cat);
-        }
-      });
-      setCategorias(Array.from(uniqueMap.values()));
-    })
-    .catch(() => setCategorias([]));
-}, []);
+  useEffect(() => {
+    categoryService.getAllParentCategories()
+      .then((data) => setParentCategories(Array.isArray(data) ? data : []))
+      .catch(() => setParentCategories([]));
+  }, []);
 
-const categoriasToShow = categorias.length > 0
-  ? categorias.map(cat => ({
-      id: cat.id,
-      name: cat.name
-    }))
-  : [];
+  useEffect(() => {
+    if (selectedParent) {
+      categoryService.getChildCategoriesOfSpecificParent(selectedParent)
+        .then((data) => setChildCategories(Array.isArray(data) ? data : []))
+        .catch(() => setChildCategories([]));
+    } else {
+      setChildCategories([]);
+    }
+  }, [selectedParent]);
+
+  useEffect(() => {
+    ingredientService.getAllIngredients()
+      .then((data) => setAllIngredients(Array.isArray(data) ? data : []))
+      .catch(() => setAllIngredients([]));
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
 
   const foto = watch("foto");
 
@@ -120,18 +116,13 @@ const categoriasToShow = categorias.length > 0
     }
   }, [foto]);
 
-  // Validación de imágenes (receta y pasos)
   const validateImageFile = (file) => {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
     if (!tiposPermitidos.includes(file.type)) {
-      setMensaje("Solo se permiten imágenes JPEG, PNG o WebP");
-      setTimeout(() => setMensaje(""), 3000);
       return false;
     }
     if (file.size > maxSize) {
-      setMensaje("La imagen no puede superar los 2MB");
-      setTimeout(() => setMensaje(""), 3000);
       return false;
     }
     return true;
@@ -176,47 +167,208 @@ const categoriasToShow = categorias.length > 0
     setPreview(null);
   };
 
-  const categoriasSeleccionadas = watch("categoriasSeleccionadas");
+  const categoriasSeleccionadas = watch("categoriasSeleccionadas") || [];
+
   const handleCategoriaChange = (categoria) => {
-    const seleccionadas = categoriasSeleccionadas || [];
+    let seleccionadas = categoriasSeleccionadas || [];
     if (seleccionadas.includes(categoria.id)) {
-      setValue(
-        "categoriasSeleccionadas",
-        seleccionadas.filter((id) => id !== categoria.id)
-      );
+      seleccionadas = seleccionadas.filter((id) => id !== categoria.id);
     } else {
-      setValue("categoriasSeleccionadas", [...seleccionadas, categoria.id]);
+      seleccionadas = [...seleccionadas, categoria.id];
+    }
+    // Garantiza unicidad
+    setValue("categoriasSeleccionadas", Array.from(new Set(seleccionadas)));
+  };
+
+  const handleIngredientChange = async (e, index) => {
+    const value = e.target.value;
+    setValue(`ingredients.${index}.name`, value);
+    const found = allIngredients.find(i => i.name === value);
+    if (found && found.unit_type_id) {
+      setValue(`ingredients.${index}.id`, found.id); 
+      if (!unitsByType[found.unit_type_id]) {
+        try {
+          const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
+          setUnitsByType(prev => ({ ...prev, [found.unit_type_id]: units }));
+          if (units && units.length > 0) {
+            setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
+          } else {
+            let unitTypeName = "";
+            if (unitTypeCache[found.unit_type_id]) {
+              unitTypeName = unitTypeCache[found.unit_type_id].name;
+            } else {
+              try {
+                const unitType = await unitTypeService.getUnitTypeById(found.unit_type_id);
+                setUnitTypeCache(prev => ({ ...prev, [found.unit_type_id]: unitType }));
+                unitTypeName = unitType.name;
+              } catch {
+                unitTypeName = "";
+              }
+            }
+            setValue(`ingredients.${index}.unit`, unitTypeName);
+          }
+        } catch {
+          setValue(`ingredients.${index}.unit`, "");
+        }
+      } else {
+        const units = unitsByType[found.unit_type_id];
+        if (units && units.length > 0) {
+          setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
+        } else {
+          let unitTypeName = "";
+          if (unitTypeCache[found.unit_type_id]) {
+            unitTypeName = unitTypeCache[found.unit_type_id].name;
+          } else {
+            try {
+              const unitType = await unitTypeService.getUnitTypeById(found.unit_type_id);
+              setUnitTypeCache(prev => ({ ...prev, [found.unit_type_id]: unitType }));
+              unitTypeName = unitType.name;
+            } catch {
+              unitTypeName = "";
+            }
+          }
+          setValue(`ingredients.${index}.unit`, unitTypeName);
+        }
+      }
+    } else {
+      setValue(`ingredients.${index}.unit`, "");
     }
   };
 
-  const onSubmit = async (data) => {
-    try {
-      const recipePayload = {
-        name: data.nombre,
-        description: data.descripcion,
-        duration_minutes: parseInt(data.tiempo, 10),
-        commensals: parseInt(data.comensales, 10),
-        categories: data.categoriasSeleccionadas,
-        ingredients: data.ingredients.map(i => ({
-          name: i.name,
-          quantity: i.quantity,
-          type: i.type,
-          unit: i.unit,
-        })),
-      };
-      await recipeService.createRecipe(recipePayload);
-      setMensaje("Receta guardada correctamente");
-      setTimeout(() => setMensaje(""), 2000);
-      reset();
-    } catch (error) {
-      setMensaje("Error al guardar la receta");
-      setTimeout(() => setMensaje(""), 3000);
-    }
+  // Validación de campos numéricos (no negativos ni cero)
+  const validatePositive = (value) => {
+    if (value === "" || value === null || value === undefined) return "Campo obligatorio";
+    if (isNaN(value)) return "Debe ser un número";
+    if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
+    return true;
   };
+
+  // Validación de cantidad de ingredientes
+  const validateIngredientQuantity = (value) => {
+    if (value === "" || value === null || value === undefined) return "Campo obligatorio";
+    if (isNaN(value)) return "Debe ser un número";
+    if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
+    return true;
+  };
+
+  const onSubmit = async (data) => {
+    // Validación manual extra para ingredientes
+    for (const ing of data.ingredients) {
+      if (!ing.name || !ing.quantity || !ing.unit) {
+        setMensaje("Todos los ingredientes deben tener nombre, cantidad y unidad.");
+        return;
+      }
+      if (isNaN(ing.quantity) || parseFloat(ing.quantity) <= 0) {
+        setMensaje("La cantidad de cada ingrediente debe ser mayor que 0.");
+        return;
+      }
+    }
+
+    // Validación manual para tiempo y comensales
+    if (isNaN(data.tiempo) || parseInt(data.tiempo, 10) <= 0) {
+      setMensaje("El tiempo debe ser mayor que 0.");
+      return;
+    }
+    if (isNaN(data.comensales) || parseInt(data.comensales, 10) <= 0) {
+      setMensaje("El número de comensales debe ser mayor que 0.");
+      return;
+    }
+
+    try {
+      // Matriz única de categorías
+      const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
+      
+// 1. Crear la receta (sin ingredientes ni pasos)
+    const recipePayload = new FormData();
+    recipePayload.append("name", data.nombre);
+    recipePayload.append("description", data.descripcion);
+    recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
+    recipePayload.append("commensals", parseInt(data.comensales, 10));
+    categoriasUnicas.forEach((category) => {
+      recipePayload.append("categories[]", parseInt(category, 10));
+    });
+    // ingredients.forEach((ingredient) => {
+    //   recipePayload.append("ingredients[]", ingredient.name);
+    // });
+
+  const formattedIngredients = data.ingredients.map(ing => ({
+  // 'ingredient' es el ID del ingrediente base (ej. el ID de 'Huevo')
+  // En tu ejemplo de consola, este es 'ing.id'
+  ingredient: parseInt(ing.id, 10),
+
+  // 'quantity' es la cantidad (asegúrate de que sea un número si el backend lo espera así)
+  quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+
+  // 'unit' es el ID de la unidad (ej. el ID de 'unidades' o 'gramos')
+  // En tu ejemplo de consola, este es 'ing.unit'
+  unit: parseInt(ing.unit, 10)
+  }));
+
+// Muestra el array formateado para verificar
+console.log("Ingredientes formateados para el backend:", formattedIngredients);
+
+// **Paso 2: Adjunta el array formateado al FormData como un string JSON**
+recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
+
+    if (data.foto) {
+      recipePayload.append("photo", data.foto);
+    }
+
+    console.log("Contenido de recipePayload:");
+
+for (const [key, value] of recipePayload.entries()) {
+  if (value instanceof File) {
+    // Si es un archivo (como la foto), solo muestra su nombre y tipo
+    console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
+  } else {
+    // Para otros valores, muestra la clave y el valor
+    console.log(`${key}: ${value}`);
+  }
+}
+  // Steps
+// Formatea los pasos para el backend
+  const formattedSteps = data.steps.map((step, idx) => ({
+  // 'description' es el texto del paso
+  description: step.text, // o step.description según tu formulario
+
+  // 'order' es el número de orden del paso
+  order: idx + 1
+}));
+
+console.log("Pasos formateados para el backend:", formattedSteps);
+recipePayload.append("steps", JSON.stringify(formattedSteps));
+
+
+
+
+
+
+console.log("--- FIN de recipePayload ---");
+
+    const recetaGuardada = await recipeService.createRecipe(recipePayload);
+    const recetaId = recetaGuardada.id;
+
+    console.log("Receta guardada con ID:", recetaId);
+
+    setRecipeId(recetaId);
+    setMensaje("Receta guardada correctamente. ID: " + recetaId);
+    reset();
+    setValue("categoriasSeleccionadas", []);
+  } catch (error) {
+    let errorMsg = "Error al guardar la receta.";
+    if (error.response && error.response.data) {
+      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+    } else if (error.message) {
+      errorMsg += "\nDetalles: " + error.message;
+    }
+    setMensaje(errorMsg);
+  }
+};
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
         <button className="mb-4" data-testid="back-button">
           <span className="text-2xl">←</span>
         </button>
@@ -226,10 +378,16 @@ const categoriasToShow = categorias.length > 0
 
         {mensaje && (
           <div
-            className="mb-4 px-3 py-4 rounded-lg text-lg font-semibold text-white bg-footer text-center transition-all duration-300"
+            className="mb-4 px-3 py-4 rounded-lg text-sm font-mono text-white bg-footer text-left transition-all duration-300"
             data-testid="console-message"
+            style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
           >
             {mensaje}
+          </div>
+        )}
+        {recipeId && (
+          <div className="mb-4 px-3 py-2 rounded-lg text-sm font-mono bg-green-100 text-green-800">
+            <strong>recipe_id generado:</strong> {recipeId}
           </div>
         )}
 
@@ -291,6 +449,7 @@ const categoriasToShow = categorias.length > 0
             <Controller
               control={control}
               name="nombre"
+              rules={{ required: "El nombre es obligatorio" }}
               render={({ field }) => (
                 <Input
                   {...field}
@@ -298,6 +457,8 @@ const categoriasToShow = categorias.length > 0
                   label="Nombre de la receta"
                   placeholder="Ej: Huevos rancheros, fabada ..."
                   data-testid="recipe-name-input"
+                  className="focus:outline-none"
+                  required
                 />
               )}
             />
@@ -308,6 +469,7 @@ const categoriasToShow = categorias.length > 0
             <Controller
               control={control}
               name="descripcion"
+              rules={{ required: "La descripción es obligatoria" }}
               render={({ field }) => (
                 <textarea
                   {...field}
@@ -315,45 +477,46 @@ const categoriasToShow = categorias.length > 0
                   placeholder="Ej: Un platillo tradicional con un toque especial..."
                   data-testid="recipe-description-input"
                   className="w-full border border-gray-300 rounded-lg p-2 resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-accent bg-white"
+                  required
                 />
               )}
             />
 
-            <div className="relative" data-testid="category-input-wrapper">
-              <label className="block text-sm font-medium text-gray-700">Categoría</label>
-              <div
-                className="w-full border border-gray-300 rounded-lg px-3 pr-10 bg-white cursor-pointer h-10 flex items-center"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+            {/* Selector de categorías padre e hijas */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría padre</label>
+              <select
+                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
+                value={selectedParent || ""}
+                onChange={e => setSelectedParent(Number(e.target.value))}
               >
-                {categoriasSeleccionadas && categoriasSeleccionadas.length > 0
-                  ? categoriasToShow
-                      .filter((cat) => categoriasSeleccionadas.includes(cat.id))
-                      .map((cat) => cat.name)
-                      .join(", ")
-                  : (
-                    <span className="text-gray-700">Selecciona categorías</span>
-                  )
-                }
-              </div>
-              {dropdownOpen && (
-                <div
-                  className="absolute left-0 w-full border border-gray-300 rounded-lg bg-white mt-2 p-2 shadow-lg z-10"
-                  style={{ maxHeight: "12rem", overflowY: "auto" }} // 5 items aprox (5 x 2.4rem)
-                >
-                  {categoriasToShow.map((categoria) => (
-                    <div
-                      key={categoria.id}
-                      className={`p-2 hover:bg-gray-200 cursor-pointer ${
-                        categoriasSeleccionadas && categoriasSeleccionadas.includes(categoria.id)
-                          ? "bg-gray-300"
-                          : ""
-                      }`}
-                      onClick={() => handleCategoriaChange(categoria)}
-                    >
-                      {categoria.name}
-                    </div>
-                  ))}
-                </div>
+                <option value="" className="text-gray-400">
+                  Selecciona una categoría padre
+                </option>
+                {parentCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+              {childCategories.length > 0 && (
+                <>
+                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Categorías hijas</label>
+                  <div className="flex flex-wrap gap-2">
+                    {childCategories.map((categoria) => (
+                      <button
+                        type="button"
+                        key={categoria.id}
+                        className={`px-3 py-1 rounded-lg border ${
+                          (categoriasSeleccionadas || []).includes(categoria.id)
+                            ? "bg-accent text-white"
+                            : "bg-white text-gray-700"
+                        }`}
+                        onClick={() => handleCategoriaChange(categoria)}
+                      >
+                        {categoria.name}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 
@@ -363,28 +526,24 @@ const categoriasToShow = categorias.length > 0
                   className="block text-sm font-medium text-gray-700 mb-1"
                   htmlFor="tiempo-preparacion"
                 >
-                  Tiempo
+                  Tiempo (minutos)
                 </label>
                 <Controller
                   control={control}
                   name="tiempo"
+                  rules={{ validate: validatePositive }}
                   render={({ field }) => (
-                    <div className="relative">
-                      <Input
-                        {...field}
-                        id="tiempo-preparacion"
-                        label="Time"
-                        type="number"
-                        placeholder="15"
-                        className="pr-10"
-                        data-testid="time-input"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
-                        min
-                      </span>
-                    </div>
+                    <Input
+                      {...field}
+                      id="tiempo-preparacion"
+                      type="number"
+                      placeholder="Ej: 30"
+                      min={1}
+                      required
+                    />
                   )}
                 />
+                <small className="text-gray-500">Introduce el tiempo total en minutos.</small>
               </div>
               <div className="flex-1">
                 <label
@@ -396,14 +555,15 @@ const categoriasToShow = categorias.length > 0
                 <Controller
                   control={control}
                   name="comensales"
+                  rules={{ validate: validatePositive }}
                   render={({ field }) => (
                     <Input
                       {...field}
                       id="comensales"
                       type="number"
                       placeholder="Ej: 4"
-                      className="w-full"
-                      data-testid="commensals-input"
+                      min={1}
+                      required
                     />
                   )}
                 />
@@ -415,60 +575,102 @@ const categoriasToShow = categorias.length > 0
               <label className="block text-sm font-medium text-gray-700 mb-1">Ingredientes</label>
               <div className="flex flex-col gap-3 items-center">
                 {ingredientFields.map((ingredient, index) => (
-                  <div key={ingredient.id} className="flex flex-col w-full gap-2">
+                  <div key={ingredient.id || index} className="w-full">
+                    {/* Input de ingrediente en una sola línea */}
                     <Controller
                       control={control}
                       name={`ingredients.${index}.name`}
+                      rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
-                        <Input
-                          {...field}
-                          placeholder={`Ingrediente ${index + 1}`}
-                          className="w-full"
-                        />
+                        <>
+                          <Input
+                            {...field}
+                            id={`ingredient-name-${index}`}
+                            list={`ingredientes-list-${index}`}
+                            placeholder="Ej: Harina, Leche..."
+                            className="w-full focus:outline-none"
+                            onChange={e => handleIngredientChange(e, index)}
+                            required
+                          />
+                          <datalist id={`ingredientes-list-${index}`}>
+                            {allIngredients.map(i => (
+                              <option key={i.id} value={i.name} />
+                            ))}
+                          </datalist>
+                        </>
                       )}
                     />
-                    <div className="flex gap-4">
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.quantity`}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            type="number"
-                            placeholder="Cantidad"
-                            className="w-24"
-                          />
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.type`}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            placeholder="Tipo (ej. sólido, líquido)"
-                            className="w-28"
-                          />
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.unit`}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            placeholder="Unidad (ej. g, ml, taza)"
-                            className="w-28"
-                          />
-                        )}
-                      />
+                    {/* Cantidad y unidad en la línea siguiente */}
+                    <div className="flex gap-4 mt-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor={`ingredient-quantity-${index}`}>
+                          Cantidad
+                        </label>
+                        <Controller
+                          control={control}
+                          name={`ingredients.${index}.quantity`}
+                          rules={{ validate: validateIngredientQuantity }}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              id={`ingredient-quantity-${index}`}
+                              type="number"
+                              placeholder="Cantidad"
+                              min={1}
+                              step="any"
+                              className="w-full focus:outline-none"
+                              required
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor={`ingredient-unit-${index}`}>
+                          Unidad
+                        </label>
+                        <Controller
+                          control={control}
+                          name={`ingredients.${index}.unit`}
+                          rules={{ required: "La unidad es obligatoria" }}
+                          render={({ field }) => {
+                            const ingName = watch(`ingredients.${index}.name`);
+                            const found = allIngredients.find(i => i.name === ingName);
+                            const units = found && found.unit_type_id ? (unitsByType[found.unit_type_id] || []) : [];
+
+                            return units.length > 0 ? (
+                              <select
+                                {...field}
+                                id={`ingredient-unit-${index}`}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
+                                required
+                              >
+                                <option value="">Selecciona unidad</option>
+                                {units.map(u => (
+                                  <option key={u.id} value={u.id}>
+                                    {u.name} {u.abbreviation && `(${u.abbreviation})`}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <Input
+                                {...field}
+                                id={`ingredient-unit-${index}`}
+                                placeholder="Unidad"
+                                className="w-full focus:outline-none"
+                                readOnly
+                                required
+                              />
+                            );
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
                 <button
                   type="button"
-                  onClick={() => appendIngredient({ name: "", quantity: "", type: "", unit: "" })}
-                  className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center"
+                  onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
+                  className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center mt-2"
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
                 </button>
@@ -482,13 +684,14 @@ const categoriasToShow = categorias.length > 0
               </label>
               <div className="flex flex-col gap-6 items-center" data-testid="steps-list">
                 {stepFields.map((step, index) => (
-                  <div key={step.id} className="w-full space-y-3">
+                  <div key={step.id || index} className="w-full space-y-3">
                     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={`step-textarea-${index}`}>
                       Paso número {index + 1}
                     </label>
                     <Controller
                       control={control}
                       name={`steps.${index}.text`}
+                      rules={{ required: "El texto del paso es obligatorio" }}
                       render={({ field }) => (
                         <textarea
                           {...field}
@@ -496,6 +699,7 @@ const categoriasToShow = categorias.length > 0
                           placeholder={`Describe el paso ${index + 1}`}
                           data-testid={`step-input-${index}`}
                           className="w-full border border-gray-300 rounded-lg p-2 resize-y min-h-[60px] focus:outline-none focus:ring-2 focus:ring-accent bg-white"
+                          required
                         />
                       )}
                     />
