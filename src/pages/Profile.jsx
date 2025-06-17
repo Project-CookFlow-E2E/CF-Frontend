@@ -18,7 +18,7 @@
  * - deleteProfileImage(): Elimina la imagen de perfil del usuario autenticado.
  * - updateBiography(bio): Actualiza la biografía del usuario autenticado.
  * - deleteBiography(): Borra la biografía del usuario autenticado.
- * 
+ *
  * Componentes utilizados:
  * - Card: Vista individual de receta con botón de favorito.
  * - Pagination: Control de cambio de página.
@@ -44,7 +44,7 @@ import { imageService } from "../services/imageService";
 import Card from "../components/Card";
 import { useNavigate } from "react-router-dom";
 
-const USER_TYPE = "USER"; 
+const USER_TYPE = "USER";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -53,20 +53,18 @@ const Profile = () => {
   const [editingBio, setEditingBio] = useState(false);
   const [bioLoading, setBioLoading] = useState(false);
 
-
   const [profileImg, setProfileImg] = useState(null);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [imgLoading, setImgLoading] = useState(false);
   const [imgFile, setImgFile] = useState(null);
 
-  
-  const { 
-    favorites, 
-    favoriteRecipes, 
-    loading: loadingFavorites, 
-    toggleFavorite 
+  const {
+    favorites,
+    favoriteRecipes,
+    loading: loadingFavorites,
+    toggleFavorite,
   } = useFavorites();
-  
+
   const {
     activeTab,
     setActiveTab,
@@ -76,7 +74,6 @@ const Profile = () => {
     totalPages,
     filteredRecipes,
   } = useProfileRecipes();
-
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -89,30 +86,28 @@ const Profile = () => {
   }, []);
 
   const handleBioSave = async () => {
-  setBioLoading(true);
-  await userService.updateMe({ biography: bio });
-  setEditingBio(false);
-  setBioLoading(false);
-  const data = await userService.getMe();
-  setUser(data);
-  };
-
-  
-const handleImgSave = async () => {
-  if (!imgFile) return;
-  setImgLoading(true);
-  try {
-    await imageService.updateProfileImage(imgFile);
+    setBioLoading(true);
+    await userService.updateMe({ biography: bio });
+    setEditingBio(false);
+    setBioLoading(false);
     const data = await userService.getMe();
     setUser(data);
-    setProfileImg(data.image || null);
-    setImgModalOpen(false);
-    setImgFile(null);
-  } finally {
-    setImgLoading(false);
-  }
-};
+  };
 
+  const handleImgSave = async () => {
+    if (!imgFile) return;
+    setImgLoading(true);
+    try {
+      await imageService.updateProfileImage(imgFile);
+      const data = await userService.getMe();
+      setUser(data);
+      setProfileImg(data.image || null);
+      setImgModalOpen(false);
+      setImgFile(null);
+    } finally {
+      setImgLoading(false);
+    }
+  };
 
   const handleImgDelete = async () => {
     setImgLoading(true);
@@ -133,16 +128,18 @@ const handleImgSave = async () => {
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Perfil de {user.name}</h2>
-      
-      
+
       <div className="flex items-center mb-4">
         <div className="relative">
           <img
             src={
               profileImg?.url
-              ? "http://localhost:8000/media/img/" + user.id + "/" + profileImg.url
-              : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
-
+                ? "http://localhost:8000/media/img/" +
+                  user.id +
+                  "/" +
+                  profileImg.url
+                : "https://ui-avatars.com/api/?name=" +
+                  encodeURIComponent(user.name)
             }
             alt="Foto de perfil"
             className="w-24 h-24 rounded-full object-cover border"
@@ -156,12 +153,15 @@ const handleImgSave = async () => {
           </button>
         </div>
         <div className="ml-6">
-          <div><strong>Nombre de usuario:</strong> {user.username}</div>
-          <div><strong>Email:</strong> {user.email}</div>
+          <div>
+            <strong>Nombre de usuario:</strong> {user.username}
+          </div>
+          <div>
+            <strong>Email:</strong> {user.email}
+          </div>
         </div>
       </div>
-      
-      
+
       <div className="mb-4">
         <strong>Biografía:</strong>
         {editingBio ? (
@@ -170,7 +170,7 @@ const handleImgSave = async () => {
               className="border rounded w-full p-2 mt-1"
               rows={3}
               value={bio}
-              onChange={e => setBio(e.target.value)}
+              onChange={(e) => setBio(e.target.value)}
             />
             <button
               className="bg-blue-500 text-white px-3 py-1 rounded mt-2 mr-2"
@@ -199,7 +199,6 @@ const handleImgSave = async () => {
         )}
       </div>
 
-      
       {imgModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-0">
           <div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-2xl relative">
@@ -210,27 +209,42 @@ const handleImgSave = async () => {
             >
               ×
             </button>
-            <h3 className="text-lg font-bold mb-6 text-center">Editar foto de perfil</h3>
+            <h3 className="text-lg font-bold mb-6 text-center">
+              Editar foto de perfil
+            </h3>
             <div className="flex flex-col items-center">
-                   <img
-            src={
-              profileImg?.url
-              ? "http://localhost:8000/media/img/" + user.id + "/" + profileImg.url
-              : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
-
-            }
-            alt="Foto de perfil"
-            className="w-24 h-24 rounded-full object-cover border"
-          />
+              <img
+                src={
+                  profileImg?.url
+                    ? "http://localhost:8000/media/img/" +
+                      user.id +
+                      "/" +
+                      profileImg.url
+                    : "https://ui-avatars.com/api/?name=" +
+                      encodeURIComponent(user.name)
+                }
+                alt="Foto de perfil"
+                className="w-24 h-24 rounded-full object-cover border"
+              />
               <label className="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-4 py-2 rounded-lg border border-blue-200 transition mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828M7 7v.01M7 7a5 5 0 017.071 0l.707.707a5 5 0 010 7.071l-6.586 6.586a5 5 0 01-7.071-7.071l.707-.707A5 5 0 017 7z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828M7 7v.01M7 7a5 5 0 017.071 0l.707.707a5 5 0 010 7.071l-6.586 6.586a5 5 0 01-7.071-7.071l.707-.707A5 5 0 017 7z"
+                  />
                 </svg>
                 Seleccionar archivo
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={e => setImgFile(e.target.files[0])}
+                  onChange={(e) => setImgFile(e.target.files[0])}
                   className="hidden"
                 />
               </label>
@@ -257,10 +271,11 @@ const handleImgSave = async () => {
         </div>
       )}
 
-      
       <div className="mb-6">
         <button
-          className={`mr-4 ${activeTab === "saved" ? "font-bold underline" : ""}`}
+          className={`mr-4 ${
+            activeTab === "saved" ? "font-bold underline" : ""
+          }`}
           onClick={() => setActiveTab("saved")}
         >
           Recetas favoritas ({favoriteRecipes.length})
@@ -273,7 +288,6 @@ const handleImgSave = async () => {
         </button>
       </div>
 
-     
       <div>
         {activeTab === "saved" ? (
           <>
@@ -284,49 +298,42 @@ const handleImgSave = async () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {favoriteRecipes.map((recipe) => (
-                  <div
+                  <Card
                     key={recipe.id}
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/recetas/${recipe.id}`)}
-                  >
-                    <Card
-                      id={recipe.id}
-                      name={recipe.name}
-                      image={recipe.image}
-                      category={recipe.category}
-                      time={recipe.time}
-                      isFavorite={true}
-                      onToggleFavorite={() => toggleFavorite(recipe.id)}
-                    />
-                  </div>
+                    id={recipe.id}
+                    name={recipe.name}
+                    image={recipe.image}
+                    category={recipe.category}
+                    time={recipe.time}
+                    isFavorite={true}
+                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                     onClick={() => navigate(`/recipe/${recipe.id}`)}
+                  />
                 ))}
               </div>
             )}
           </>
+        ) : paginatedRecipes.length === 0 ? (
+          <div>No hay recetas para mostrar.</div>
         ) : (
-          paginatedRecipes.length === 0 ? (
-            <div>No hay recetas para mostrar.</div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {paginatedRecipes.map((recipe) => (
-                <div
-                  key={recipe.id}
-                  className="cursor-pointer"
-                  onClick={() => navigate(`/recetas/${recipe.id}`)}
-                >
-                  <Card
-                    recipe={recipe}
-                    isFavorite={favorites.includes(String(recipe.id))}
-                    onToggleFavorite={() => toggleFavorite(recipe.id)}
-                  />
-                </div>
-              ))}
-            </div>
-          )
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {paginatedRecipes.map((recipe) => (
+              <Card
+                key={recipe.id}
+                id={recipe.id}
+                name={recipe.name}
+                image={recipe.image}
+                category={recipe.category}
+                time={recipe.time}
+                isFavorite={favorites.includes(String(recipe.id))}
+                onToggleFavorite={() => toggleFavorite(recipe.id)}
+                 onClick={() => navigate(`/recipe/${recipe.id}`)}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      
       <div className="flex justify-between items-center mt-4">
         <button
           className="px-3 py-1 border rounded"

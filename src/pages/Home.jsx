@@ -117,9 +117,7 @@ const Home = () => {
                                 name={recipe.name}
                                 category={recipe.category}
                                 time={`${recipe.duration_minutes}`}
-                                isFavorite={
-                                    Array.isArray(favorites) && favorites.some((fav) => fav?.recipe_id === recipe.id)
-                                }
+                               isFavorite={favorites.includes(String(recipe.id))} 
                                 onToggleFavorite={() => toggleFavorite(recipe.id)}
                                 onClick={() => navigate(`/recipe/${recipe.id}`)}
                             />
