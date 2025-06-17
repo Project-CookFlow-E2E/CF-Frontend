@@ -21,7 +21,7 @@
 import React from "react";
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
-import { mockRecipes } from "../data/mockData";
+import { useLatestRecipes } from "../hooks/useLatestRecipes";
 import { FaGear } from "react-icons/fa6";
 
 /**
@@ -48,8 +48,8 @@ import { FaGear } from "react-icons/fa6";
  */
 
 
-const Landing = () => {  
-  const featuredRecipes = mockRecipes.slice(0, 3);
+const Landing = () => {
+  const { latestRecipes, loading } = useLatestRecipes();
   const navigate = useNavigate();
 
   return (
@@ -93,7 +93,7 @@ const Landing = () => {
           data-testid="problem-title"
           id="problem-title"
         >
-          De la frustración a la diversión 
+          De la frustración a la diversión
         </h2>
         <div
           className="flex flex-col md:flex-row justify-center gap-6 md:gap-4 px-4"
@@ -110,7 +110,7 @@ const Landing = () => {
             </div>
             <h3 className="font-semibold text-lg mb-2">¿Que cocinamos hoy?</h3>
             <p className="text-gray-600 text-sm">
-              Despídete del estrés diario de decidir qué comer. 
+              Despídete del estrés diario de decidir qué comer.
               Planifica tus comidas de forma fácil, rápida y sin frustraciones
             </p>
           </div>
@@ -127,7 +127,7 @@ const Landing = () => {
             </h3>
             <p className="text-gray-600 text-sm">
               Recetas que se pierden, compras a última hora y cenas caóticas.
-               ¿Te suena? Te ayudamos a recuperar el control.
+              ¿Te suena? Te ayudamos a recuperar el control.
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ const Landing = () => {
           data-testid="solution-title"
           id="solution-title"
         >
-          La solución CookFlow 
+          La solución CookFlow
         </h2>
         <p
           className="max-w-2xl mx-auto text-gray-700 mb-8 text-sm"
@@ -158,18 +158,22 @@ const Landing = () => {
           data-testid="recipe-cards-grid"
           id="recipe-cards-grid"
         >
-          {featuredRecipes.map((recipe) => (
-            <Card
-              key={recipe.id}
-              id={`recipe-card-${recipe.id}`}
-              image={recipe.image_url}
-              name={recipe.name}
-              category={recipe.category}
-              time={`${recipe.duration_minutes}`}              
-              onToggleFavorite={() => navigate("/login")}
-              onClick={() => navigate(`/recipe/${recipe.id}`)}
-            />
-          ))}
+          {loading ? (
+            <p>Cargando recetas...</p>
+          ) : (
+            latestRecipes.map((recipe) => (
+              <Card
+                key={recipe.id}
+                id={`recipe-card-${recipe.id}`}
+                image={recipe.image_url}
+                name={recipe.name}
+                category={recipe.category}
+                time={`${recipe.duration_minutes}`}
+                onToggleFavorite={() => navigate("/login")}
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
+              />
+            ))
+          )}
         </div>
         <div
           className="pb-20"
