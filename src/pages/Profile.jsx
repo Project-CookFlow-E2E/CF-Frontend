@@ -1,26 +1,6 @@
 /**
  * @file Profile.jsx
- * @description Página de perfil de usuario que muestra recetas guardadas (favoritas) y recetas creadas por el usuario.
- * Incluye paginación, navegación por pestañas y control de favoritos almacenados en localStorage.
- *
- * Funcionalidades:
- * - Alternancia entre recetas guardadas y creadas por el usuario.
- * - Visualización paginada de recetas (8 por página).
- * - Posibilidad de marcar/desmarcar recetas como favoritas.
- * - Muestra información del usuario con nombre y descripción.
- *
- * Componentes utilizados:
- * - Card: Vista individual de receta con botón de favorito.
- * - Pagination: Control de cambio de página.
- * - useProfileRecipes: Hook para gestionar lógica de perfil y recetas.
- *
- * @module pages/Profile
- * @modifiedby Ana Castro
- * @modified Adaptación del componente Card.jsx para usarlo directamente, gestión de favoritos y recetas propias a través del hook useProfileRecipes.
- * @modifiedby Ángel Aragón
- * @modified Agregado cursor-pointer a los botones de las pestañas.
- * @modifiedby Lorena Martínez, Saray Miguel
- * @modified Añadida funcionalidad de edición de biografía del usuario y petición al backend para obtener información del usuario autenticado.
+ * @description Página de perfil de usuario
  */
 
 import { useState, useEffect } from "react";
@@ -28,22 +8,32 @@ import useFavorites from "../hooks/useFavorites";
 import useProfileRecipes from "../hooks/useProfileRecipes";
 import { userService } from "../services/userService";
 import { imageService } from "../services/imageService";
+import Card from "../components/Card";
+import { useNavigate } from "react-router-dom";
 
-const USER_TYPE = "USER"; // El tipo que usas para la foto de perfil
+const USER_TYPE = "USER";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bio, setBio] = useState("");
   const [editingBio, setEditingBio] = useState(false);
   const [bioLoading, setBioLoading] = useState(false);
-
+  
   // Foto de perfil
   const [profileImg, setProfileImg] = useState(null);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [imgLoading, setImgLoading] = useState(false);
   const [imgFile, setImgFile] = useState(null);
 
-  const { favorites } = useFavorites();
+  // Usando el hook modificado de favoritos
+  const { 
+    favorites, 
+    favoriteRecipes, 
+    loading: loadingFavorites, 
+    toggleFavorite 
+  } = useFavorites();
+  
   const {
     activeTab,
     setActiveTab,
@@ -52,7 +42,6 @@ const Profile = () => {
     paginatedRecipes,
     totalPages,
     filteredRecipes,
-    toggleFavorite,
   } = useProfileRecipes();
 
   // Cargar datos del usuario y su foto de perfil
@@ -61,10 +50,9 @@ const Profile = () => {
       const data = await userService.getMe();
       setUser(data);
       setBio(data.biography || "");
-      // Cargar imagen de perfil
       try {
         const img = await imageService.getImageByTypeAndExternalId(USER_TYPE, data.id);
-        setProfileImg(img?.results?.[0] || null); // Si tu backend devuelve results
+        setProfileImg(img?.results?.[0] || null);
       } catch {
         setProfileImg(null);
       }
@@ -72,7 +60,6 @@ const Profile = () => {
     fetchUser();
   }, []);
 
-  // Guardar biografía
   const handleBioSave = async () => {
     setBioLoading(true);
     await userService.updateMe({ biography: bio });
@@ -80,13 +67,12 @@ const Profile = () => {
     setBioLoading(false);
   };
 
-  // Subir o actualizar imagen de perfil
   const handleImgSave = async () => {
     if (!imgFile) return;
     setImgLoading(true);
     try {
       await imageService.updateProfileImage(imgFile);
-      window.location.reload(); 
+      window.location.reload();
       setImgModalOpen(false);
       setImgFile(null);
     } finally {
@@ -94,7 +80,6 @@ const Profile = () => {
     }
   };
 
-  // Borrar imagen de perfil
   const handleImgDelete = async () => {
     if (!profileImg) return;
     setImgLoading(true);
@@ -109,20 +94,16 @@ const Profile = () => {
   };
 
   if (!user) return <div>Cargando perfil...</div>;
-  console.log(profileImg)
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Perfil de {user.name}</h2>
+      
+      {/* Sección de información del usuario */}
       <div className="flex items-center mb-4">
         <div className="relative">
           <img
-            src={
-              profileImg?.url
-              
-                // ? "http://localhost:8000/media/" + user.id + "/" + profileImg.url
-                // : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
-
-            }
+            src={profileImg?.url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
             alt="Foto de perfil"
             className="w-24 h-24 rounded-full object-cover border"
           />
@@ -139,6 +120,8 @@ const Profile = () => {
           <div><strong>Email:</strong> {user.email}</div>
         </div>
       </div>
+      
+      {/* Biografía */}
       <div className="mb-4">
         <strong>Biografía:</strong>
         {editingBio ? (
@@ -197,7 +180,7 @@ const Profile = () => {
                     ? (profileImg.url.startsWith("http")
                         ? profileImg.url
                         : `/media/${user.id}/${profileImg.url}`)
-                    : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`
                 }
                 alt="Preview"
                 className="w-28 h-28 rounded-full object-cover border-2 border-blue-200 mb-5 shadow"
@@ -237,14 +220,13 @@ const Profile = () => {
         </div>
       )}
 
+      {/* Pestañas de recetas */}
       <div className="mb-6">
         <button
-          className={`mr-4 ${
-            activeTab === "saved" ? "font-bold underline" : ""
-          }`}
+          className={`mr-4 ${activeTab === "saved" ? "font-bold underline" : ""}`}
           onClick={() => setActiveTab("saved")}
         >
-          Recetas favoritas ({favorites.length})
+          Recetas favoritas ({favoriteRecipes.length})
         </button>
         <button
           className={activeTab === "created" ? "font-bold underline" : ""}
@@ -254,34 +236,60 @@ const Profile = () => {
         </button>
       </div>
 
+      {/* Listado de recetas */}
       <div>
-        {paginatedRecipes.length === 0 ? (
-          <div>No hay recetas para mostrar.</div>
+        {activeTab === "saved" ? (
+          <>
+            {loadingFavorites ? (
+              <div>Cargando recetas favoritas...</div>
+            ) : favoriteRecipes.length === 0 ? (
+              <div>No tienes recetas favoritas.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {favoriteRecipes.map((recipe) => (
+                  <div
+                    key={recipe.id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/recetas/${recipe.id}`)}
+                  >
+                    <Card
+                      id={recipe.id}
+                      name={recipe.name}
+                      image={recipe.image}
+                      category={recipe.category}
+                      time={recipe.time}
+                      isFavorite={true}
+                      onToggleFavorite={() => toggleFavorite(recipe.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         ) : (
-          <ul>
-            {paginatedRecipes.map((recipe) => (
-              <li
-                key={recipe.id}
-                className="mb-2 flex justify-between items-center border-b pb-2"
-              >
-                <span>{recipe.name}</span>
-                <button
-                  className={`ml-2 ${
-                    favorites.includes(String(recipe.id))
-                      ? "text-yellow-500"
-                      : "text-gray-400"
-                  }`}
-                  onClick={() => toggleFavorite(recipe.id)}
-                  title="Favorito"
+          paginatedRecipes.length === 0 ? (
+            <div>No hay recetas para mostrar.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {paginatedRecipes.map((recipe) => (
+                <div
+                  key={recipe.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/recetas/${recipe.id}`)}
                 >
-                  ★
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <Card
+                    recipe={recipe}
+                    isFavorite={favorites.includes(String(recipe.id))}
+                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
 
+      {/* Paginación */}
       <div className="flex justify-between items-center mt-4">
         <button
           className="px-3 py-1 border rounded"
