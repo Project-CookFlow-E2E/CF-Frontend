@@ -50,12 +50,7 @@ const Profile = () => {
       const data = await userService.getMe();
       setUser(data);
       setBio(data.biography || "");
-      try {
-        const img = await imageService.getImageByTypeAndExternalId(USER_TYPE, data.id);
-        setProfileImg(img?.results?.[0] || null);
-      } catch {
-        setProfileImg(null);
-      }
+      setProfileImg(data.image || null);
     };
     fetchUser();
   }, []);
@@ -63,6 +58,7 @@ const Profile = () => {
   const handleBioSave = async () => {
     setBioLoading(true);
     await userService.updateMe({ biography: bio });
+    window.location.reload(); 
     setEditingBio(false);
     setBioLoading(false);
   };
@@ -103,7 +99,12 @@ const Profile = () => {
       <div className="flex items-center mb-4">
         <div className="relative">
           <img
-            src={profileImg?.url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
+            src={
+              profileImg?.url
+              ? "http://localhost:8000/media/img/" + user.id + "/" + profileImg.url
+              : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
+
+            }
             alt="Foto de perfil"
             className="w-24 h-24 rounded-full object-cover border"
           />
@@ -159,9 +160,9 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Modal para editar foto de perfil */}
+      
       {imgModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-0">
           <div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-2xl relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl"
@@ -172,19 +173,16 @@ const Profile = () => {
             </button>
             <h3 className="text-lg font-bold mb-6 text-center">Editar foto de perfil</h3>
             <div className="flex flex-col items-center">
-              <img
-                src={
-                  imgFile
-                    ? URL.createObjectURL(imgFile)
-                    : profileImg?.url
-                    ? (profileImg.url.startsWith("http")
-                        ? profileImg.url
-                        : `/media/${user.id}/${profileImg.url}`)
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`
-                }
-                alt="Preview"
-                className="w-28 h-28 rounded-full object-cover border-2 border-blue-200 mb-5 shadow"
-              />
+                   <img
+            src={
+              profileImg?.url
+              ? "http://localhost:8000/media/img/" + user.id + "/" + profileImg.url
+              : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
+
+            }
+            alt="Foto de perfil"
+            className="w-24 h-24 rounded-full object-cover border"
+          />
               <label className="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-4 py-2 rounded-lg border border-blue-200 transition mb-4 flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828M7 7v.01M7 7a5 5 0 017.071 0l.707.707a5 5 0 010 7.071l-6.586 6.586a5 5 0 01-7.071-7.071l.707-.707A5 5 0 017 7z" />
