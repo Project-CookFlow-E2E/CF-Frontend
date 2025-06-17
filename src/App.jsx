@@ -85,26 +85,26 @@ import React, { useEffect, useState } from 'react';
      return <div>Cargando autenticación...</div>;
    }
 
-   return (
-     <BrowserRouter data-testid='app-browser-router'>
-       <Header data-testid='app-header' isAuthenticated={isAuthenticated} />
-       <ScrollToTop />
-       <Routes data-testid='app-routes'>
-         <Route path='/' element={<Landing />} />
-         <Route path='/login' element={isAuthenticated ? <Navigate to='/' /> : <Login />} />
-         <Route path='/register' element={<SignUp />} />
-         <Route path='/profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
-         <Route path='/recipe/:id' element={<Recipe />} />
-         <Route path='/search' element={<Search />} />
-         <Route path='/inspire-me' element={isAuthenticated ? <InspireMe /> : <Navigate to='/login' />} />
-         <Route path='/add-recipe' element={isAuthenticated ? <AddRecipe /> : <Navigate to='/login' />} />
-         <Route path='/admin-dashboard' element={isAuthenticated ? <AdminDashboard /> : <Navigate to='/login' />} />
-         <Route path='/shopping-list' element={isAuthenticated ? <ShoppingList /> : <Navigate to='/login' />} />
-         <Route path='/main' element={<Home />} />
-       </Routes>
-       <Footer data-testid='app-footer' />
-     </BrowserRouter>
-   );
+ return (
+    <BrowserRouter data-testid='app-browser-router'>
+      <Header data-testid='app-header' isAuthenticated={isAuthenticated} />
+      <ScrollToTop />
+      <Routes data-testid='app-routes'>
+        <Route path='/' element={<Landing />} />
+        <Route path='/login' element={isAuthenticated ? <Navigate to='/main' /> : <Login />} />
+        <Route path='/register' element={<SignUp />} />
+        <Route path='/profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
+        <Route path='/recipe/:id' element={<Recipe />} />
+        <Route path='/search' element={<Search />} />
+        <Route path='/inspire-me' element={isAuthenticated ? <InspireMe /> : <Navigate to='/login' />} />
+        <Route path='/add-recipe' element={isAuthenticated ? <AddRecipe /> : <Navigate to='/login' />} />
+        <Route path='/admin-dashboard' element={isAuthenticated ? <AdminDashboard /> : <Navigate to='/login' />} />
+        <Route path='/shopping-list' element={isAuthenticated ? <ShoppingList /> : <Navigate to='/login' />} />
+        <Route path='/main' element={<Home />} />
+      </Routes>
+      <Footer data-testid='app-footer' />
+    </BrowserRouter>
+  );
  }
 
  export default App;
