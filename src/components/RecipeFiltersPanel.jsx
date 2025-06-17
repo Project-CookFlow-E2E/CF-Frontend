@@ -2,6 +2,7 @@
  * @file RecipeFiltersPanel.jsx
  * @description Componente visual para seleccionar filtros de recetas: categoría general, tipo de cocina y origen.
  * Muestra badges interactivos reutilizando el componente <Badge />, permitiendo seleccionar múltiples opciones por grupo.
+ * Estilizado con bordes grises cuando no están seleccionados.
  *
  * @author Ana Castro basado en el código de Saray en Search.jsx.
  */
@@ -23,9 +24,7 @@ const RecipeFiltersPanel = ({ general = [], type = [], origin = [], selected, se
                         return (
                             <span
                                 key={cat.id}
-                                className={
-                                    !isSelected ? "border border-gray-300 rounded-full inline-block" : "inline-block"
-                                }
+                                className={`inline-block rounded-full ${isSelected ? "" : "border border-gray-300"}`}
                             >
                                 <Badge
                                     checked={isSelected}
@@ -60,9 +59,7 @@ const RecipeFiltersPanel = ({ general = [], type = [], origin = [], selected, se
                         return (
                             <span
                                 key={cat.id}
-                                className={
-                                    !isSelected ? "border border-gray-300 rounded-full inline-block" : "inline-block"
-                                }
+                                className={`inline-block rounded-full ${isSelected ? "" : "border border-gray-300"}`}
                             >
                                 <Badge
                                     checked={isSelected}
@@ -97,9 +94,7 @@ const RecipeFiltersPanel = ({ general = [], type = [], origin = [], selected, se
                         return (
                             <span
                                 key={cat.id}
-                                className={
-                                    !isSelected ? "border border-gray-300 rounded-full inline-block" : "inline-block"
-                                }
+                                className={`inline-block rounded-full ${isSelected ? "" : "border border-gray-300"}`}
                             >
                                 <Badge
                                     checked={isSelected}

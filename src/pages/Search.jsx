@@ -1,8 +1,7 @@
 /**
  * @file Search.jsx
  * @description Página de búsqueda de recetas. Permite aplicar filtros por categoría, tipo de cocina y origen,
- * además de realizar búsquedas por texto. Solo se muestran las recetas tras pulsar "Buscar" o la tecla Enter.
- *
+ * además de realizar búsquedas por texto. 
  * @author Saray
  * @modified Ana Castro - Refactorización del filtrado a hook personalizado, integración con base de datos
  * para categorías y recetas. Se ha externalizado la lógica de selección automática desde parámetros de URL
@@ -14,6 +13,8 @@ import RecipeFiltersPanel from "../components/RecipeFiltersPanel";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import useRecipeSearch from "../hooks/useRecipeSearch";
+import useFavorites from "../hooks/useFavorites";
+import { useNavigate } from "react-router-dom";
 
 const Search = () => {
     const {
@@ -33,6 +34,9 @@ const Search = () => {
         showingAll,
         toggleMostrarTodo,
     } = useRecipeSearch();
+
+    const navigate = useNavigate();
+    const { favorites, toggleFavorite } = useFavorites();
 
     const [isOpen, setIsOpen] = useState(true);
 
@@ -95,7 +99,7 @@ const Search = () => {
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
                                 </svg>
-                            ) : (                                
+                            ) : (
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <rect x="9" y="5" width="2" height="10" rx="1" fill="currentColor" />
                                     <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
@@ -139,7 +143,20 @@ const Search = () => {
                     {Array.isArray(recipesToShow) && recipesToShow.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30">
                             {recipesToShow.map((recipe) => (
-                                <Card className="pt-1" key={recipe.id} {...recipe} />
+                                <Card
+                                    key={recipe.id}
+                                    id={`recipe-card-${recipe.id}`}
+                                    image={recipe.image_url}
+                                    name={recipe.name}
+                                    category={recipe.category}
+                                    time={`${recipe.duration_minutes}`}
+                                    isFavorite={
+                                        Array.isArray(favorites) &&
+                                        favorites.some((fav) => fav?.recipe_id === recipe.id)
+                                    }
+                                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                                    onClick={() => navigate(`/recipe/${recipe.id}`)}
+                                />
                             ))}
                         </div>
                     ) : (

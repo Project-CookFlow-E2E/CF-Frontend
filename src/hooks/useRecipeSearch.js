@@ -1,7 +1,7 @@
 /**
  * @file useRecipeSearch.js
  * @description Hook personalizado que unifica toda la lógica de filtrado, búsqueda y visualización de recetas.
- * Utiliza hooks internos (`useCategories`, `useRecipes`, `useRecipeFilters`) y controla la interacción con la URL (parámetro de categoría),
+ * Utiliza hooks internos (`useCategories` y `useRecipes`) y controla la interacción con la URL (parámetro de categoría),
  * además de aplicar una selección por defecto si no hay filtros activos. Maneja también el control de visibilidad de filtros
  * y la gestión de los resultados mostrados tras aplicar búsqueda o filtrado.
  *
