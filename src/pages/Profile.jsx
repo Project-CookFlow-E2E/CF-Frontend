@@ -41,10 +41,13 @@ import useFavorites from "../hooks/useFavorites";
 import useProfileRecipes from "../hooks/useProfileRecipes";
 import { userService } from "../services/userService";
 import { imageService } from "../services/imageService";
+import Card from "../components/Card";
+import { useNavigate } from "react-router-dom";
 
 const USER_TYPE = "USER"; 
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bio, setBio] = useState("");
   const [editingBio, setEditingBio] = useState(false);
@@ -56,7 +59,14 @@ const Profile = () => {
   const [imgLoading, setImgLoading] = useState(false);
   const [imgFile, setImgFile] = useState(null);
 
-  const { favorites } = useFavorites();
+  
+  const { 
+    favorites, 
+    favoriteRecipes, 
+    loading: loadingFavorites, 
+    toggleFavorite 
+  } = useFavorites();
+  
   const {
     activeTab,
     setActiveTab,
@@ -65,7 +75,6 @@ const Profile = () => {
     paginatedRecipes,
     totalPages,
     filteredRecipes,
-    toggleFavorite,
   } = useProfileRecipes();
 
 
@@ -78,7 +87,6 @@ const Profile = () => {
     };
     fetchUser();
   }, []);
-
 
   const handleBioSave = async () => {
   setBioLoading(true);
@@ -95,10 +103,9 @@ const handleImgSave = async () => {
   setImgLoading(true);
   try {
     await imageService.updateProfileImage(imgFile);
-    // Vuelve a pedir los datos del usuario y actualiza el estado
     const data = await userService.getMe();
     setUser(data);
-    setProfileImg(data.image || null); // Ajusta si tu backend devuelve la url en otro campo
+    setProfileImg(data.image || null);
     setImgModalOpen(false);
     setImgFile(null);
   } finally {
@@ -122,10 +129,12 @@ const handleImgSave = async () => {
   };
 
   if (!user) return <div>Cargando perfil...</div>;
-  console.log(profileImg)
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Perfil de {user.name}</h2>
+      
+      
       <div className="flex items-center mb-4">
         <div className="relative">
           <img
@@ -151,6 +160,8 @@ const handleImgSave = async () => {
           <div><strong>Email:</strong> {user.email}</div>
         </div>
       </div>
+      
+      
       <div className="mb-4">
         <strong>Biografía:</strong>
         {editingBio ? (
@@ -246,14 +257,13 @@ const handleImgSave = async () => {
         </div>
       )}
 
+      
       <div className="mb-6">
         <button
-          className={`mr-4 ${
-            activeTab === "saved" ? "font-bold underline" : ""
-          }`}
+          className={`mr-4 ${activeTab === "saved" ? "font-bold underline" : ""}`}
           onClick={() => setActiveTab("saved")}
         >
-          Recetas favoritas ({favorites.length})
+          Recetas favoritas ({favoriteRecipes.length})
         </button>
         <button
           className={activeTab === "created" ? "font-bold underline" : ""}
@@ -263,34 +273,60 @@ const handleImgSave = async () => {
         </button>
       </div>
 
+     
       <div>
-        {paginatedRecipes.length === 0 ? (
-          <div>No hay recetas para mostrar.</div>
+        {activeTab === "saved" ? (
+          <>
+            {loadingFavorites ? (
+              <div>Cargando recetas favoritas...</div>
+            ) : favoriteRecipes.length === 0 ? (
+              <div>No tienes recetas favoritas.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {favoriteRecipes.map((recipe) => (
+                  <div
+                    key={recipe.id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/recetas/${recipe.id}`)}
+                  >
+                    <Card
+                      id={recipe.id}
+                      name={recipe.name}
+                      image={recipe.image}
+                      category={recipe.category}
+                      time={recipe.time}
+                      isFavorite={true}
+                      onToggleFavorite={() => toggleFavorite(recipe.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         ) : (
-          <ul>
-            {paginatedRecipes.map((recipe) => (
-              <li
-                key={recipe.id}
-                className="mb-2 flex justify-between items-center border-b pb-2"
-              >
-                <span>{recipe.name}</span>
-                <button
-                  className={`ml-2 ${
-                    favorites.includes(String(recipe.id))
-                      ? "text-yellow-500"
-                      : "text-gray-400"
-                  }`}
-                  onClick={() => toggleFavorite(recipe.id)}
-                  title="Favorito"
+          paginatedRecipes.length === 0 ? (
+            <div>No hay recetas para mostrar.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {paginatedRecipes.map((recipe) => (
+                <div
+                  key={recipe.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/recetas/${recipe.id}`)}
                 >
-                  ★
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <Card
+                    recipe={recipe}
+                    isFavorite={favorites.includes(String(recipe.id))}
+                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
 
+      
       <div className="flex justify-between items-center mt-4">
         <button
           className="px-3 py-1 border rounded"
