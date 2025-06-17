@@ -1,25 +1,11 @@
-/**
- * Hook personalizado para gestionar los favoritos del usuario autenticado.
- * Este hook se encarga de obtener, añadir y eliminar recetas favoritas.
- * También gestiona el estado de la lista de favoritos y expone la función `toggleFavorite`
- * para alternar entre marcar o desmarcar una receta como favorita.
- *
- * @module useFavorites
- * @author Ana Castro basado en el código de Yuliia Martynovych en Home.jsx
- *
- * @returns {Object} Objeto que contiene las siguientes propiedades:
- * - `favorites` {Array}: Lista de recetas favoritas del usuario autenticado.
- * - `loading` {boolean}: Indicador de si se están cargando los datos de favoritos.
- * - `toggleFavorite` {function}: Función que añade o elimina una receta de la lista de favoritos.
- */
-
-
 import { useState, useEffect } from "react";
 import { favoriteService } from "../services/favoriteService";
 import { getToken } from "../services/authService";
+import { recipeService } from "../services/recipeService"; // Asegúrate de importar recipeService
 
 const useFavorites = () => {
     const [favorites, setFavorites] = useState([]);
+    const [favoriteRecipes, setFavoriteRecipes] = useState([]); // Nuevo estado para datos completos
     const [loading, setLoading] = useState(true);
 
     const getUserFavorites = async () => {
@@ -29,6 +15,13 @@ const useFavorites = () => {
         try {
             const data = await favoriteService.getUserFavorites();
             setFavorites(data);
+            
+            // Obtener los datos completos de las recetas favoritas
+            const recipesPromises = data.map(fav => 
+                recipeService.getRecipeById(fav.recipe_id)
+            );
+            const recipesData = await Promise.all(recipesPromises);
+            setFavoriteRecipes(recipesData.filter(recipe => recipe !== null));
         } catch (error) {
             console.error("Error fetching favorites:", error);
         } finally {
@@ -45,10 +38,16 @@ const useFavorites = () => {
         try {
             if (favorite) {
                 await favoriteService.removeFavorite(favorite.id);
-                setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== favorite.id));
+                setFavorites(prev => prev.filter(fav => fav.id !== favorite.id));
+                setFavoriteRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
             } else {
                 await favoriteService.addFavorite(recipeId);
-                getUserFavorites();
+                // Obtenemos los datos de la nueva receta favorita
+                const newRecipe = await recipeService.getRecipeById(recipeId);
+                if (newRecipe) {
+                    setFavoriteRecipes(prev => [...prev, newRecipe]);
+                }
+                getUserFavorites(); // Actualizamos la lista de IDs
             }
         } catch (error) {
             console.error("Error toggling favorite:", error);
@@ -59,7 +58,12 @@ const useFavorites = () => {
         getUserFavorites();
     }, []);
 
-    return { favorites, loading, toggleFavorite };
+    return { 
+        favorites: favorites.map(fav => String(fav.recipe_id)), // Solo IDs como strings
+        favoriteRecipes, // Datos completos de las recetas
+        loading, 
+        toggleFavorite 
+    };
 };
 
 export default useFavorites;

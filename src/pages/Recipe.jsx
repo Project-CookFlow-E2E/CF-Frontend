@@ -1,80 +1,140 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { RecipeIngredientsChecklist, Button } from "../components";
 import TimerBadge from "../components/TimerBadge";
-
-// ========================================================================
-// ✅ SECCIÓN TEMPORAL DE MOCK:
-// Estas recetas son datos simulados para desarrollo sin backend.
-// ❌ IMPORTANTE: Cuando se conecte con backend, esta constante debe eliminarse.
-// Será reemplazada por un useEffect que obtenga datos desde una API.
-// ========================================================================
-const recetasOrdenadas = [
-  {
-    id: 1,
-    titulo: "Tarta de queso",
-    tiempo: 35,
-    imagen: "/tarta-queso.jpeg",
-    ingredientes: [
-      { id: 1, name: "Queso crema", quantity: 300, unit: "g" },
-      { id: 2, name: "Galletas", quantity: 150, unit: "g" },
-      { id: 3, name: "Mantequilla", quantity: 100, unit: "g" },
-      { id: 4, name: "Azucar", quantity: 200, unit: "g" },
-      { id: 5, name: "Leche", quantity: 200, unit: "ml" },
-    ],
-    pasos: [
-      { descripcion: "Precalentar horno", imagen: "/huevos.jpeg" },
-      { descripcion: "Machacar galletas", imagen: "/harina.jpeg" },
-      { descripcion: "Mezclar todo", imagen: "/mezclar-queso.jpeg" },
-      { descripcion: "Hornear 40 min", imagen: "/hornear.jpeg" },
-    ],
-  },
-  {
-    id: 2,
-    titulo: "Pan de plátano",
-    tiempo: 20,
-    imagen: "/panplatano.jpeg",
-    ingredientes: [
-      { id: 1, name: "Plátano", quantity: 3, unit: "ud" },
-      { id: 2, name: "Huevos", quantity: 2, unit: "ud" },
-      { id: 3, name: "Harina", quantity: 200, unit: "g" },
-      { id: 4, name: "Azucar", quantity: 200, unit: "g" },
-      { id: 5, name: "Leche", quantity: 200, unit: "ml" },
-    ],
-    pasos: [
-      { descripcion: "Precalentar horno", imagen: "/huevos.jpeg" },
-      { descripcion: "Machacar plátanos", imagen: "/harina.jpeg" },
-      { descripcion: "Mezclar todo", imagen: "/mezclar-queso.jpeg" },
-      { descripcion: "Hornear 40 min", imagen: "/hornear.jpeg" },
-    ],
-  },
-];
+import { recipeService } from '../services/recipeService';
+import { ingredientService } from '../services/ingredientService';
+import { unitService } from '../services/unitService';
 
 /**
  * Componente de pantalla de receta.
  * Muestra la información de una receta según el ID en la URL.
- *
- * 🔄 En el futuro:
- * - Esta pantalla debe hacer `fetch` de una receta específica desde el backend.
- * - El orden visual de navegación puede mantenerse con un array global o con IDs previos/siguientes.
  */
 const Recipe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const pasosRef = useRef(null);
 
-  const currentId = parseInt(id, 10);
-
-  // ==================================================================================
-  // ✅ Esta lógica usa los mocks. Más adelante, esta búsqueda se eliminará.
-  // 🔁 Será sustituida por:
-  // - useEffect(() => { fetch(`/api/recipes/${id}`)... }, [id])
-  // - Y estados tipo: const [receta, setReceta] = useState(null);
-  // ==================================================================================
-  const currentIndex = recetasOrdenadas.findIndex((r) => r.id === currentId);
-  const receta = recetasOrdenadas[currentIndex];
-
+  const [receta, setReceta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      setLoading(true);
+      setError(null);
+      setCheckedItems({});
+
+      try {
+        const rawRecipeData = await recipeService.getRecipeById(Number(id));
+
+        if (!rawRecipeData) {
+            throw new Error("Receta no encontrada o datos vacíos después de la llamada al servicio.");
+        }
+
+        const ingredientsWithDetailsPromises = rawRecipeData.ingredients.map(async (ing) => {
+          try {
+            const ingredientDetail = await ingredientService.getIngredientById(ing.ingredient);
+            const unitDetail = await unitService.getUnitById(ing.unit);
+
+            if (!ingredientDetail || !unitDetail) {
+                console.warn(`Advertencia: Detalle de ingrediente ${ing.ingredient} o unidad ${ing.unit} no encontrado.`);
+                return {
+                  id: ing.id,
+                  name: `Ingrediente desconocido (ID: ${ing.ingredient})`,
+                  quantity: ing.quantity,
+                  unit: `Unidad desconocida (ID: ${ing.unit})`,
+                };
+            }
+
+            return {
+              id: ing.id, 
+              name: ingredientDetail.name, 
+              quantity: ing.quantity,
+              unit: unitDetail.name,
+            };
+          } catch (innerErr) {
+            console.error(`Error al obtener detalles para ingrediente ID ${ing.ingredient} o unidad ID ${ing.unit}:`, innerErr);
+            return {
+              id: ing.id,
+              name: `ERROR: Ingrediente (${ing.ingredient})`,
+              quantity: ing.quantity,
+              unit: `ERROR: Unidad (${ing.unit})`,
+            };
+          }
+        });
+
+        const ingredientsWithDetails = await Promise.all(ingredientsWithDetailsPromises);
+
+        setReceta({
+          id: rawRecipeData.id,
+          titulo: rawRecipeData.name,
+          tiempo: rawRecipeData.duration_minutes,
+          imagen: rawRecipeData.image,
+          ingredientes: ingredientsWithDetails,
+          pasos: rawRecipeData.steps || [],
+        });
+      } catch (err) {
+        console.error("Error FATAL al cargar la receta completa:", err);
+        setError("No se pudo cargar la receta. Por favor, inténtalo de nuevo.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchRecipe();
+    }
+  }, [id]);
+
+  const handleToggleCheck = (ingredientId) => {
+    setCheckedItems((prev) => ({
+      ...prev,
+      [ingredientId]: !prev[ingredientId],
+    }));
+  };
+
+  const areAllChecked = receta && receta.ingredientes.every(
+    (item) => checkedItems[item.id]
+  );
+  const isAnyChecked = Object.values(checkedItems).some(Boolean);
+
+  const handleStartCooking = () => {
+    if (pasosRef.current) {
+      pasosRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleAddToShoppingList = () => {
+    if (!receta || !receta.ingredientes) return;
+
+    const noSeleccionados = receta.ingredientes.filter(
+      (item) => !checkedItems[item.id]
+    );
+
+    localStorage.setItem("shoppingList", JSON.stringify(noSeleccionados));
+
+    alert(
+      `${noSeleccionados.length} ingrediente(s) añadido(s) a la lista de la compra.`
+    );
+  };
+
+  if (loading) {
+    return (
+      <div data-testid="loading-recipe" className="text-center p-6">
+        Cargando receta...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div data-testid="recipe-error" className="text-center p-6 text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   if (!receta) {
     return (
@@ -84,82 +144,17 @@ const Recipe = () => {
     );
   }
 
-  /**
-   * Marca o desmarca un ingrediente en la lista.
-   * @param {number} id - ID del ingrediente.
-   */
-  const handleToggleCheck = (id) => {
-    setCheckedItems((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const areAllChecked = receta.ingredientes.every(
-    (item) => checkedItems[item.id]
-  );
-  const isAnyChecked = Object.values(checkedItems).some(Boolean);
-
-  /**
-   * Desplaza la vista hacia la sección de pasos.
-   */
-  const handleStartCooking = () => {
-    if (pasosRef.current) {
-      pasosRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  /**
-   * Reemplaza completamente la lista de la compra en localStorage
-   * con los ingredientes no seleccionados (no checkeados).
-   */
-  const handleAddToShoppingList = () => {
-    const noSeleccionados = receta.ingredientes.filter(
-      (item) => !checkedItems[item.id]
-    );
-
-    localStorage.setItem("shoppingList", JSON.stringify(noSeleccionados));
-
-    alert(
-      `${noSeleccionados.length} ingrediente(s) añadidos a la lista de la compra.`
-    );
-  };
-
-  /**
-   * Navega a la receta anterior según orden visual (no ID numérico).
-   */
-  const handleAnterior = () => {
-    setCheckedItems({});
-    if (currentIndex > 0) {
-      const anteriorId = recetasOrdenadas[currentIndex - 1].id;
-      navigate(`/recipe/${anteriorId}`);
-    }
-  };
-
-  /**
-   * Navega a la receta siguiente según orden visual (no ID numérico).
-   */
-  const handleSiguiente = () => {
-    setCheckedItems({});
-    if (currentIndex < recetasOrdenadas.length - 1) {
-      const siguienteId = recetasOrdenadas[currentIndex + 1].id;
-      navigate(`/recipe/${siguienteId}`);
-    }
-  };
-
   return (
     <div
       data-testid="recipe-screen"
       className="flex flex-col min-h-screen bg-background text-center"
     >
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
-        {/* Navegación entre recetas */}
         <div className="flex items-center justify-between mb-4">
           <button
             data-testid="btn-anterior"
-            onClick={handleAnterior}
-            disabled={currentIndex === 0}
-            className="text-3xl"
+            disabled={true}
+            className="text-3xl opacity-50 cursor-not-allowed"
           >
             &lt;
           </button>
@@ -170,7 +165,6 @@ const Recipe = () => {
             <h1 data-testid="recipe-title" className="text-3xl font-bold">
               {receta.titulo}
             </h1>
-            {console.log(receta.tiempo, typeof receta.tiempo)}
             <TimerBadge
               data-testid="recipe-time"
               minutes={receta.tiempo}
@@ -179,15 +173,13 @@ const Recipe = () => {
           </div>
           <button
             data-testid="btn-siguiente"
-            onClick={handleSiguiente}
-            disabled={currentIndex === recetasOrdenadas.length - 1}
-            className="text-3xl"
+            disabled={true}
+            className="text-3xl opacity-50 cursor-not-allowed"
           >
             &gt;
           </button>
         </div>
 
-        {/* Imagen de la receta */}
         <img
           data-testid="recipe-image"
           src={receta.imagen}
@@ -195,7 +187,6 @@ const Recipe = () => {
           className="rounded-xl drop-shadow-xl w-full max-w-md mx-auto"
         />
 
-        {/* Lista de ingredientes con checklist */}
         <RecipeIngredientsChecklist
           data-testid="ingredients-checklist"
           ingredients={receta.ingredientes}
@@ -203,7 +194,6 @@ const Recipe = () => {
           onToggleCheck={handleToggleCheck}
         />
 
-        {/* Botones de acción */}
         <div className="grid grid-cols-2 gap-3 mt-6 max-w-md mx-auto">
           <Button
             data-testid="btn-add-to-shopping-list"
@@ -231,7 +221,6 @@ const Recipe = () => {
           </Button>
         </div>
 
-        {/* Pasos de la receta */}
         <div data-testid="steps-section" ref={pasosRef} className="mt-16">
           <h2
             data-testid="steps-title"

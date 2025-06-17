@@ -2,10 +2,21 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Button from "./Button";
 import LogoTitle from "./LogoTitle";
-import { X } from "lucide-react";
+import { X, Shield } from "lucide-react";
+import { getToken } from "../services/authService";
 
 /**
  * Componente Sidebar que muestra un menú lateral con opciones de navegación en dispositivos móviles.
+ *
+ * Características:
+ * - Muestra enlaces de navegación según el estado de autenticación del usuario.
+ * - Si el usuario está logueado (`isLoggedIn`), muestra enlaces a perfil y cerrar sesión.
+ * - Si el usuario es administrador (según el JWT), muestra un botón con icono de escudo y texto "Administrador" que enlaza al panel de administración (`/admin-dashboard`).
+ *   El botón de administrador solo es visible si el token JWT contiene alguno de los siguientes campos:
+ *     - `is_staff: true`
+ *     - `is_admin: true`
+ *     - `role: "admin"`
+ * - Si el usuario no está logueado, muestra enlaces para iniciar sesión y registrarse.
  *
  * @param {{ open: boolean; onClose: () => void; isLoggedIn: boolean; onLogout: () => void; }} param0
  * @param {boolean} param0.open
@@ -14,8 +25,21 @@ import { X } from "lucide-react";
  * @param {() => void} param0.onLogout
  * @returns {JSX.Element}
  * @author Ángel Aragón
+ * @modifiedby Noemi Casaprima
+ * @modified Añadido botón de acceso al panel de administración visible solo para administradores.
  */
 const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
+  const isAdmin = () => {
+    try {
+      const token = getToken();
+      if (!token) return false;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.is_staff || payload.is_admin;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <div
       className={`fixed inset-0 z-50 flex transition-colors duration-300 ${
@@ -47,9 +71,25 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
         <nav className="flex flex-col gap-4">
           {isLoggedIn ? (
             <>
+              {isAdmin() && (
+                <Link
+                  to="/admin-dashboard"
+                  data-testid="admin-dashboard-link"
+                  title="Panel de administración"
+                  onClick={onClose}
+                >
+                  <Button
+                    className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
+                    ariaLabel="Panel de administración"
+                  >
+                    <Shield size={20} className="mr-2" />
+                    Administrador
+                  </Button>
+                </Link>
+              )}
               <Link to="/profile" data-testid="profile-link" onClick={onClose}>
                 <Button
-                  className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
                   data-testid="profile-button"
                 >
                   Mi Perfil
@@ -57,7 +97,7 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
               </Link>
               <Link to="/" data-testid="logout-link" onClick={onClose}>
                 <Button
-                  className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
                   data-testid="logout-button"
                   onClick={onLogout}
                 >
@@ -69,7 +109,7 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
             <>
               <Link to="/login" data-testid="login-link" onClick={onClose}>
                 <Button
-                  className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
                   data-testid="login-button"
                 >
                   Iniciar Sesión
@@ -81,7 +121,7 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
                 onClick={onClose}
               >
                 <Button
-                  className="bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200"
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
                   data-testid="register-button"
                 >
                   Registrarse

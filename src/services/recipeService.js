@@ -1,4 +1,6 @@
+import { wait } from "@testing-library/user-event/dist/cjs/utils/index.js";
 import api from "./api";
+import { getUserIdFromToken } from "./authService";
 /**
  * src/services/recipeService.js
  *
@@ -44,6 +46,9 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
     */
     getRecipeById: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${recipeId}/`);
         return response.data;
     },
@@ -70,6 +75,63 @@ export const recipeService = {
             limit: amountRecipes,
         };
         const response = await api.get(`${BASE_URL}/`, { params });
+        return response.data;
+    },
+
+    /**
+    * Fetches a list of recipes filtered by a specific user ID.
+    * This utilizes the backend's filtering capabilities on the recipes list endpoint.
+    * GET /api/recipes/?user_id={userId}
+     *
+    * @param {number} userId (optional) - The unique integer ID of the user whose recipes are to be fetched.
+    * Must be a positive integer.
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of recipe objects
+    * belonging to the specified user. Returns an empty array
+     * if no recipes are found for the given user ID.
+    * @throws {Error} If `userId` is not a valid positive integer, if the API request fails
+    * (e.g., network error, server error) or token doesn't have and user id.
+    */
+   getRecipeByUserId: async (userId) => {
+    let finalUserId = userId; 
+    
+    if (finalUserId === null || typeof finalUserId === 'undefined') {
+        try {
+            finalUserId = await getUserIdFromToken(); 
+        } catch (error) {
+            throw new Error("The user id is not delivered from token: " + error.message);
+        }
+    }
+
+    if (typeof finalUserId !== 'number' || !Number.isInteger(finalUserId) || finalUserId <= 0) {
+        throw new Error("User id is not valid.");
+    }
+
+    const response = await api.get(`${BASE_URL}/?user_id=${finalUserId}`);
+    return response.data;
+    },
+
+    /**
+    * Fetches a specified number of random recipes from the backend.
+    * This function enforces a maximum limit of 5 recipes per request to optimize database petition.
+    *
+    * GET /api/recipes/recipes/random/?count={numRecipes}
+    *
+    * @async
+    * @param {number} numRecipes - The desired number of random recipes to fetch.
+    * Must be a positive integer between 1 and 5 (inclusive).
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of random recipe objects.
+    * @throws {Error} If `numRecipes` is not a valid positive integer,
+    * or if `numRecipes` exceeds the maximum allowed limit of 5,
+    * or if the API request fails (e.g., network error, server error).
+    */
+    getRandomRecipes: async (numRecipes) => {
+        if (typeof numRecipes !== 'number' || !Number.isInteger(numRecipes) || numRecipes <= 0) {
+            throw new Error("Invalid parameter: received parameter must be a positive integer number");
+        };
+        if (numRecipes > 5) {
+            throw new Error("Max 5 recipes for DB petition.");
+        };
+        const response = await api.get(`${BASE_URL}/random?count=${numRecipes}`);
         return response.data;
     },
 
@@ -103,9 +165,12 @@ export const recipeService = {
     * Can include `name` (str), `description` (str), `duration_minutes` (int), `commensals` (int),
     * and `categories` (array of int IDs).
     * @returns {Promise<object>} A promise that resolves with the updated recipe object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
     */
     updateRecipe: async (recipeId, recipeData) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         const response = await api.patch(`${BASE_URL}/${recipeId}/`, recipeData);
         return response.data; 
     },
@@ -116,9 +181,12 @@ export const recipeService = {
     * 
     * @param {number} recipeId - The ID of the recipe to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the recipe is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
     */
     deleteRecipe: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
         await api.delete(`${BASE_URL}/${recipeId}/`);
         return true;
     }
