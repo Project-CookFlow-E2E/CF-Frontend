@@ -26,6 +26,7 @@ const AddRecipe = () => {
   const [allIngredients, setAllIngredients] = useState([]);
   const [unitsByType, setUnitsByType] = useState({});
   const [unitTypeCache, setUnitTypeCache] = useState({});
+  const [mensaje, setMensaje] = useState("");
   const dropdownRef = useRef(null);
 
   const {
@@ -63,14 +64,12 @@ const AddRecipe = () => {
     name: "steps",
   });
 
-  // Cargar categorías padre al montar
   useEffect(() => {
     categoryService.getAllParentCategories()
       .then((data) => setParentCategories(Array.isArray(data) ? data : []))
       .catch(() => setParentCategories([]));
   }, []);
 
-  // Cargar categorías hijas cuando cambia el padre seleccionado
   useEffect(() => {
     if (selectedParent) {
       categoryService.getChildCategoriesOfSpecificParent(selectedParent)
@@ -81,14 +80,12 @@ const AddRecipe = () => {
     }
   }, [selectedParent]);
 
-  // Cargar todos los ingredientes para autocompletar
   useEffect(() => {
     ingredientService.getAllIngredients()
       .then((data) => setAllIngredients(Array.isArray(data) ? data : []))
       .catch(() => setAllIngredients([]));
   }, []);
 
-  // Cerrar el dropdown de categorías al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -115,7 +112,6 @@ const AddRecipe = () => {
     }
   }, [foto]);
 
-  // Validación de imágenes (receta y pasos)
   const validateImageFile = (file) => {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
@@ -167,20 +163,18 @@ const AddRecipe = () => {
     setPreview(null);
   };
 
-  const categoriasSeleccionadas = watch("categoriasSeleccionadas");
+  const categoriasSeleccionadas = watch("categoriasSeleccionadas") || [];
+
   const handleCategoriaChange = (categoria) => {
-    const seleccionadas = categoriasSeleccionadas || [];
+    let seleccionadas = categoriasSeleccionadas || [];
     if (seleccionadas.includes(categoria.id)) {
-      setValue(
-        "categoriasSeleccionadas",
-        seleccionadas.filter((id) => id !== categoria.id)
-      );
+      seleccionadas = seleccionadas.filter((id) => id !== categoria.id);
     } else {
-      setValue("categoriasSeleccionadas", [...seleccionadas, categoria.id]);
+      seleccionadas = [...seleccionadas, categoria.id];
     }
+    setValue("categoriasSeleccionadas", seleccionadas);
   };
 
-  // Manejo de selección de ingrediente y unidades
   const handleIngredientChange = async (e, index) => {
     const value = e.target.value;
     setValue(`ingredients.${index}.name`, value);
@@ -235,34 +229,81 @@ const AddRecipe = () => {
     }
   };
 
+  // Mostrar todos los datos recopilados para todas las tablas
+  const mostrarDatosAGuardar = (data) => {
+    const receta = {
+      nombre: data.nombre,
+      descripcion: data.descripcion,
+      tiempo: data.tiempo,
+      comensales: data.comensales,
+      foto: data.foto ? data.foto.name : null,
+    };
+
+    const categorias = data.categoriasSeleccionadas.map(id => {
+      const todas = [...parentCategories, ...childCategories];
+      const cat = todas.find(c => c.id === id);
+      return cat ? `${cat.name} (ID: ${cat.id})` : `ID: ${id}`;
+    });
+
+    const ingredientes = data.ingredients.map(ing => ({
+      nombre: ing.name,
+      cantidad: ing.quantity,
+      unidad: ing.unit,
+    }));
+
+    const pasos = data.steps.map((step, i) => ({
+      paso: i + 1,
+      texto: step.text,
+      imagen: step.image ? step.image.name : null,
+    }));
+
+    return `
+Tabla recetas
+${JSON.stringify(receta, null, 2)}
+
+Tabla recetas_categorias
+${JSON.stringify(categorias, null, 2)}
+
+Tabla recetas_ingredientes
+${JSON.stringify(ingredientes, null, 2)}
+
+Tabla recetas_pasos
+${JSON.stringify(pasos, null, 2)}
+    `;
+  };
+
   const onSubmit = async (data) => {
+    // Mostrar todos los datos recopilados antes de grabar
+    setMensaje("Datos a guardar:\n" + mostrarDatosAGuardar(data));
+    await new Promise(resolve => setTimeout(resolve, 10000)); // Espera 10 segundos
+
     try {
-      const formData = new FormData();
-      formData.append("name", data.nombre);
-      formData.append("description", data.descripcion);
-      formData.append("duration_minutes", parseInt(data.tiempo, 10));
-      formData.append("commensals", parseInt(data.comensales, 10));
-      data.categoriasSeleccionadas.forEach((catId) =>
-        formData.append("categories", catId)
-      );
+      // Guardar la receta principal en el backend
+      const recipePayload = new FormData();
+      recipePayload.append("name", data.nombre);
+      recipePayload.append("description", data.descripcion);
+      recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
+      recipePayload.append("commensals", parseInt(data.comensales, 10));
       if (data.foto) {
-        formData.append("photo", data.foto);
+        recipePayload.append("photo", data.foto);
       }
-      data.ingredients.forEach((ing, i) => {
-        formData.append(`ingredients[${i}][name]`, ing.name);
-        formData.append(`ingredients[${i}][quantity]`, ing.quantity);
-        formData.append(`ingredients[${i}][unit]`, ing.unit);
-      });
-      data.steps.forEach((step, i) => {
-        formData.append(`steps[${i}][text]`, step.text);
-        if (step.image) {
-          formData.append(`steps[${i}][image]`, step.image);
-        }
-      });
-      await recipeService.createRecipe(formData);
+
+      const recetaGuardada = await recipeService.createRecipe(recipePayload);
+
+      setMensaje(
+        "Datos a guardar:\n" +
+        mostrarDatosAGuardar(data) +
+        `\n\nReceta guardada correctamente. ID de la receta creada: ${recetaGuardada.id || "(no disponible)"}`
+      );
       reset();
-    } catch {
-      // Puedes mostrar un mensaje de error aquí si lo deseas
+    } catch (error) {
+      let errorMsg = "Error al guardar la receta.";
+      if (error.response && error.response.data) {
+        errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+      } else if (error.message) {
+        errorMsg += "\nDetalles: " + error.message;
+      }
+      setMensaje(errorMsg);
     }
   };
 
@@ -276,6 +317,17 @@ const AddRecipe = () => {
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
           Añadir receta
         </h1>
+
+        {/* Mensaje */}
+        {mensaje && (
+          <div
+            className="mb-4 px-3 py-4 rounded-lg text-sm font-mono text-white bg-footer text-left transition-all duration-300"
+            data-testid="console-message"
+            style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+          >
+            {mensaje}
+          </div>
+        )}
 
         {/* Imagen de la receta */}
         <div
@@ -372,7 +424,9 @@ const AddRecipe = () => {
                 value={selectedParent || ""}
                 onChange={e => setSelectedParent(Number(e.target.value))}
               >
-                <option value="">Selecciona una categoría padre</option>
+                <option value="" className="text-gray-400">
+                  Selecciona una categoría padre
+                </option>
                 {parentCategories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -616,7 +670,8 @@ const AddRecipe = () => {
                         >
                           {field.value?.imagePreview ? (
                             <>
-                              <img                                src={field.value.imagePreview}
+                              <img
+                                src={field.value.imagePreview}
                                 alt={`Imagen paso ${index + 1}`}
                                 className="object-contain w-full h-full"
                                 data-testid={`step-image-preview-${index}`}
