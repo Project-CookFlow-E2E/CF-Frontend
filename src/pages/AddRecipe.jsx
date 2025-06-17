@@ -5,7 +5,6 @@
  * created by Nico
  * @modify Rafael Fernández
  */
-
 import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Image, Plus } from "lucide-react";
@@ -275,15 +274,21 @@ ${JSON.stringify(pasos, null, 2)}
   const onSubmit = async (data) => {
     // Mostrar todos los datos recopilados antes de grabar
     setMensaje("Datos a guardar:\n" + mostrarDatosAGuardar(data));
-    await new Promise(resolve => setTimeout(resolve, 10000)); // Espera 10 segundos
+    await new Promise(resolve => setTimeout(resolve, 50000)); // Espera 10 segundos
 
     try {
-      // Guardar la receta principal en el backend
+      // Guardar la receta principal en el backend, incluyendo las categorías
       const recipePayload = new FormData();
       recipePayload.append("name", data.nombre);
       recipePayload.append("description", data.descripcion);
       recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
       recipePayload.append("commensals", parseInt(data.comensales, 10));
+      // Agrega cada categoría como un campo separado (no como array)
+      if (data.categoriasSeleccionadas && data.categoriasSeleccionadas.length > 0) {
+        data.categoriasSeleccionadas.forEach(catId =>
+          recipePayload.append("categories", catId)
+        );
+      }
       if (data.foto) {
         recipePayload.append("photo", data.foto);
       }
