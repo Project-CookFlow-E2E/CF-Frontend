@@ -54,9 +54,12 @@ export const ingredientService = {
     * 
     * @param {number} ingredientId - The ID of the ingredient to fetch.
     * @returns {Promise<object>} A promise that resolves with the ingredient's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found if the ingredient is not found or not approved).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found if the ingredient is not found or not approved) or ingredient id not valid.
     */
     getIngredientById: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         const response = await api.get(`${BASE_URL}/${ingredientId}/`);
         return response.data;
     },
@@ -70,9 +73,12 @@ export const ingredientService = {
     * 
     * @param {number} ingredientId - The ID of the ingredient to fetch.
     * @returns {Promise<object>} A promise that resolves with the ingredient's data.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or ingredient id not valid.
     */
     getIngredientByIdAdmin: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         const response = await api.get(`${ADMIN_BASE_URL}/${ingredientId}/`);
         return response.data;
     },
@@ -112,9 +118,12 @@ export const ingredientService = {
     * @param {object} ingredientData - An object containing the ingredient data to update.
     * Expected fields: `name` (str), `description` (str), `quantity` (int), `unit` (str), `is_checked` (bool), `is_approved` (bool, if applicable).
     * @returns {Promise<object>} A promise that resolves with the updated ingredient object.
-    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or ingredient id not valid.
     */
     updateIngredientAdmin: async (ingredientId, ingredientData) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         const response = await api.put(`${ADMIN_BASE_URL}/${ingredientId}/`, ingredientData);
         return response.data;
     },
@@ -125,9 +134,12 @@ export const ingredientService = {
     * 
     * @param {number} ingredientId - The ID of the ingredient to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the ingredient is successfully deleted.
-    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden).
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or ingredient id not valid.
     */
     deleteIngredientAdmin: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
         await api.delete(`${ADMIN_BASE_URL}/${ingredientId}/`);
         return true;
     }

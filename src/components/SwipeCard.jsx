@@ -151,7 +151,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
         data-testid="open-recipe-button-wrapper"
       >
         <Button
-          onClick={() => navigate(`/recipes/${recipe.id}`)}
+          onClick={() => navigate(`/recipe/${recipe.id}`)}
           type="button"
           className="w-full px-4 py-2 rounded-lg"
           aria-label="Ver receta"

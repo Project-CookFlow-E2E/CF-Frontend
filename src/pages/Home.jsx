@@ -9,10 +9,9 @@
  *
  * Usa `useNavigate` para la navegación entre páginas.
  * Usa `useFavorites` para gestionar las recetas favoritas del usuario
- * 
- * @author Yuliia Martynovych 
- * @module Home
+ *
  * @author Yuliia Martynovych
+ * @module Home 
  * @modifiedby Ana Castro
  * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites,
  * gestion de categorias a través del hook useCategories,
@@ -20,29 +19,41 @@
  *  Seleccion de las tres ultimas recetas creadas en la db.
  */
 
-
 import { Badge, Button, Card } from "../components";
 import useFavorites from "../hooks/useFavorites";
 import useCategories from "../hooks/useCategories";
 import useLatestRecipes from "../hooks/useLatestRecipes";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { userService } from "../services/userService";
 
-
-const Home = () => {    
-    
+const Home = () => {
     const { latestRecipes } = useLatestRecipes();
-    const { favorites, toggleFavorite } = useFavorites();    
-    const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(1); 
-   
+    const { favorites, toggleFavorite } = useFavorites();
+    const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(2);
     const navigate = useNavigate();
+    const [userName, setUserName] = useState("");
+
+    useEffect(() => {
+        userService
+            .getMe()
+            .then((user) => setUserName(user?.name || user?.first_name || user?.username || ""))
+            .catch(() => setUserName(""));
+    }, []);
 
     return (
         <div className="min-h-screen bg-background w-full" data-testid="home-page">
             <div className="w-full bg-background pt-7 pb-12 px-4 sm:px-6 lg:px-20" id="home-header">
                 <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                     <div className="flex flex-col ml-12 justify-center items-center lg:items-start text-center lg:text-left">
-                        <p className="text-gray-600 mb-8" data-testid="prompt-text" >
-                            ¿No sabes que elegir?
+                        <p className="text-gray-600 mb-8 text-lg" data-testid="prompt-text">
+                            {userName ? (
+                                <>
+                                    <span className="font-bold">Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
+                                </>
+                            ) : (
+                                "¿No sabes qué elegir?"
+                            )}
                         </p>
                         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-10" data-testid="main-title">
                             ¿Qué te apetece?
@@ -109,7 +120,7 @@ const Home = () => {
                                 isFavorite={
                                     Array.isArray(favorites) && favorites.some((fav) => fav?.recipe_id === recipe.id)
                                 }
-                                onToggleFavorite={() => toggleFavorite(recipe.id)} // Asegúrate de que pasas correctamente el id aquí
+                                onToggleFavorite={() => toggleFavorite(recipe.id)}
                                 onClick={() => navigate(`/recipe/${recipe.id}`)}
                             />
                         ))}
@@ -126,7 +137,7 @@ const Home = () => {
                         onClick={() => navigate("/inspire-me")}
                         ariaLabel="Inspire me"
                         className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition"
-                        >
+                    >
                         <span className="text-white font-semibold text-lg">Inspire me</span>
                     </Button>
                 </div>
