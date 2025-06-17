@@ -100,7 +100,7 @@ import React, { useEffect, useState } from 'react';
         <Route path='/add-recipe' element={isAuthenticated ? <AddRecipe /> : <Navigate to='/login' />} />
         <Route path='/admin-dashboard' element={isAuthenticated ? <AdminDashboard /> : <Navigate to='/login' />} />
         <Route path='/shopping-list' element={isAuthenticated ? <ShoppingList /> : <Navigate to='/login' />} />
-        <Route path='/main' element={<Home />} />
+        <Route path='/main'element={isAuthenticated ? <Home /> : <Navigate to='/login' />} />
       </Routes>
       <Footer data-testid='app-footer' />
     </BrowserRouter>
