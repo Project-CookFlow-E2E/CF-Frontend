@@ -1,4 +1,6 @@
+import { wait } from "@testing-library/user-event/dist/cjs/utils/index.js";
 import api from "./api";
+import { getUserIdFromToken } from "./authService";
 /**
  * src/services/recipeService.js
  *
@@ -81,20 +83,55 @@ export const recipeService = {
     * This utilizes the backend's filtering capabilities on the recipes list endpoint.
     * GET /api/recipes/?user_id={userId}
      *
-    * @param {number} userId - The unique integer ID of the user whose recipes are to be fetched.
+    * @param {number} userId (optional) - The unique integer ID of the user whose recipes are to be fetched.
     * Must be a positive integer.
     * @returns {Promise<Array<object>>} A promise that resolves with an array of recipe objects
     * belonging to the specified user. Returns an empty array
      * if no recipes are found for the given user ID.
-    * @throws {Error} If `userId` is not a valid positive integer, or if the API request fails
-    * (e.g., network error, server error).
+    * @throws {Error} If `userId` is not a valid positive integer, if the API request fails
+    * (e.g., network error, server error) or token doesn't have and user id.
     */
-    getRecipeByUserId: async (userId) => {
-        if (typeof userId !== 'number' || !Number.isInteger(userId) || userId <= 0) {
-            throw new Error("user id is not valid.");
-        };
+   getRecipeByUserId: async (userId) => {
+    let finalUserId = userId; 
+    
+    if (finalUserId === null || typeof finalUserId === 'undefined') {
+        try {
+            finalUserId = await getUserIdFromToken(); 
+        } catch (error) {
+            throw new Error("The user id is not delivered from token: " + error.message);
+        }
+    }
 
-        const response = await api.get(`${BASE_URL}/?user_id=${userId}`);
+    if (typeof finalUserId !== 'number' || !Number.isInteger(finalUserId) || finalUserId <= 0) {
+        throw new Error("User id is not valid.");
+    }
+
+    const response = await api.get(`${BASE_URL}/?user_id=${finalUserId}`);
+    return response.data;
+    },
+
+    /**
+    * Fetches a specified number of random recipes from the backend.
+    * This function enforces a maximum limit of 5 recipes per request to optimize database petition.
+    *
+    * GET /api/recipes/recipes/random/?count={numRecipes}
+    *
+    * @async
+    * @param {number} numRecipes - The desired number of random recipes to fetch.
+    * Must be a positive integer between 1 and 5 (inclusive).
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of random recipe objects.
+    * @throws {Error} If `numRecipes` is not a valid positive integer,
+    * or if `numRecipes` exceeds the maximum allowed limit of 5,
+    * or if the API request fails (e.g., network error, server error).
+    */
+    getRandomRecipes: async (numRecipes) => {
+        if (typeof numRecipes !== 'number' || !Number.isInteger(numRecipes) || numRecipes <= 0) {
+            throw new Error("Invalid parameter: received parameter must be a positive integer number");
+        };
+        if (numRecipes > 5) {
+            throw new Error("Max 5 recipes for DB petition.");
+        };
+        const response = await api.get(`${BASE_URL}/random?count=${numRecipes}`);
         return response.data;
     },
 
