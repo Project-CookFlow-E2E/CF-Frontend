@@ -64,7 +64,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-background px-4 py-3 flex justify-between items-center mx-auto max-w-6xl md:max-w-full">
+      <header className="bg-background px-10 pt-6 py-3 flex justify-between items-center mx-auto max-w-6xl md:max-w-full">
         <LogoTitle />
         <div className="md:hidden">
           <button
