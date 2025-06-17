@@ -32,7 +32,7 @@ const Home = () => {
     
     const { latestRecipes } = useLatestRecipes();
     const { favorites, toggleFavorite } = useFavorites();    
-    const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(1); 
+    const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(2); 
    
     const navigate = useNavigate();
 

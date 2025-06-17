@@ -16,30 +16,27 @@
  * @author Ana Castro basado en el codigo de yuliia Martynovych en Home.jsx.
  */
 
-
 import { useState, useEffect } from "react";
-import { categoryService } from "../services/categoryService"; 
+import { categoryService } from "../services/categoryService";
 import { useNavigate } from "react-router-dom";
 
-
 const useCategories = (parentCategoryId = 0) => {
-    const [categories, setCategories] = useState([]); 
-    const [selectedCategories, setSelectedCategories] = useState([]); 
-    const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null); 
-    const navigate = useNavigate(); 
+    const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-  
     const TakeCategories = async () => {
         setLoading(true);
         try {
             let data;
-            if (parentCategoryId === 0) {               
+            if (parentCategoryId === 0) {
                 data = await categoryService.getAllParentCategories();
-            } else {                
+            } else {
                 data = await categoryService.getChildCategoriesOfSpecificParent(parentCategoryId);
             }
-            setCategories(data); 
+            setCategories(data);
         } catch (err) {
             setError(err);
             console.error("Error fetching categories:", err);
@@ -47,19 +44,17 @@ const useCategories = (parentCategoryId = 0) => {
             setLoading(false);
         }
     };
-    
+
     useEffect(() => {
         TakeCategories();
     }, [parentCategoryId]);
-    
+
     const toggleCategory = (categoryName) => {
         setSelectedCategories((prev) =>
-            prev.includes(categoryName) 
-                ? prev.filter((category) => category !== categoryName)
-                : [...prev, categoryName] 
+            prev.includes(categoryName) ? prev.filter((category) => category !== categoryName) : [...prev, categoryName]
         );
     };
-    
+
     const handleSearchClick = () => {
         if (selectedCategories.length === 0) return;
 
@@ -68,17 +63,17 @@ const useCategories = (parentCategoryId = 0) => {
             return matched?.slug || selectedName.toLowerCase();
         });
 
-        const uniqueMapped = [...new Set(mapped)]; 
+        const uniqueMapped = [...new Set(mapped)];
         navigate(`/search?category=${uniqueMapped.join(",")}`);
     };
 
     return {
-        categories, 
-        selectedCategories, 
+        categories,
+        selectedCategories,
         toggleCategory,
-        loading, 
-        error, 
-        handleSearchClick, 
+        loading,
+        error,
+        handleSearchClick,
     };
 };
 

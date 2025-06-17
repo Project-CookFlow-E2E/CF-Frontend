@@ -7,90 +7,94 @@
  * @modified Ana Castro - Añadido filtrado dinámico por subcategorías y lógica de categoría inicial desde URL.
  */
 
-import { useState, useEffect } from "react";
-import { categoryService } from "../services/categoryService";
+import React from "react";
+import Badge from "./Badge";
 
-const useRecipeFilters = (recipes) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState([]);
-  const [selectedType, setSelectedType] = useState([]);
-  const [selectedOrigin, setSelectedOrigin] = useState([]);
-  const [subcategoryIds, setSubcategoryIds] = useState([]);
+const RecipeFiltersPanel = ({ general = [], type = [], origin = [], selected, setSelected }) => (
+    <div className="flex flex-col gap-6">
+        {/* Categorías generales */}
+        <div className="bg-white rounded-lg shadow p-4 mb-4">
+            <h5 className="font-semibold mb-2">Categorías</h5>
+            <div className="flex flex-wrap gap-2">
+                {general.length === 0 ? (
+                    <span className="text-gray-400">No categories available</span>
+                ) : (
+                    general.map((cat) => (
+                        <Badge
+                            key={cat.id}
+                            checked={selected.selectedCategory.includes(cat.id)}
+                            onChange={() => {
+                                if (selected.selectedCategory.includes(cat.id)) {
+                                    setSelected.setSelectedCategory(
+                                        selected.selectedCategory.filter((id) => id !== cat.id)
+                                    );
+                                } else {
+                                    setSelected.setSelectedCategory([...selected.selectedCategory, cat.id]);
+                                }
+                            }}
+                        >
+                            {cat.name}
+                        </Badge>
+                    ))
+                )}
+            </div>
+        </div>
 
-  /**
-   * Obtiene las subcategorías si hay una única categoría seleccionada (se asume que es una categoría padre).
-   */
-  
-  useEffect(() => {
-    const fetchSubcategories = async () => {
-      if (selectedCategory.length === 1) {
-        try {
-          const data = await categoryService.getChildCategoriesOfSpecificParent(selectedCategory[0]);
-          const subcategories = Array.isArray(data)
-            ? data
-            : Array.isArray(data.results)
-            ? data.results
-            : [];
-          setSubcategoryIds(subcategories.map((cat) => cat.id));
-        } catch (err) {
-          console.error("❌ Error fetching subcategories:", err);
-          setSubcategoryIds([]);
-        }
-      } else {
-        setSubcategoryIds([]);
-      }
-    };
+        {/* Tipos de cocina */}
+        <div className="bg-white rounded-lg shadow p-4 mb-4">
+            <h5 className="font-semibold mb-2">Tipo de cocina</h5>
+            <div className="flex flex-wrap gap-2">
+                {type.length === 0 ? (
+                    <span className="text-gray-400">No categories available</span>
+                ) : (
+                    type.map((cat) => (
+                        <Badge
+                            key={cat.id}
+                            checked={selected.selectedType.includes(cat.id)}
+                            onChange={() => {
+                                if (selected.selectedType.includes(cat.id)) {
+                                    setSelected.setSelectedType(selected.selectedType.filter((id) => id !== cat.id));
+                                } else {
+                                    setSelected.setSelectedType([...selected.selectedType, cat.id]);
+                                }
+                            }}
+                            withBorder
+                        >
+                            {cat.name}
+                        </Badge>
+                    ))
+                )}
+            </div>
+        </div>
 
-    fetchSubcategories();
-  }, [selectedCategory]);
+        {/* Origen */}
+        <div className="bg-white rounded-lg shadow p-4 mb-4">
+            <h5 className="font-semibold mb-2">Origen</h5>
+            <div className="flex flex-wrap gap-2">
+                {origin.length === 0 ? (
+                    <span className="text-gray-400">No categories available</span>
+                ) : (
+                    origin.map((cat) => (
+                        <Badge
+                            key={cat.id}
+                            checked={selected.selectedOrigin.includes(cat.id)}
+                            onChange={() => {
+                                if (selected.selectedOrigin.includes(cat.id)) {
+                                    setSelected.setSelectedOrigin(
+                                        selected.selectedOrigin.filter((id) => id !== cat.id)
+                                    );
+                                } else {
+                                    setSelected.setSelectedOrigin([...selected.selectedOrigin, cat.id]);
+                                }
+                            }}
+                        >
+                            {cat.name}
+                        </Badge>
+                    ))
+                )}
+            </div>
+        </div>
+    </div>
+);
 
-  /**
-   * Filtra las recetas según los filtros activos: subcategorías (si hay una categoría padre), tipo, origen y búsqueda.
-   */
-  const filteredRecipes = recipes.filter((recipe) => {
-    const matchCategory =
-      selectedCategory.length === 0 ||
-      recipe.categories?.some((id) => subcategoryIds.includes(id));
-
-    const matchType =
-      selectedType.length === 0 || selectedType.includes(recipe.type?.id);
-
-    const matchOrigin =
-      selectedOrigin.length === 0 || selectedOrigin.includes(recipe.origin?.id);
-
-    const matchSearch = recipe.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    return matchCategory && matchType && matchOrigin && matchSearch;
-  });
-
-  /**
-   * Aplica una categoría inicial (por nombre) desde la URL si coincide con alguna existente.
-   * @param {string} categoryName - Nombre de la categoría a buscar (ej: "Comida").
-   * @param {Array} categoriesList - Lista de categorías disponibles.
-   */
-  const applyCategoryFromURL = (categoryName, categoriesList) => {
-    const match = categoriesList.find(
-      (cat) => cat.name.toLowerCase() === categoryName.toLowerCase()
-    );
-    if (match) {
-      setSelectedCategory([match.id]);
-    }
-  };
-
-  return {
-    filteredRecipes,
-    searchTerm,
-    setSearchTerm,
-    selectedCategory,
-    setSelectedCategory,
-    selectedType,
-    setSelectedType,
-    selectedOrigin,
-    setSelectedOrigin,
-    applyCategoryFromURL,
-  };
-};
-
-export default useRecipeFilters;
+export default RecipeFiltersPanel;
