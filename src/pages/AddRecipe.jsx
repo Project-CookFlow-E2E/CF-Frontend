@@ -278,9 +278,9 @@ const AddRecipe = () => {
       recipePayload.append("description", data.descripcion);
       recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
       recipePayload.append("commensals", parseInt(data.comensales, 10));
-      if (categoriasUnicas.length > 0) {
-        recipePayload.append("categories", JSON.stringify(categoriasUnicas));
-      }
+      categoriasUnicas.forEach((category) => {
+        recipePayload.append("categories[]", parseInt(category,10));
+      });
       if (data.foto) {
         recipePayload.append("photo", data.foto);
       }
