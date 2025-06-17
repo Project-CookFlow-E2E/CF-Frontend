@@ -1,35 +1,28 @@
 /**
  * @file Search.jsx
  * @description Página de búsqueda de recetas. Permite aplicar filtros por categoría, tipo de cocina y origen,
- * además de realizar búsquedas por texto. Solo se muestran las recetas tras pulsar "Buscar" o la tecla Enter.
- *
+ * además de realizar búsquedas por texto. 
  * @author Saray
  * @modified Ana Castro - Refactorización del filtrado a hook personalizado, integración con base de datos
  * para categorías y recetas. Se ha externalizado la lógica de selección automática desde parámetros de URL
  * hacia el hook de filtros.
  */
 
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import RecipeFiltersPanel from "../components/RecipeFiltersPanel";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import useCategories from "../hooks/useCategories";
-import useRecipes from "../hooks/useRecipes";
-import useRecipeFilters from "../hooks/useRecipeFilters";
-import { useState, useEffect } from "react";
+import useRecipeSearch from "../hooks/useRecipeSearch";
+import useFavorites from "../hooks/useFavorites";
+import { useNavigate } from "react-router-dom";
 
 const Search = () => {
-    const [searchParams] = useSearchParams();
-    const categoryParam = searchParams.get("category");
-    const [showAll, setShowAll] = useState(false);
-
-    const { categories, loading } = useCategories(1);
-    const { categories: typeCategories, loading: loadingType } = useCategories(2);
-    const { categories: originCategories, loading: loadingOrigin } = useCategories(3);
-    const { recipes, loading: loadingRecipes } = useRecipes();
-
     const {
-        filteredRecipes,
+        loadingAll,
+        categories,
+        typeCategories,
+        originCategories,
+        recipesToShow,
         searchTerm,
         setSearchTerm,
         selectedCategory,
@@ -38,21 +31,16 @@ const Search = () => {
         setSelectedType,
         selectedOrigin,
         setSelectedOrigin,
-        applyCategoryFromURL,
-    } = useRecipeFilters(recipes);
+        showingAll,
+        toggleMostrarTodo,
+    } = useRecipeSearch();
 
-    
-    useEffect(() => {
-        if (categoryParam && categories.length > 0) {
-            applyCategoryFromURL(categoryParam, categories);
-        }
-    }, [categoryParam, categories]);
+    const navigate = useNavigate();
+    const { favorites, toggleFavorite } = useFavorites();
 
-    const visibleRecipes = showAll ? filteredRecipes : recipes;
+    const [isOpen, setIsOpen] = useState(true);
 
-    if (loading || loadingType || loadingOrigin) {
-        return <div>Cargando categorías...</div>;
-    }
+    if (loadingAll) return <div className="p-6 text-center">Cargando categorías...</div>;
 
     return (
         <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-15 lg:px-10">
@@ -64,13 +52,17 @@ const Search = () => {
                             type="text"
                             placeholder="Buscar receta..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") setShowAll(true);
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                if (e.target.value.length > 0) {
+                                    setSelectedCategory([]);
+                                    setSelectedType([]);
+                                    setSelectedOrigin([]);
+                                }
                             }}
                             className="outline-none w-full bg-transparent text-base lg:text-lg"
                         />
-                        <button onClick={() => setShowAll(true)}>
+                        <button tabIndex={-1} type="button" onClick={() => setSearchTerm("")}>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -90,44 +82,88 @@ const Search = () => {
                 </div>
             </div>
 
-            <div className="w-full flex flex-col md:flex-row items-start gap-8 px-0 md:px-4">
-                <div className="w-full md:w-1/2">
-                    <RecipeFiltersPanel
-                        general={categories}
-                        type={typeCategories}
-                        origin={originCategories}
-                        selected={{ selectedCategory, selectedType, selectedOrigin }}
-                        setSelected={{ setSelectedCategory, setSelectedType, setSelectedOrigin }}
-                    />
-                    <div className="flex justify-center mt-4">
-                        <Button onClick={() => setShowAll(true)}>Buscar</Button>
+            <div className="w-full flex flex-col md:flex-row items-start gap-12 px-0 md:px-4">
+                {/* panel de filtros */}
+                <div className="w-full md:w-1/2 relative">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-semibold">Filtros</span>
+                        <button
+                            className="flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition"
+                            onClick={() => setIsOpen(!isOpen)}
+                            aria-label={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
+                            title={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
+                            type="button"
+                        >
+                            {isOpen ? (
+                                // icono mas y menos
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
+                                </svg>
+                            ) : (
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="9" y="5" width="2" height="10" rx="1" fill="currentColor" />
+                                    <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
+                                </svg>
+                            )}
+                        </button>
                     </div>
+                    {isOpen && (
+                        <>
+                            <RecipeFiltersPanel
+                                general={categories}
+                                type={typeCategories}
+                                origin={originCategories}
+                                selected={{
+                                    selectedCategory,
+                                    selectedType,
+                                    selectedOrigin,
+                                }}
+                                setSelected={{
+                                    setSelectedCategory,
+                                    setSelectedType,
+                                    setSelectedOrigin,
+                                }}
+                            />
+                            <div className="flex justify-center mt-4">
+                                <Button onClick={() => {}}>Buscar</Button>
+                            </div>
+                        </>
+                    )}
                 </div>
 
-                <div className="w-full md:w-1/2 md:pl-4 md:mt-0">
-                    <div className="flex justify-between items-center px-1 sm:px-2">
-                        <h4 className="text-xl font-bold text-black mb-1">Recetas populares</h4>
+                {/* cards de recetas */}
+                <div className="w-full md:w-1/2 md:pl-12 md:mt-0">
+                    <div className="flex justify-between items-center px-1 sm:px-2 mb-4 mt-0">
+                        <h4 className="text-xl font-bold text-black">Recetas populares</h4>
+                        <h4 className="text-l text-gray-500 cursor-pointer" onClick={toggleMostrarTodo}>
+                            {showingAll ? "Ocultar todas" : "Mostrar todas"}
+                        </h4>
                     </div>
 
-                    {loadingRecipes ? (
-                        <div className="text-center text-gray-600 text-lg mt-10 mb-40">Cargando recetas...</div>
-                    ) : showAll ? (
-                        filteredRecipes.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30">
-                                {filteredRecipes.map((recipe) => (
-                                    <Card key={recipe.id} {...recipe} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center text-gray-600 text-lg mt-10 mb-40">
-                                Lo siento, no tenemos resultados para esa receta.
-                            </div>
-                        )
-                    ) : (
+                    {Array.isArray(recipesToShow) && recipesToShow.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30">
-                            {visibleRecipes.map((recipe) => (
-                                <Card key={recipe.id} {...recipe} />
+                            {recipesToShow.map((recipe) => (
+                                <Card
+                                    key={recipe.id}
+                                    id={`recipe-card-${recipe.id}`}
+                                    image={recipe.image_url}
+                                    name={recipe.name}
+                                    category={recipe.category}
+                                    time={`${recipe.duration_minutes}`}
+                                    isFavorite={
+                                        Array.isArray(favorites) &&
+                                        favorites.some((fav) => fav?.recipe_id === recipe.id)
+                                    }
+                                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                                    onClick={() => navigate(`/recipe/${recipe.id}`)}
+                                />
                             ))}
+                        </div>
+                    ) : (
+                        <div className="text-center text-gray-600 text-lg mt-10 mb-40">
+                            {showingAll
+                                ? "No hay recetas para mostrar."
+                                : "Selecciona una categoría o busca para ver recetas."}
                         </div>
                     )}
                 </div>

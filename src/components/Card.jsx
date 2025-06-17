@@ -66,6 +66,7 @@ const Card = ({
           </h3>
           {onToggleFavorite && (
             <Button
+                
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleFavorite(id);
@@ -73,7 +74,7 @@ const Card = ({
               aria-label={
                 isFavorite ? "Quitar de Favoritos" : "Agregar a Favoritos"
               }
-              className={`${"hover:bg-transparent bg-transparent"}`}
+              className={`${"hover:bg-transparent bg-transparent mt-1"}`}
             >
               {isFavorite ? (
                 <BsBookmarkFill size={20} color="#F37A7E" />
