@@ -6,7 +6,6 @@ import api from "./api";
  * @author Lorena Martínez
  */
 
-const BASE_URL = "/users/me/image/";
 export const imageService = {
   /**
    * Actualiza la imagen de perfil del usuario autenticado.
@@ -16,9 +15,18 @@ export const imageService = {
   updateProfileImage: async (imageFile) => {
     const formData = new FormData();
     formData.append("image", imageFile);
-    const response = await api.put(BASE_URL, formData, {
+    const response = await api.put("/users/me/image/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+    return response.data;
+  },
+  /**
+   * Elimina la imagen de perfil del usuario autenticado.
+   * @returns {Promise<object>} - Datos de la imagen eliminada.
+   */
+  deleteProfileImage: async () => {
+    // No enviamos archivo, solo DELETE
+    const response = await api.delete("/users/me/image/");
     return response.data;
   },
 };

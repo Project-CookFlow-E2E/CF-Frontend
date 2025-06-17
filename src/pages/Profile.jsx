@@ -8,19 +8,32 @@
  * - Visualización paginada de recetas (8 por página).
  * - Posibilidad de marcar/desmarcar recetas como favoritas.
  * - Muestra información del usuario con nombre y descripción.
+ * - Subir o actualizar la imagen de perfil del usuario.
+ * - Eliminar la imagen de perfil del usuario.
+ * - Editar la biografía del usuario autenticado.
+ * - Borrar la biografía del usuario.
  *
+ * Métodos:
+ * - updateProfileImage(imageFile): Sube o actualiza la imagen de perfil del usuario autenticado.
+ * - deleteProfileImage(): Elimina la imagen de perfil del usuario autenticado.
+ * - updateBiography(bio): Actualiza la biografía del usuario autenticado.
+ * - deleteBiography(): Borra la biografía del usuario autenticado.
+ * 
  * Componentes utilizados:
  * - Card: Vista individual de receta con botón de favorito.
  * - Pagination: Control de cambio de página.
  * - useProfileRecipes: Hook para gestionar lógica de perfil y recetas.
+ * - useFavorites: Hook para gestionar favoritos del usuario.
  *
  * @module pages/Profile
  * @modifiedby Ana Castro
  * @modified Adaptación del componente Card.jsx para usarlo directamente, gestión de favoritos y recetas propias a través del hook useProfileRecipes.
  * @modifiedby Ángel Aragón
  * @modified Agregado cursor-pointer a los botones de las pestañas.
- * @modifiedby Lorena Martínez, Saray Miguel
- * @modified Añadida funcionalidad de edición de biografía del usuario y petición al backend para obtener información del usuario autenticado.
+ * @modifiedby Lorena Martínez
+ * @modified Añadida petición al backend para obtener información del usuario autenticado, funcionalidad de modificar y borrar imagen y biografía del usuario y funcionalidad de edición de biografía del usuario .
+ * @modifiedby Saray Miguel
+ * @modified Añadida relación con los hooks useFavorites y useProfileRecipes para gestionar favoritos y recetas del perfil.
  */
 
 import { useState, useEffect } from "react";
@@ -29,7 +42,7 @@ import useProfileRecipes from "../hooks/useProfileRecipes";
 import { userService } from "../services/userService";
 import { imageService } from "../services/imageService";
 
-const USER_TYPE = "USER"; // El tipo que usas para la foto de perfil
+const USER_TYPE = "USER"; 
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -37,7 +50,7 @@ const Profile = () => {
   const [editingBio, setEditingBio] = useState(false);
   const [bioLoading, setBioLoading] = useState(false);
 
-  // Foto de perfil
+
   const [profileImg, setProfileImg] = useState(null);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [imgLoading, setImgLoading] = useState(false);
@@ -55,7 +68,7 @@ const Profile = () => {
     toggleFavorite,
   } = useProfileRecipes();
 
-  // Cargar datos del usuario y su foto de perfil
+
   useEffect(() => {
     const fetchUser = async () => {
       const data = await userService.getMe();
@@ -66,35 +79,40 @@ const Profile = () => {
     fetchUser();
   }, []);
 
-  // Guardar biografía
+
   const handleBioSave = async () => {
-    setBioLoading(true);
-    await userService.updateMe({ biography: bio });
-    window.location.reload(); 
-    setEditingBio(false);
-    setBioLoading(false);
+  setBioLoading(true);
+  await userService.updateMe({ biography: bio });
+  setEditingBio(false);
+  setBioLoading(false);
+  const data = await userService.getMe();
+  setUser(data);
   };
 
-  // Subir o actualizar imagen de perfil
-  const handleImgSave = async () => {
-    if (!imgFile) return;
-    setImgLoading(true);
-    try {
-      await imageService.updateProfileImage(imgFile);
-      window.location.reload(); 
-      setImgModalOpen(false);
-      setImgFile(null);
-    } finally {
-      setImgLoading(false);
-    }
-  };
+  
+const handleImgSave = async () => {
+  if (!imgFile) return;
+  setImgLoading(true);
+  try {
+    await imageService.updateProfileImage(imgFile);
+    // Vuelve a pedir los datos del usuario y actualiza el estado
+    const data = await userService.getMe();
+    setUser(data);
+    setProfileImg(data.image || null); // Ajusta si tu backend devuelve la url en otro campo
+    setImgModalOpen(false);
+    setImgFile(null);
+  } finally {
+    setImgLoading(false);
+  }
+};
 
-  // Borrar imagen de perfil
+
   const handleImgDelete = async () => {
-    if (!profileImg) return;
     setImgLoading(true);
     try {
-      await imageService.deleteImage(user.id, USER_TYPE);
+      await imageService.deleteProfileImage();
+      const data = await userService.getMe();
+      setUser(data);
       setProfileImg(null);
       setImgModalOpen(false);
       setImgFile(null);
