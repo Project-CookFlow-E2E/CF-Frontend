@@ -26,6 +26,7 @@ const AddRecipe = () => {
   const [unitsByType, setUnitsByType] = useState({});
   const [unitTypeCache, setUnitTypeCache] = useState({});
   const [mensaje, setMensaje] = useState("");
+  const [recipeId, setRecipeId] = useState(null);
   const dropdownRef = useRef(null);
 
   const {
@@ -171,7 +172,8 @@ const AddRecipe = () => {
     } else {
       seleccionadas = [...seleccionadas, categoria.id];
     }
-    setValue("categoriasSeleccionadas", seleccionadas);
+    // Garantiza unicidad
+    setValue("categoriasSeleccionadas", Array.from(new Set(seleccionadas)));
   };
 
   const handleIngredientChange = async (e, index) => {
@@ -228,66 +230,56 @@ const AddRecipe = () => {
     }
   };
 
-  // Mostrar todos los datos recopilados para todas las tablas
-  const mostrarDatosAGuardar = (data) => {
-    const receta = {
-      nombre: data.nombre,
-      descripcion: data.descripcion,
-      tiempo: data.tiempo,
-      comensales: data.comensales,
-      foto: data.foto ? data.foto.name : null,
-    };
+  // Validación de campos numéricos (no negativos ni cero)
+  const validatePositive = (value) => {
+    if (value === "" || value === null || value === undefined) return "Campo obligatorio";
+    if (isNaN(value)) return "Debe ser un número";
+    if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
+    return true;
+  };
 
-    const categorias = data.categoriasSeleccionadas.map(id => {
-      const todas = [...parentCategories, ...childCategories];
-      const cat = todas.find(c => c.id === id);
-      return cat ? `${cat.name} (ID: ${cat.id})` : `ID: ${id}`;
-    });
-
-    const ingredientes = data.ingredients.map(ing => ({
-      nombre: ing.name,
-      cantidad: ing.quantity,
-      unidad: ing.unit,
-    }));
-
-    const pasos = data.steps.map((step, i) => ({
-      paso: i + 1,
-      texto: step.text,
-      imagen: step.image ? step.image.name : null,
-    }));
-
-    return `
-Tabla recetas
-${JSON.stringify(receta, null, 2)}
-
-Tabla recetas_categorias
-${JSON.stringify(categorias, null, 2)}
-
-Tabla recetas_ingredientes
-${JSON.stringify(ingredientes, null, 2)}
-
-Tabla recetas_pasos
-${JSON.stringify(pasos, null, 2)}
-    `;
+  // Validación de cantidad de ingredientes
+  const validateIngredientQuantity = (value) => {
+    if (value === "" || value === null || value === undefined) return "Campo obligatorio";
+    if (isNaN(value)) return "Debe ser un número";
+    if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
+    return true;
   };
 
   const onSubmit = async (data) => {
-    // Mostrar todos los datos recopilados antes de grabar
-    setMensaje("Datos a guardar:\n" + mostrarDatosAGuardar(data));
-    await new Promise(resolve => setTimeout(resolve, 50000)); // Espera 10 segundos
+    // Validación manual extra para ingredientes
+    for (const ing of data.ingredients) {
+      if (!ing.name || !ing.quantity || !ing.unit) {
+        setMensaje("Todos los ingredientes deben tener nombre, cantidad y unidad.");
+        return;
+      }
+      if (isNaN(ing.quantity) || parseFloat(ing.quantity) <= 0) {
+        setMensaje("La cantidad de cada ingrediente debe ser mayor que 0.");
+        return;
+      }
+    }
+
+    // Validación manual para tiempo y comensales
+    if (isNaN(data.tiempo) || parseInt(data.tiempo, 10) <= 0) {
+      setMensaje("El tiempo debe ser mayor que 0.");
+      return;
+    }
+    if (isNaN(data.comensales) || parseInt(data.comensales, 10) <= 0) {
+      setMensaje("El número de comensales debe ser mayor que 0.");
+      return;
+    }
 
     try {
-      // Guardar la receta principal en el backend, incluyendo las categorías
+      // Matriz única de categorías
+      const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
+
       const recipePayload = new FormData();
       recipePayload.append("name", data.nombre);
       recipePayload.append("description", data.descripcion);
       recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
       recipePayload.append("commensals", parseInt(data.comensales, 10));
-      // Agrega cada categoría como un campo separado (no como array)
-      if (data.categoriasSeleccionadas && data.categoriasSeleccionadas.length > 0) {
-        data.categoriasSeleccionadas.forEach(catId =>
-          recipePayload.append("categories", catId)
-        );
+      if (categoriasUnicas.length > 0) {
+        recipePayload.append("categories", JSON.stringify(categoriasUnicas));
       }
       if (data.foto) {
         recipePayload.append("photo", data.foto);
@@ -295,12 +287,10 @@ ${JSON.stringify(pasos, null, 2)}
 
       const recetaGuardada = await recipeService.createRecipe(recipePayload);
 
-      setMensaje(
-        "Datos a guardar:\n" +
-        mostrarDatosAGuardar(data) +
-        `\n\nReceta guardada correctamente. ID de la receta creada: ${recetaGuardada.id || "(no disponible)"}`
-      );
+      setRecipeId(recetaGuardada.id);
+      setMensaje("Receta guardada correctamente. ID: " + recetaGuardada.id);
       reset();
+      setValue("categoriasSeleccionadas", []);
     } catch (error) {
       let errorMsg = "Error al guardar la receta.";
       if (error.response && error.response.data) {
@@ -323,7 +313,6 @@ ${JSON.stringify(pasos, null, 2)}
           Añadir receta
         </h1>
 
-        {/* Mensaje */}
         {mensaje && (
           <div
             className="mb-4 px-3 py-4 rounded-lg text-sm font-mono text-white bg-footer text-left transition-all duration-300"
@@ -331,6 +320,11 @@ ${JSON.stringify(pasos, null, 2)}
             style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
           >
             {mensaje}
+          </div>
+        )}
+        {recipeId && (
+          <div className="mb-4 px-3 py-2 rounded-lg text-sm font-mono bg-green-100 text-green-800">
+            <strong>recipe_id generado:</strong> {recipeId}
           </div>
         )}
 
@@ -392,6 +386,7 @@ ${JSON.stringify(pasos, null, 2)}
             <Controller
               control={control}
               name="nombre"
+              rules={{ required: "El nombre es obligatorio" }}
               render={({ field }) => (
                 <Input
                   {...field}
@@ -400,6 +395,7 @@ ${JSON.stringify(pasos, null, 2)}
                   placeholder="Ej: Huevos rancheros, fabada ..."
                   data-testid="recipe-name-input"
                   className="focus:outline-none"
+                  required
                 />
               )}
             />
@@ -410,6 +406,7 @@ ${JSON.stringify(pasos, null, 2)}
             <Controller
               control={control}
               name="descripcion"
+              rules={{ required: "La descripción es obligatoria" }}
               render={({ field }) => (
                 <textarea
                   {...field}
@@ -417,6 +414,7 @@ ${JSON.stringify(pasos, null, 2)}
                   placeholder="Ej: Un platillo tradicional con un toque especial..."
                   data-testid="recipe-description-input"
                   className="w-full border border-gray-300 rounded-lg p-2 resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-accent bg-white"
+                  required
                 />
               )}
             />
@@ -465,28 +463,24 @@ ${JSON.stringify(pasos, null, 2)}
                   className="block text-sm font-medium text-gray-700 mb-1"
                   htmlFor="tiempo-preparacion"
                 >
-                  Tiempo
+                  Tiempo (minutos)
                 </label>
                 <Controller
                   control={control}
                   name="tiempo"
+                  rules={{ validate: validatePositive }}
                   render={({ field }) => (
-                    <div className="relative">
-                      <Input
-                        {...field}
-                        id="tiempo-preparacion"
-                        label="Time"
-                        type="number"
-                        placeholder="15"
-                        className="pr-10 focus:outline-none"
-                        data-testid="time-input"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
-                        min
-                      </span>
-                    </div>
+                    <Input
+                      {...field}
+                      id="tiempo-preparacion"
+                      type="number"
+                      placeholder="Ej: 30"
+                      min={1}
+                      required
+                    />
                   )}
                 />
+                <small className="text-gray-500">Introduce el tiempo total en minutos.</small>
               </div>
               <div className="flex-1">
                 <label
@@ -498,14 +492,15 @@ ${JSON.stringify(pasos, null, 2)}
                 <Controller
                   control={control}
                   name="comensales"
+                  rules={{ validate: validatePositive }}
                   render={({ field }) => (
                     <Input
                       {...field}
                       id="comensales"
                       type="number"
                       placeholder="Ej: 4"
-                      className="w-full focus:outline-none"
-                      data-testid="commensals-input"
+                      min={1}
+                      required
                     />
                   )}
                 />
@@ -522,6 +517,7 @@ ${JSON.stringify(pasos, null, 2)}
                     <Controller
                       control={control}
                       name={`ingredients.${index}.name`}
+                      rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
                           <Input
@@ -531,6 +527,7 @@ ${JSON.stringify(pasos, null, 2)}
                             placeholder="Ej: Harina, Leche..."
                             className="w-full focus:outline-none"
                             onChange={e => handleIngredientChange(e, index)}
+                            required
                           />
                           <datalist id={`ingredientes-list-${index}`}>
                             {allIngredients.map(i => (
@@ -549,13 +546,17 @@ ${JSON.stringify(pasos, null, 2)}
                         <Controller
                           control={control}
                           name={`ingredients.${index}.quantity`}
+                          rules={{ validate: validateIngredientQuantity }}
                           render={({ field }) => (
                             <Input
                               {...field}
                               id={`ingredient-quantity-${index}`}
                               type="number"
                               placeholder="Cantidad"
+                              min={0.01}
+                              step="any"
                               className="w-full focus:outline-none"
+                              required
                             />
                           )}
                         />
@@ -567,6 +568,7 @@ ${JSON.stringify(pasos, null, 2)}
                         <Controller
                           control={control}
                           name={`ingredients.${index}.unit`}
+                          rules={{ required: "La unidad es obligatoria" }}
                           render={({ field }) => {
                             const ingName = watch(`ingredients.${index}.name`);
                             const found = allIngredients.find(i => i.name === ingName);
@@ -577,6 +579,7 @@ ${JSON.stringify(pasos, null, 2)}
                                 {...field}
                                 id={`ingredient-unit-${index}`}
                                 className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
+                                required
                               >
                                 <option value="">Selecciona unidad</option>
                                 {units.map(u => (
@@ -592,6 +595,7 @@ ${JSON.stringify(pasos, null, 2)}
                                 placeholder="Unidad"
                                 className="w-full focus:outline-none"
                                 readOnly
+                                required
                               />
                             );
                           }}
@@ -624,6 +628,7 @@ ${JSON.stringify(pasos, null, 2)}
                     <Controller
                       control={control}
                       name={`steps.${index}.text`}
+                      rules={{ required: "El texto del paso es obligatorio" }}
                       render={({ field }) => (
                         <textarea
                           {...field}
@@ -631,6 +636,7 @@ ${JSON.stringify(pasos, null, 2)}
                           placeholder={`Describe el paso ${index + 1}`}
                           data-testid={`step-input-${index}`}
                           className="w-full border border-gray-300 rounded-lg p-2 resize-y min-h-[60px] focus:outline-none focus:ring-2 focus:ring-accent bg-white"
+                          required
                         />
                       )}
                     />
