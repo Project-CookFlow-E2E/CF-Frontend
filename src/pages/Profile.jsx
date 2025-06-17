@@ -118,9 +118,8 @@ const Profile = () => {
           <img
             src={
               profileImg?.url
-              
-                // ? "http://localhost:8000/media/" + user.id + "/" + profileImg.url
-                // : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
+              ? "http://localhost:8000/media/img/" + user.id + "/" + profileImg.url
+              : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name)
 
             }
             alt="Foto de perfil"
