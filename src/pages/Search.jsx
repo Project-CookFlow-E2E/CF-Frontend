@@ -84,7 +84,7 @@ const Search = () => {
 
             <div className="w-full flex flex-col md:flex-row items-start gap-12 px-0 md:px-4">
                 {/* panel de filtros */}
-                <div className="w-full md:w-1/2 relative">
+                <div className={`w-full md:w-1/2 relative ${!isOpen ? 'hidden' : ''}`}>
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-lg font-semibold">Filtros</span>
                         <button
@@ -95,7 +95,6 @@ const Search = () => {
                             type="button"
                         >
                             {isOpen ? (
-                                // icono mas y menos
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
                                 </svg>
@@ -132,7 +131,7 @@ const Search = () => {
                 </div>
 
                 {/* cards de recetas */}
-                <div className="w-full md:w-1/2 md:pl-12 md:mt-0">
+                <div className="w-full md:pl-12 md:mt-0">
                     <div className="flex justify-between items-center px-1 sm:px-2 mb-4 mt-0">
                         <h4 className="text-xl font-bold text-black">Recetas populares</h4>
                         <h4 className="text-l text-gray-500 cursor-pointer" onClick={toggleMostrarTodo}>
@@ -140,25 +139,32 @@ const Search = () => {
                         </h4>
                     </div>
 
+                    {/* Conditional rendering for recipe cards based on `showingAll` */}
                     {Array.isArray(recipesToShow) && recipesToShow.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30">
-                            {recipesToShow.map((recipe) => (
-                                <Card
-                                    key={recipe.id}
-                                    id={`recipe-card-${recipe.id}`}
-                                    image={recipe.image_url}
-                                    name={recipe.name}
-                                    category={recipe.category}
-                                    time={`${recipe.duration_minutes}`}
-                                    isFavorite={
-                                        Array.isArray(favorites) &&
-                                        favorites.some((fav) => fav?.recipe_id === recipe.id)
-                                    }
-                                    onToggleFavorite={() => toggleFavorite(recipe.id)}
-                                    onClick={() => navigate(`/recipe/${recipe.id}`)}
-                                />
-                            ))}
-                        </div>
+                        showingAll ? ( 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-30">
+                                {recipesToShow.map((recipe) => (
+                                    <Card
+                                        key={recipe.id}
+                                        id={`recipe-card-${recipe.id}`}
+                                        image={recipe.image_url}
+                                        name={recipe.name}
+                                        category={recipe.category}
+                                        time={`${recipe.duration_minutes}`}
+                                        isFavorite={
+                                            Array.isArray(favorites) &&
+                                            favorites.some((fav) => fav?.recipe_id === recipe.id)
+                                        }
+                                        onToggleFavorite={() => toggleFavorite(recipe.id)}
+                                        onClick={() => navigate(`/recipe/${recipe.id}`)}
+                                    />
+                                ))}
+                            </div>
+                        ) : ( 
+                            <div className="text-center text-gray-600 text-lg mt-10 mb-40">
+                                Haz clic en "Mostrar todas" para ver las recetas.
+                            </div>
+                        )
                     ) : (
                         <div className="text-center text-gray-600 text-lg mt-10 mb-40">
                             {showingAll
