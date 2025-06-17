@@ -5,11 +5,15 @@ import TimerBadge from "../components/TimerBadge";
 import { recipeService } from '../services/recipeService';
 import { ingredientService } from '../services/ingredientService';
 import { unitService } from '../services/unitService';
+import { shoppingListItemService } from '../services/shoppingListItemService';
 
 /**
  * Componente de pantalla de receta.
  * Muestra la información de una receta según el ID en la URL.
+ * @modified by Ana Castro
+ * @modified añadir ingrendientes a la base de datos de la lista de compra
  */
+
 const Recipe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,11 +53,13 @@ const Recipe = () => {
             }
 
             return {
-              id: ing.id, 
-              name: ingredientDetail.name, 
-              quantity: ing.quantity,
-              unit: unitDetail.name,
-            };
+                id: ing.id, // ID del item en la receta
+                ingredientId: ing.ingredient, // <-- este es el que quiere tu backend
+                name: ingredientDetail.name,
+                quantity: ing.quantity,
+                unitId: ing.unit, // <-- ID real de unidad
+                unit: unitDetail.name,
+                };
           } catch (innerErr) {
             console.error(`Error al obtener detalles para ingrediente ID ${ing.ingredient} o unidad ID ${ing.unit}:`, innerErr);
             return {
@@ -98,7 +104,8 @@ const Recipe = () => {
   const areAllChecked = receta && receta.ingredientes.every(
     (item) => checkedItems[item.id]
   );
-  const isAnyChecked = Object.values(checkedItems).some(Boolean);
+const hasIngredientes = receta && receta.ingredientes.length > 0;
+
 
   const handleStartCooking = () => {
     if (pasosRef.current) {
@@ -106,19 +113,32 @@ const Recipe = () => {
     }
   };
 
-  const handleAddToShoppingList = () => {
-    if (!receta || !receta.ingredientes) return;
+  const handleAddToShoppingList = async () => {
+  if (!receta || !receta.ingredientes) return;
 
-    const noSeleccionados = receta.ingredientes.filter(
-      (item) => !checkedItems[item.id]
+  const noSeleccionados = receta.ingredientes.filter(
+    (item) => !checkedItems[item.id]
+  );
+
+  try {
+    await Promise.all(
+      noSeleccionados.map((item) =>
+        shoppingListItemService.createShoppingListItem({
+          ingredient_id: item.ingredientId,
+          unit: item.unitId, // <-- no el string "g", sino el ID // Este debe ser el ID real del ingrediente
+          quantity_needed: item.quantity || 1,           
+          is_purchased: false,
+        })
+      )
     );
 
-    localStorage.setItem("shoppingList", JSON.stringify(noSeleccionados));
+    alert(`${noSeleccionados.length} ingrediente(s) guardado(s) en tu lista de compra 🛒`);
+  } catch (error) {
+    console.error("Error al guardar en la DB ❌", error);
+    alert("No se pudo guardar la lista de compra.");
+  }
+};
 
-    alert(
-      `${noSeleccionados.length} ingrediente(s) añadido(s) a la lista de la compra.`
-    );
-  };
 
   if (loading) {
     return (
@@ -198,9 +218,9 @@ const Recipe = () => {
           <Button
             data-testid="btn-add-to-shopping-list"
             onClick={handleAddToShoppingList}
-            disabled={!isAnyChecked}
+            disabled={!hasIngredientes}
             className={`py-3 rounded-lg font-medium transition duration-300 ${
-              isAnyChecked
+              hasIngredientes
                 ? "bg-accent text-white hover:bg-accent/90"
                 : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
             }`}
