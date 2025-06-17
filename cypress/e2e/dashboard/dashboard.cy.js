@@ -1,42 +1,14 @@
 // cypress/e2e/dashboard/dashboard.cy.js
 
-describe('Dashboard/Home Page Tests', () => {
-  let users;
+describe('Dashboard/Home Page Tests', function() {
 
   before(() => {
     cy.viewport(1280, 800);
-    Cypress.session.clearAllSavedSessions();
-    cy.fixture('auth/users.json').then((data) => {
-      users = data;
-    });
   });
 
-  after(() => {
-    Cypress.session.clearAllSavedSessions();
-  });
-
-  beforeEach(() => {
-    const validUser = users.find(u => u.username === 'ana456');
-
-    cy.loginAPI(validUser.username, validUser.password);
-    cy.intercept('GET', `${Cypress.env('API_URL')}/users/me/`, {
-      statusCode: 200,
-      body: {
-        id: 2,
-        username: validUser.username,
-        email: 'ana456@example.com',
-        first_name: 'Ana',
-        last_name: ''
-      },
-      delay: 50
-    }).as('getUserMe');
-
-    cy.visit('/main');
-    cy.wait('@getUserMe');
-    cy.get('header').should('be.visible');
-    cy.get('header').should('contain.text', 'Mi Perfil', { timeout: 10000 });
-    cy.getDataTest('footer-link-search').should('be.visible').and('contain.text', 'Buscar');
-    cy.getDataTest('main-title').should('be.visible').and('contain.text', '¿Qué te apetece?');
+  beforeEach(function() {
+    const validUser = this.users.find(u => u.username === 'ana456');
+    cy.setupDashboardPage(validUser.username, validUser.password);
   });
 
   it('1. Displays the welcome message with the user\'s name', () => {
@@ -52,14 +24,25 @@ describe('Dashboard/Home Page Tests', () => {
   });
 
   it('3. Displays category filter badges and allows selection', () => {
+    // Verify Category & Items List Visibility
     cy.getDataTest('category-list').should('be.visible');
-    cy.getDataTest('category-badge-Comida').should('exist');
-    cy.getDataTest('badge-label').contains('Comida').should('be.visible');
+    cy.getDataTest('badge-label').contains('Comida').should('exist')
+      .and('have.class', 'bg-gray-200');
+    cy.getDataTest('badge-label').contains('Desayuno').should('exist')
+      .and('have.class', 'bg-gray-200');
+
+    // Click 'Comida', assert selection
     cy.getDataTest('badge-label').contains('Comida').click();
-    cy.getDataTest('category-badge-Comida').should('be.checked');
-    cy.getDataTest('badge-label').contains('Desayuno').click();
-    cy.getDataTest('category-badge-Desayuno').should('be.checked');
-    cy.getDataTest('category-badge-Comida').should('be.checked');
+    cy.getDataTest('badge-label').contains('Comida')
+      .should('exist').and('have.class', 'bg-pink-500');
+
+    // Click 'Desayuno', assert selection
+    cy.getDataTest('badge-label').contains('Desayuno').click();    
+    cy.getDataTest('badge-label').contains('Desayuno')
+      .should('exist').and('have.class', 'bg-pink-500');
+
+    // On multi-selection, "Comida" should still be selected and styled
+    cy.getDataTest('badge-label').contains('Comida').should('have.class', 'bg-pink-500');
   });
 
   it('4. Displays the "Buscar" (Search) button in the header section', () => {
@@ -123,15 +106,7 @@ describe('Dashboard/Home Page Tests', () => {
     cy.url().should('include', '/profile');
   });
 
-  it.only('11. Navigation from header to "Cerrar Sesión" (Logout) works', () => {
-    cy.getDataTest('custom-button')
-      .contains('Cerrar Sesión')
-      .should('be.visible')
-      .and('be.enabled')
-      .click();
-    cy.url().should('include', '/');
-    cy.getDataTest('hero-subtitle')
-      .should('include.text', 'Redescubre el placer de cocinar')
-      .and('be.visible');
+  it('11. Navigation from header to "Cerrar Sesión" (Logout) works', () => {
+    cy.logoutUI();
   });
 });
