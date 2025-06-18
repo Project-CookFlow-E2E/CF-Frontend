@@ -11,13 +11,10 @@ import { Image, Plus } from "lucide-react";
 import { Button, Input } from "../components/";
 import { recipeService } from "../services/recipeService";
 import { categoryService } from "../services/categoryService";
+import { useNavigate } from "react-router-dom";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
-// import { getUserIdFromToken } from "../services/authService";
-
-
-
 
 const AddRecipe = () => {
   const [parentCategories, setParentCategories] = useState([]);
@@ -32,6 +29,7 @@ const AddRecipe = () => {
   const [mensaje, setMensaje] = useState("");
   const [recipeId, setRecipeId] = useState(null);
   const dropdownRef = useRef(null);
+
 
   const {
     control,
@@ -185,7 +183,7 @@ const AddRecipe = () => {
     setValue(`ingredients.${index}.name`, value);
     const found = allIngredients.find(i => i.name === value);
     if (found && found.unit_type_id) {
-      setValue(`ingredients.${index}.id`, found.id); 
+      setValue(`ingredients.${index}.id`, found.id);
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
@@ -235,6 +233,7 @@ const AddRecipe = () => {
     }
   };
 
+  const navigate = useNavigate();
   // Validación de campos numéricos (no negativos ni cero)
   const validatePositive = (value) => {
     if (value === "" || value === null || value === undefined) return "Campo obligatorio";
@@ -250,6 +249,7 @@ const AddRecipe = () => {
     if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
     return true;
   };
+
 
   const onSubmit = async (data) => {
     // Validación manual extra para ingredientes
@@ -277,99 +277,66 @@ const AddRecipe = () => {
     try {
       // Matriz única de categorías
       const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
-      
-// 1. Crear la receta (sin ingredientes ni pasos)
-    const recipePayload = new FormData();
-    recipePayload.append("name", data.nombre);
-    recipePayload.append("description", data.descripcion);
-    recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
-    recipePayload.append("commensals", parseInt(data.comensales, 10));
-    categoriasUnicas.forEach((category) => {
-      recipePayload.append("categories[]", parseInt(category, 10));
-    });
-    // ingredients.forEach((ingredient) => {
-    //   recipePayload.append("ingredients[]", ingredient.name);
-    // });
 
-  const formattedIngredients = data.ingredients.map(ing => ({
-  // 'ingredient' es el ID del ingrediente base (ej. el ID de 'Huevo')
-  // En tu ejemplo de consola, este es 'ing.id'
-  ingredient: parseInt(ing.id, 10),
+      // 1. Crear la receta (sin ingredientes ni pasos)
+      const recipePayload = new FormData();
+      recipePayload.append("name", data.nombre);
+      recipePayload.append("description", data.descripcion);
+      recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
+      recipePayload.append("commensals", parseInt(data.comensales, 10));
+      categoriasUnicas.forEach((category) => {
+        recipePayload.append("categories[]", parseInt(category, 10));
+      });
 
-  // 'quantity' es la cantidad (asegúrate de que sea un número si el backend lo espera así)
-  quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+      const formattedIngredients = data.ingredients.map(ing => ({
+        ingredient: parseInt(ing.id, 10),
+        quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+        unit: parseInt(ing.unit, 10)
+      }));
 
-  // 'unit' es el ID de la unidad (ej. el ID de 'unidades' o 'gramos')
-  // En tu ejemplo de consola, este es 'ing.unit'
-  unit: parseInt(ing.unit, 10)
-  }));
+      // **Paso 2: Adjunta el array formateado al FormData como un string JSON**
+      recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
+      if (data.foto) {
+        recipePayload.append("recipe_image", data.foto);
+      }
 
-// Muestra el array formateado para verificar
-console.log("Ingredientes formateados para el backend:", formattedIngredients);
+      // Steps
+      // Formatea los pasos para el backend
+      const formattedSteps = data.steps.map((step, idx) => ({
+        description: step.text,
+        order: idx + 1
+      }));
 
-// **Paso 2: Adjunta el array formateado al FormData como un string JSON**
-recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
+      console.log("Pasos formateados para el backend:", formattedSteps);
+      recipePayload.append("steps", JSON.stringify(formattedSteps));
 
-    if (data.foto) {
-      recipePayload.append("photo", data.foto);
+      console.log("--- FIN de recipePayload ---");
+
+      const recetaGuardada = await recipeService.createRecipe(recipePayload);
+      const recetaId = recetaGuardada.id;
+
+      console.log("Receta guardada con ID:", recetaId);
+
+      setRecipeId(recetaId);
+      setMensaje("Receta guardada correctamente. ID: " + recetaId);
+      reset();
+      setValue("categoriasSeleccionadas", []);
+    } catch (error) {
+      let errorMsg = "Error al guardar la receta.";
+      if (error.response && error.response.data) {
+        errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+      } else if (error.message) {
+        errorMsg += "\nDetalles: " + error.message;
+      }
+      setMensaje(errorMsg);
     }
-
-    console.log("Contenido de recipePayload:");
-
-for (const [key, value] of recipePayload.entries()) {
-  if (value instanceof File) {
-    // Si es un archivo (como la foto), solo muestra su nombre y tipo
-    console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
-  } else {
-    // Para otros valores, muestra la clave y el valor
-    console.log(`${key}: ${value}`);
-  }
-}
-  // Steps
-// Formatea los pasos para el backend
-  const formattedSteps = data.steps.map((step, idx) => ({
-  // 'description' es el texto del paso
-  description: step.text, // o step.description según tu formulario
-
-  // 'order' es el número de orden del paso
-  order: idx + 1
-}));
-
-console.log("Pasos formateados para el backend:", formattedSteps);
-recipePayload.append("steps", JSON.stringify(formattedSteps));
-
-
-
-
-
-
-console.log("--- FIN de recipePayload ---");
-
-    const recetaGuardada = await recipeService.createRecipe(recipePayload);
-    const recetaId = recetaGuardada.id;
-
-    console.log("Receta guardada con ID:", recetaId);
-
-    setRecipeId(recetaId);
-    setMensaje("Receta guardada correctamente. ID: " + recetaId);
-    reset();
-    setValue("categoriasSeleccionadas", []);
-  } catch (error) {
-    let errorMsg = "Error al guardar la receta.";
-    if (error.response && error.response.data) {
-      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
-    } else if (error.message) {
-      errorMsg += "\nDetalles: " + error.message;
-    }
-    setMensaje(errorMsg);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
-        <button className="mb-4" data-testid="back-button">
+        <button className="mb-4" data-testid="back-button" onClick={() => navigate("/main")}>
           <span className="text-2xl">←</span>
         </button>
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
@@ -385,17 +352,10 @@ console.log("--- FIN de recipePayload ---");
             {mensaje}
           </div>
         )}
-        {recipeId && (
-          <div className="mb-4 px-3 py-2 rounded-lg text-sm font-mono bg-green-100 text-green-800">
-            <strong>recipe_id generado:</strong> {recipeId}
-          </div>
-        )}
-
         {/* Imagen de la receta */}
         <div
-          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${
-            isDragOver ? "border-accent border-2 bg-accent/5" : ""
-          }`}
+          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${isDragOver ? "border-accent border-2 bg-accent/5" : ""
+            }`}
           data-testid="image-upload-area"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -484,14 +444,14 @@ console.log("--- FIN de recipePayload ---");
 
             {/* Selector de categorías padre e hijas */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría padre</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categorías</label>
               <select
                 className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                 value={selectedParent || ""}
                 onChange={e => setSelectedParent(Number(e.target.value))}
               >
                 <option value="" className="text-gray-400">
-                  Selecciona una categoría padre
+                  Selecciona una categoría
                 </option>
                 {parentCategories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -499,17 +459,16 @@ console.log("--- FIN de recipePayload ---");
               </select>
               {childCategories.length > 0 && (
                 <>
-                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Categorías hijas</label>
+                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Subcategorías</label>
                   <div className="flex flex-wrap gap-2">
                     {childCategories.map((categoria) => (
                       <button
                         type="button"
                         key={categoria.id}
-                        className={`px-3 py-1 rounded-lg border ${
-                          (categoriasSeleccionadas || []).includes(categoria.id)
-                            ? "bg-accent text-white"
-                            : "bg-white text-gray-700"
-                        }`}
+                        className={`px-3 py-1 rounded-lg border ${(categoriasSeleccionadas || []).includes(categoria.id)
+                          ? "bg-accent text-white"
+                          : "bg-white text-gray-700"
+                          }`}
                         onClick={() => handleCategoriaChange(categoria)}
                       >
                         {categoria.name}
@@ -583,15 +542,23 @@ console.log("--- FIN de recipePayload ---");
                       rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
-                          <Input
+
+                          <select
                             {...field}
                             id={`ingredient-name-${index}`}
-                            list={`ingredientes-list-${index}`}
-                            placeholder="Ej: Harina, Leche..."
-                            className="w-full focus:outline-none"
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                             onChange={e => handleIngredientChange(e, index)}
                             required
-                          />
+                          >
+                            <option value="">Selecciona un ingrediente</option>
+                            {allIngredients.map(i => (
+                              <option key={i.id} value={i.name}>
+                                {i.name}
+                              </option>
+                            ))}
+                          </select>
+
+
                           <datalist id={`ingredientes-list-${index}`}>
                             {allIngredients.map(i => (
                               <option key={i.id} value={i.name} />
@@ -671,6 +638,7 @@ console.log("--- FIN de recipePayload ---");
                   type="button"
                   onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
                   className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center mt-2"
+                  style={{ width: "100%" }}
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
                 </button>
@@ -709,9 +677,8 @@ console.log("--- FIN de recipePayload ---");
                       name={`steps.${index}`}
                       render={({ field }) => (
                         <div
-                          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${
-                            field.value?.isDragOver ? "border-accent border-2 bg-accent/5" : ""
-                          }`}
+                          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${field.value?.isDragOver ? "border-accent border-2 bg-accent/5" : ""
+                            }`}
                           data-testid={`step-image-upload-area-${index}`}
                           onDragOver={e => {
                             e.preventDefault();
@@ -802,6 +769,7 @@ console.log("--- FIN de recipePayload ---");
                   }
                   className="border rounded-xl px-6 py-3 h-10 flex justify-center items-center"
                   data-testid="add-step-button"
+                  style={{ width: "100%" }}
                 >
                   Añadir paso
                   <Plus className="w-5 h-5" />

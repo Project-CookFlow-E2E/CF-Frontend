@@ -37,7 +37,7 @@ import IngredientManagement from '../components/admin/IngredientManagement';
 
 const AdminDashboard = () => {
 
-  const [activeSection, setActiveSection] = useState('dashboard'); 
+  const [activeSection, setActiveSection] = useState('dashboard');
 
   const renderContent = () => {
     switch (activeSection) {
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Panel de Control</h2>
             <p className="text-gray-600">Bienvenido al panel de administración. Selecciona una opción del menú lateral para gestionar el contenido de CookFlow.</p>
-            
+
           </div>
         );
       case 'recipes':
@@ -68,7 +68,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100"> 
+    <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-lg p-6 flex flex-col">
         <div className="mb-8">
@@ -78,9 +78,8 @@ const AdminDashboard = () => {
           <ul>
             <li className="mb-2">
               <button
-                className={`flex items-center p-2 rounded-md w-full text-left ${
-                  activeSection === 'dashboard' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'dashboard' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 onClick={() => setActiveSection('dashboard')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
@@ -91,9 +90,8 @@ const AdminDashboard = () => {
             </li>
             <li className="mb-2">
               <button
-                className={`flex items-center p-2 rounded-md w-full text-left ${
-                  activeSection === 'recipes' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'recipes' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 onClick={() => setActiveSection('recipes')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
@@ -104,9 +102,8 @@ const AdminDashboard = () => {
             </li>
             <li className="mb-2">
               <button
-                className={`flex items-center p-2 rounded-md w-full text-left ${
-                  activeSection === 'users' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'users' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 onClick={() => setActiveSection('users')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
@@ -117,9 +114,8 @@ const AdminDashboard = () => {
             </li>
             <li className="mb-2">
               <button
-                className={`flex items-center p-2 rounded-md w-full text-left ${
-                  activeSection === 'categories' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'categories' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 onClick={() => setActiveSection('categories')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
@@ -130,9 +126,8 @@ const AdminDashboard = () => {
             </li>
             <li className="mb-2">
               <button
-                className={`flex items-center p-2 rounded-md w-full text-left ${
-                  activeSection === 'ingredients' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'ingredients' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 onClick={() => setActiveSection('ingredients')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
@@ -143,10 +138,10 @@ const AdminDashboard = () => {
             </li>
           </ul>
         </nav>
-        
+
       </div>
 
- 
+
       <div className="flex-1 p-8 bg-gray-100">
         {renderContent()}
       </div>

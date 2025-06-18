@@ -2,16 +2,21 @@ import React, { useRef, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { RecipeIngredientsChecklist, Button } from "../components";
 import TimerBadge from "../components/TimerBadge";
-import { recipeService } from '../services/recipeService';
-import { ingredientService } from '../services/ingredientService';
-import { unitService } from '../services/unitService';
-import { shoppingListItemService } from '../services/shoppingListItemService';
+import { recipeService } from "../services/recipeService";
+import { ingredientService } from "../services/ingredientService";
+import { unitService } from "../services/unitService";
+import { shoppingListItemService } from "../services/shoppingListItemService";
+import SuccessMsg from "../components/SuccessMsg";
+import ErrorMsg from "../components/ErrorMsg";
+import { TiShoppingCart } from "react-icons/ti";
+const mediaUrl = import.meta.env.VITE_MEDIA_URL;
 
 /**
  * Componente de pantalla de receta.
  * Muestra la información de una receta según el ID en la URL.
  * @modified by Ana Castro
  * @modified añadir ingrendientes a la base de datos de la lista de compra
+ * @modified Ángel Áragón - Añadido manejo de errores y mensajes de éxito,
  */
 
 const Recipe = () => {
@@ -22,6 +27,7 @@ const Recipe = () => {
   const [receta, setReceta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
 
   useEffect(() => {
@@ -34,50 +40,65 @@ const Recipe = () => {
         const rawRecipeData = await recipeService.getRecipeById(Number(id));
 
         if (!rawRecipeData) {
-            throw new Error("Receta no encontrada o datos vacíos después de la llamada al servicio.");
+          throw new Error(
+            "Receta no encontrada o datos vacíos después de la llamada al servicio."
+          );
         }
 
-        const ingredientsWithDetailsPromises = rawRecipeData.ingredients.map(async (ing) => {
-          try {
-            const ingredientDetail = await ingredientService.getIngredientById(ing.ingredient);
-            const unitDetail = await unitService.getUnitById(ing.unit);
+        const ingredientsWithDetailsPromises = rawRecipeData.ingredients.map(
+          async (ing) => {
+            try {
+              const ingredientDetail =
+                await ingredientService.getIngredientById(ing.ingredient);
+              const unitDetail = await unitService.getUnitById(ing.unit);
 
-            if (!ingredientDetail || !unitDetail) {
-                console.warn(`Advertencia: Detalle de ingrediente ${ing.ingredient} o unidad ${ing.unit} no encontrado.`);
+              if (!ingredientDetail || !unitDetail) {
+                console.warn(
+                  `Advertencia: Detalle de ingrediente ${ing.ingredient} o unidad ${ing.unit} no encontrado.`
+                );
                 return {
                   id: ing.id,
                   name: `Ingrediente desconocido (ID: ${ing.ingredient})`,
                   quantity: ing.quantity,
                   unit: `Unidad desconocida (ID: ${ing.unit})`,
                 };
-            }
+              }
 
-            return {
+              return {
                 id: ing.id, // ID del item en la receta
                 ingredientId: ing.ingredient, // <-- este es el que quiere tu backend
                 name: ingredientDetail.name,
                 quantity: ing.quantity,
                 unitId: ing.unit, // <-- ID real de unidad
                 unit: unitDetail.name,
-                };
-          } catch (innerErr) {
-            console.error(`Error al obtener detalles para ingrediente ID ${ing.ingredient} o unidad ID ${ing.unit}:`, innerErr);
-            return {
-              id: ing.id,
-              name: `ERROR: Ingrediente (${ing.ingredient})`,
-              quantity: ing.quantity,
-              unit: `ERROR: Unidad (${ing.unit})`,
-            };
+              };
+            } catch (innerErr) {
+              console.error(
+                `Error al obtener detalles para ingrediente ID ${ing.ingredient} o unidad ID ${ing.unit}:`,
+                innerErr
+              );
+              setError(
+                "Error al cargar los detalles de los ingredientes. Por favor, inténtalo de nuevo."
+              );
+              return {
+                id: ing.id,
+                name: `ERROR: Ingrediente (${ing.ingredient})`,
+                quantity: ing.quantity,
+                unit: `ERROR: Unidad (${ing.unit})`,
+              };
+            }
           }
-        });
+        );
 
-        const ingredientsWithDetails = await Promise.all(ingredientsWithDetailsPromises);
+        const ingredientsWithDetails = await Promise.all(
+          ingredientsWithDetailsPromises
+        );
 
         setReceta({
           id: rawRecipeData.id,
           titulo: rawRecipeData.name,
           tiempo: rawRecipeData.duration_minutes,
-          imagen: rawRecipeData.image,
+          imagen: rawRecipeData.image ? mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display",
           ingredientes: ingredientsWithDetails,
           pasos: rawRecipeData.steps || [],
         });
@@ -101,11 +122,9 @@ const Recipe = () => {
     }));
   };
 
-  const areAllChecked = receta && receta.ingredientes.every(
-    (item) => checkedItems[item.id]
-  );
-const hasIngredientes = receta && receta.ingredientes.length > 0;
-
+  const areAllChecked =
+    receta && receta.ingredientes.every((item) => checkedItems[item.id]);
+  const hasIngredientes = receta && receta.ingredientes.length > 0;
 
   const handleStartCooking = () => {
     if (pasosRef.current) {
@@ -114,31 +133,38 @@ const hasIngredientes = receta && receta.ingredientes.length > 0;
   };
 
   const handleAddToShoppingList = async () => {
-  if (!receta || !receta.ingredientes) return;
+    if (!receta || !receta.ingredientes) return;
 
-  const noSeleccionados = receta.ingredientes.filter(
-    (item) => !checkedItems[item.id]
-  );
-
-  try {
-    await Promise.all(
-      noSeleccionados.map((item) =>
-        shoppingListItemService.createShoppingListItem({
-          ingredient_id: item.ingredientId,
-          unit: item.unitId, // <-- no el string "g", sino el ID // Este debe ser el ID real del ingrediente
-          quantity_needed: item.quantity || 1,           
-          is_purchased: false,
-        })
-      )
+    const noSeleccionados = receta.ingredientes.filter(
+      (item) => !checkedItems[item.id]
     );
 
-    alert(`${noSeleccionados.length} ingrediente(s) guardado(s) en tu lista de compra 🛒`);
-  } catch (error) {
-    console.error("Error al guardar en la DB ❌", error);
-    alert("No se pudo guardar la lista de compra.");
-  }
-};
-
+    try {
+      await Promise.all(
+        noSeleccionados.map((item) =>
+          shoppingListItemService.createShoppingListItem({
+            ingredient_id: item.ingredientId,
+            unit: item.unitId, // <-- no el string "g", sino el ID // Este debe ser el ID real del ingrediente
+            quantity_needed: item.quantity || 1,
+            is_purchased: false,
+          })
+        )
+      );
+      if (noSeleccionados.length === 0) {
+        setSuccess("Todos los ingredientes ya están en tu lista de compra.");
+      } else {
+        setSuccess(
+          <>
+            '{noSeleccionados.length} ingredientes añadidos a tu lista de
+            compra. <TiShoppingCart className="inline-block ml-2" />
+          </>
+        );
+      }
+    } catch (error) {
+      console.error("Error al guardar en la DB ❌", error);
+      setError("No se pudo guardar la lista de compra. Inténtalo de nuevo.");
+    }
+  };
 
   if (loading) {
     return (
@@ -182,6 +208,14 @@ const hasIngredientes = receta && receta.ingredientes.length > 0;
             data-testid="recipe-title-container"
             className="text-center flex-1"
           >
+            {error && (
+              <ErrorMsg data-testid="recipe-error-msg">{error}</ErrorMsg>
+            )}
+            {success && (
+              <SuccessMsg data-testid="recipe-success-msg" className="">
+                {success}
+              </SuccessMsg>
+            )}
             <h1 data-testid="recipe-title" className="text-3xl font-bold">
               {receta.titulo}
             </h1>
@@ -219,11 +253,10 @@ const hasIngredientes = receta && receta.ingredientes.length > 0;
             data-testid="btn-add-to-shopping-list"
             onClick={handleAddToShoppingList}
             disabled={!hasIngredientes}
-            className={`py-3 rounded-lg font-medium transition duration-300 ${
-              hasIngredientes
-                ? "bg-accent text-white hover:bg-accent/90"
-                : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
-            }`}
+            className={`py-3 rounded-lg font-medium transition duration-300 ${hasIngredientes
+              ? "bg-accent text-white hover:bg-accent/90"
+              : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
+              }`}
           >
             ¡A comprar!
           </Button>
@@ -231,11 +264,10 @@ const hasIngredientes = receta && receta.ingredientes.length > 0;
             data-testid="btn-start-cooking"
             onClick={handleStartCooking}
             disabled={!areAllChecked}
-            className={`py-3 rounded-lg font-medium transition duration-300 ${
-              areAllChecked
-                ? "bg-accent text-white hover:bg-accent/90"
-                : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
-            }`}
+            className={`py-3 rounded-lg font-medium transition duration-300 ${areAllChecked
+              ? "bg-accent text-white hover:bg-accent/90"
+              : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
+              }`}
           >
             ¡A cocinar!
           </Button>

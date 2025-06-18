@@ -51,6 +51,7 @@ import { FaGear } from "react-icons/fa6";
 const Landing = () => {
   const { latestRecipes, loading } = useLatestRecipes();
   const navigate = useNavigate();
+  const mediaUrl = import.meta.env.VITE_MEDIA_URL;
 
   return (
     <div
@@ -165,7 +166,11 @@ const Landing = () => {
               <Card
                 key={recipe.id}
                 id={`recipe-card-${recipe.id}`}
-                image={recipe.image_url}
+                image={
+                  recipe?.user?.id && recipe?.image?.url
+                    ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                    : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
+                }
                 name={recipe.name}
                 category={recipe.category}
                 time={`${recipe.duration_minutes}`}
