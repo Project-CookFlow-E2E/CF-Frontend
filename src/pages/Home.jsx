@@ -119,7 +119,17 @@ const Home = () => {
                                         : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                                 }
                                 name={recipe.name}
-                                category={recipe.category}
+                                category={
+                                        Array.isArray(recipe.categories)
+                                            ? recipe.categories
+                                                  .map((cat) => {
+                                                      const catId = typeof cat === "object" ? cat.id : cat;
+                                                      const fullCat = categories.find((c) => c.id === catId);
+                                                      return fullCat?.name;
+                                                  })
+                                                  .filter(Boolean)
+                                            : ["Sin categoría"]
+                                    }
                                 time={`${recipe.duration_minutes}`}
                                 isFavorite={favorites.includes(String(recipe.id))}
                                 onToggleFavorite={() => toggleFavorite(recipe.id)}

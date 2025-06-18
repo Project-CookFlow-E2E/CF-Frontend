@@ -41,15 +41,12 @@ const Search = () => {
 
     const [isOpen, setIsOpen] = useState(true);
 
-    if (loadingAll)
-        return <div className="p-6 text-center">Cargando categorías...</div>;
+    if (loadingAll) return <div className="p-6 text-center">Cargando categorías...</div>;
 
     return (
         <div className="min-h-screen flex flex-col justify-start items-start bg-background px-4 pt-15 lg:px-10">
             <div className="w-full lg:w-1/2 pr-4">
-                <h4 className="text-xl font-bold text-black mb-2">
-                    ¿Qué quieres cocinar?
-                </h4>
+                <h4 className="text-xl font-bold text-black mb-2">¿Qué quieres cocinar?</h4>
                 <div className="w-full max-w-xl lg:max-w-2xl border border-black rounded-lg mb-10 mt-0 lg:mt-4">
                     <div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 lg:px-6 lg:py-4 w-full">
                         <input
@@ -66,11 +63,7 @@ const Search = () => {
                             }}
                             className="outline-none w-full bg-transparent text-base lg:text-lg"
                         />
-                        <button
-                            tabIndex={-1}
-                            type="button"
-                            onClick={() => setSearchTerm("")}
-                        >
+                        <button tabIndex={-1} type="button" onClick={() => setSearchTerm("")}>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -104,33 +97,12 @@ const Search = () => {
                         >
                             {isOpen ? (
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <rect
-                                        x="5"
-                                        y="9"
-                                        width="10"
-                                        height="2"
-                                        rx="1"
-                                        fill="currentColor"
-                                    />
+                                    <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
                                 </svg>
                             ) : (
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <rect
-                                        x="9"
-                                        y="5"
-                                        width="2"
-                                        height="10"
-                                        rx="1"
-                                        fill="currentColor"
-                                    />
-                                    <rect
-                                        x="5"
-                                        y="9"
-                                        width="10"
-                                        height="2"
-                                        rx="1"
-                                        fill="currentColor"
-                                    />
+                                    <rect x="9" y="5" width="2" height="10" rx="1" fill="currentColor" />
+                                    <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
                                 </svg>
                             )}
                         </button>
@@ -160,13 +132,8 @@ const Search = () => {
                 {/* cards de recetas */}
                 <div className="w-full lg:flex-1 mb-10 lg:mt-10">
                     <div className="flex justify-between items-center px-1 sm:px-2 mb-4">
-                        <h4 className="text-xl font-bold text-black lg:ml-4">
-                            Recetas populares
-                        </h4>
-                        <h4
-                            className="text-l text-gray-500 cursor-pointer lg:mr-4"
-                            onClick={toggleMostrarTodo}
-                        >
+                        <h4 className="text-xl font-bold text-black lg:ml-4">Recetas populares</h4>
+                        <h4 className="text-l text-gray-500 cursor-pointer lg:mr-4" onClick={toggleMostrarTodo}>
                             {showingAll ? "Ocultar todas" : "Mostrar todas"}
                         </h4>
                     </div>
@@ -183,7 +150,17 @@ const Search = () => {
                                             : ""
                                     }
                                     name={recipe.name}
-                                    category={recipe.category}
+                                    category={
+                                        Array.isArray(recipe.categories)
+                                            ? recipe.categories
+                                                  .map((cat) => {
+                                                      const catId = typeof cat === "object" ? cat.id : cat;
+                                                      const fullCat = categories.find((c) => c.id === catId);
+                                                      return fullCat?.name;
+                                                  })
+                                                  .filter(Boolean)
+                                            : ["Sin categoría"]
+                                    }
                                     time={`${recipe.duration_minutes}`}
                                     isFavorite={favorites.includes(String(recipe.id))}
                                     onToggleFavorite={() => toggleFavorite(recipe.id)}

@@ -23,6 +23,7 @@ import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
 import useLatestRecipes from "../hooks/useLatestRecipes";
 import { FaGear } from "react-icons/fa6";
+import useCategories from "../hooks/useCategories";
 
 /**
  * Renderiza una receta individual dentro del carrusel de recetas destacadas.
@@ -52,6 +53,7 @@ const Landing = () => {
   const { latestRecipes, loading } = useLatestRecipes();
   const navigate = useNavigate();
   const mediaUrl = import.meta.env.VITE_MEDIA_URL;
+  const { categories } = useCategories(2);
 
   return (
     <div
@@ -172,7 +174,17 @@ const Landing = () => {
                     : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                 }
                 name={recipe.name}
-                category={recipe.category}
+                category={
+                    Array.isArray(recipe.categories)
+                        ? recipe.categories
+                                .map((cat) => {
+                                    const catId = typeof cat === "object" ? cat.id : cat;
+                                    const fullCat = categories.find((c) => c.id === catId);
+                                    return fullCat?.name;
+                                })
+                                .filter(Boolean)
+                        : ["Sin categoría"]
+                }
                 time={`${recipe.duration_minutes}`}
                 onToggleFavorite={() => navigate("/login")}
                 onClick={() => navigate(`/recipe/${recipe.id}`)}
