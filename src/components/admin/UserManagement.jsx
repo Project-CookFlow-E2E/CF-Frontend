@@ -7,33 +7,38 @@
  * Funcionalidades principales:
  * - Listar todos los usuarios existentes (conectados al backend con userService.getAllUsersAdmin).
  * - Buscar usuarios por nombre de usuario (username) mediante un input de búsqueda (consulta siempre al backend con debounce y filtra por username, no por name).
- * - Editar el nombre y el rol de un usuario mediante un modal.
+ * - Editar el nombre, el rol y la contraseña de un usuario mediante un modal (la contraseña solo se actualiza si se rellena el campo).
+ * - Muestra un mensaje de éxito o error tras editar un usuario (incluido el cambio de contraseña).
  * - Botón para añadir nuevos usuarios (funcionalidad pendiente de implementar).
- * - Acciones de edición y borrado para cada usuario.
+ * - Acciones de edición y borrado para cada usuario (no disponibles para usuarios admin/staff).
  * - Paginación: muestra 5 usuarios por página, con navegación entre páginas.
  *
  * Estados:
  * - users: array de usuarios obtenidos del backend (ya filtrados por username si hay búsqueda).
  * - loading: booleano para mostrar el estado de carga.
  * - editModal: controla la visibilidad y datos del modal de edición.
- * - editForm: almacena los valores del formulario de edición.
+ * - editForm: almacena los valores del formulario de edición (incluye password).
+ * - editMsg: mensaje de éxito tras editar usuario.
+ * - editError: mensaje de error tras editar usuario.
  * - page: página actual de la paginación.
  * - search: término de búsqueda para filtrar usuarios por nombre de usuario.
  *
  * Servicios utilizados:
  * - userService.getAllUsersAdmin(): obtiene todos los usuarios.
  * - userService.searchUsersByUsernameAdmin(username): busca usuarios por nombre de usuario en el backend.
- * - userService.updateUserAdmin(id, data): actualiza un usuario.
+ * - userService.updateUserAdmin(id, data): actualiza un usuario (incluida la contraseña si se indica).
  *
  * Uso:
  * Este componente está pensado para ser usado por administradores.
- * Permite buscar y modificar los campos "Nombre" y "Rol" de cada usuario,
+ * Permite buscar y modificar los campos "Nombre", "Rol" y "Contraseña" de cada usuario,
  * navegar entre páginas y gestionar la información de usuarios de forma sencilla.
  *
  * Cambios recientes:
  * - La búsqueda de usuarios consulta siempre al backend (con debounce) y filtra solo por username.
  * - Se eliminó el filtrado local por name.
  * - Se añadió un filtrado extra por username en frontend para asegurar coincidencia si el backend no filtra correctamente.
+ * - Ahora el administrador puede cambiar la contraseña de los usuarios desde el modal de edición.
+ * - Se muestra un mensaje de éxito o error tras editar un usuario.
  *
  * @author
  * Lorena Martínez, Noemi Casaprima
@@ -49,7 +54,9 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
 
   const [editModal, setEditModal] = useState({ open: false, user: null });
-  const [editForm, setEditForm] = useState({ name: "", is_staff: false });
+  const [editForm, setEditForm] = useState({ name: "", is_staff: false, password: "" });
+  const [editMsg, setEditMsg] = useState("");
+  const [editError, setEditError] = useState("");
 
   const [viewModal, setViewModal] = useState({ open: false, user: null });
   const [deleteModal, setDeleteModal] = useState({ open: false, user: null });
@@ -97,6 +104,7 @@ const UserManagement = () => {
     setEditForm({
       name: user.name || "",
       is_staff: !!user.is_staff,
+      password: ""
     });
     setEditModal({ open: true, user });
   };
@@ -125,16 +133,36 @@ const UserManagement = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    setEditMsg("");
+    setEditError("");
     const id = editModal.user.id;
     const updatedData = {
       name: editForm.name,
       is_staff: editForm.is_staff,
     };
-    await userService.updateUserAdmin(id, updatedData);
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, ...updatedData } : u))
-    );
-    closeEditModal();
+    if (editForm.password) {
+      updatedData.password = editForm.password;
+    }
+    try {
+      await userService.updateUserAdmin(id, updatedData);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, ...updatedData } : u))
+      );
+      setEditMsg("Usuario actualizado correctamente.");
+      setTimeout(() => {
+        setEditMsg("");
+        closeEditModal();
+      }, 1500);
+    } catch (err) {
+      let msg = "Error al actualizar usuario";
+      if (err && err.response && err.response.data) {
+        if (typeof err.response.data === "string") msg += ": " + err.response.data;
+        else if (typeof err.response.data.detail === "string") msg += ": " + err.response.data.detail;
+        else msg += ": " + JSON.stringify(err.response.data);
+      }
+      setEditError(msg);
+      setTimeout(() => setEditError(""), 3500);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -227,13 +255,13 @@ const UserManagement = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-4">
+                <td colSpan="8" className="text-center py-4">
                   Cargando...
                 </td>
               </tr>
             ) : paginatedUsers.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-4">
+                <td colSpan="8" className="text-center py-4">
                   No se encontraron usuarios.
                 </td>
               </tr>
@@ -267,24 +295,29 @@ const UserManagement = () => {
                     {user.updated_at}
                   </td>
                   <td className="py-2 px-4 border-b text-sm">
-                    <button
-                      className="text-blue-600 hover:text-blue-900 mr-2"
-                      onClick={() => openViewModal(user)}
-                    >
-                      Ver
-                    </button>
-                    <button
-                      className="text-yellow-600 hover:text-yellow-900 mr-2"
-                      onClick={() => openEditModal(user)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => openDeleteModal(user)}
-                    >
-                      Borrar
-                    </button>
+                    {/* Solo mostrar acciones si NO es admin ni staff */}
+                    {!(user.is_staff || user.is_admin) && (
+                      <>
+                        <button
+                          className="text-blue-600 hover:text-blue-900 mr-2"
+                          onClick={() => openViewModal(user)}
+                        >
+                          Ver
+                        </button>
+                        <button
+                          className="text-yellow-600 hover:text-yellow-900 mr-2"
+                          onClick={() => openEditModal(user)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => openDeleteModal(user)}
+                        >
+                          Borrar
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))
@@ -317,6 +350,8 @@ const UserManagement = () => {
           <div className="fixed inset-0 z-0" style={{ backgroundColor: "rgba(0,0,0,0.1)" }} onClick={closeEditModal} />
           <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
             <h3 className="text-xl font-bold mb-4">Editar Usuario</h3>
+            {editMsg && <div className="text-green-600 text-sm mb-2">{editMsg}</div>}
+            {editError && <div className="text-red-600 text-sm mb-2">{editError}</div>}
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Nombre</label>
@@ -345,6 +380,18 @@ const UserManagement = () => {
                   <option value="user">Usuario</option>
                   <option value="admin">Admin</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Nueva contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={editForm.password}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Dejar en blanco para no cambiar"
+                  autoComplete="new-password"
+                />
               </div>
               <div className="flex justify-end space-x-2">
                 <button
