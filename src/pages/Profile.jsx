@@ -43,6 +43,7 @@ import { userService } from "../services/userService";
 import { imageService } from "../services/imageService";
 import Card from "../components/Card";
 import { useNavigate } from "react-router-dom";
+import useCategories from "../hooks/useCategories";
 
 const USER_TYPE = "USER";
 
@@ -95,6 +96,8 @@ const Profile = () => {
     const data = await userService.getMe();
     setUser(data);
   };
+
+  const { categories } = useCategories(2);
 
   const handleImgSave = async () => {
     if (!imgFile) return;
@@ -315,7 +318,17 @@ const Profile = () => {
                         ? mediaUrl + recipe.user.id + '/' + recipe.image.url
                         : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                     }
-                    category={recipe.category}
+                    category={
+                        Array.isArray(recipe.categories)
+                            ? recipe.categories
+                                    .map((cat) => {
+                                        const catId = typeof cat === "object" ? cat.id : cat;
+                                        const fullCat = categories.find((c) => c.id === catId);
+                                        return fullCat?.name;
+                                    })
+                                    .filter(Boolean)
+                            : ["Sin categoría"]
+                    }
                     time={recipe.time}
                     isFavorite={true}
                     onToggleFavorite={() => toggleFavorite(recipe.id)}
@@ -339,7 +352,17 @@ const Profile = () => {
                     ? mediaUrl + recipe.user.id + '/' + recipe.image.url
                     : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                 }
-                category={recipe.category}
+                category={
+                    Array.isArray(recipe.categories)
+                        ? recipe.categories
+                                .map((cat) => {
+                                    const catId = typeof cat === "object" ? cat.id : cat;
+                                    const fullCat = categories.find((c) => c.id === catId);
+                                    return fullCat?.name;
+                                })
+                                .filter(Boolean)
+                        : ["Sin categoría"]
+                }
                 time={recipe.time}
                 isFavorite={favorites.includes(String(recipe.id))}
                 onToggleFavorite={() => toggleFavorite(recipe.id)}

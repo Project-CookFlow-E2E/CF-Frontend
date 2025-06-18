@@ -33,8 +33,8 @@ export const categoryService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found) or category id not valid.
     */
     getCategoryById: async (categoryId) => {
-        if (typeof categoryId !== 'number' || isNaN(unitTypeId) || unitTypeId < 1) {
-            return Promise.reject(new Error("unit_type_id not valid."));
+        if (typeof categoryId !== 'number' || isNaN(categoryId) || categoryId < 1) {
+            return Promise.reject(new Error("categoryId not valid."));
         }
         const response = await api.get(`${BASE_URL}/${categoryId}`);
         return response.data;
