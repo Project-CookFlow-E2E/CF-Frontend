@@ -127,7 +127,7 @@ const Profile = () => {
   if (!user) return <div>Cargando perfil...</div>;
 
   return (
-   <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex flex-col items-center text-center space-y-4">
         <h2 className="text-base font-medium leading-tight">
           {user.name} {user.surname}
@@ -139,11 +139,11 @@ const Profile = () => {
               src={
                 profileImg?.url
                   ? "http://localhost:8000/media/img/" +
-                    user.id +
-                    "/" +
-                    profileImg.url
+                  user.id +
+                  "/" +
+                  profileImg.url
                   : "https://ui-avatars.com/api/?name=" +
-                    encodeURIComponent(user.name)
+                  encodeURIComponent(user.name)
               }
               alt="Foto de perfil"
               className="w-24 h-24 rounded-full object-cover border"
@@ -214,11 +214,11 @@ const Profile = () => {
                   imgFile
                     ? URL.createObjectURL(imgFile)
                     : profileImg?.url
-                    ? "http://localhost:8000/media/img/" +
+                      ? "http://localhost:8000/media/img/" +
                       user.id +
                       "/" +
                       profileImg.url
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                         user.name
                       )}`
                 }
@@ -272,21 +272,19 @@ const Profile = () => {
 
       <div className="mb-6 flex gap-0">
         <button
-          className={`px-2 py-2 rounded font-semibold transition-colors ${
-            activeTab === "saved"
+          className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "saved"
               ? "bg-red-400 text-white scale-100"
               : "bg-gray-200 text-gray-600 scale-90"
-          }`}
+            }`}
           onClick={() => setActiveTab("saved")}
         >
           Recetas favoritas ({favoriteRecipes.length})
         </button>
         <button
-          className={`px-2 py-2 rounded font-semibold transition-colors ${
-            activeTab === "created"
+          className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "created"
               ? "bg-red-400 text-white scale-100"
               : "bg-gray-200 text-gray-600 scale-90"
-          }`}
+            }`}
           onClick={() => setActiveTab("created")}
         >
           Recetas creadas ({filteredRecipes.length})
@@ -301,13 +299,17 @@ const Profile = () => {
             ) : favoriteRecipes.length === 0 ? (
               <div>No tienes recetas favoritas.</div>
             ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {favoriteRecipes.map((recipe) => (
                   <Card
                     key={recipe.id}
                     id={recipe.id}
                     name={recipe.name}
-                    image={mediaUrl + recipe.user.id + '/' + recipe.image.url}
+                    image={
+                      recipe?.user?.id && recipe?.image?.url
+                        ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                        : ''
+                    }
                     category={recipe.category}
                     time={recipe.time}
                     isFavorite={true}
@@ -327,7 +329,11 @@ const Profile = () => {
                 key={recipe.id}
                 id={recipe.id}
                 name={recipe.name}
-                image={mediaUrl + recipe.user.id + '/' + recipe.image.url}
+                iimage={
+                  recipe?.user?.id && recipe?.image?.url
+                    ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                    : '' // puedes cambiar esta ruta por otra imagen por defecto
+                }
                 category={recipe.category}
                 time={recipe.time}
                 isFavorite={favorites.includes(String(recipe.id))}

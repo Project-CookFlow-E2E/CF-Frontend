@@ -145,7 +145,11 @@ const Search = () => {
                                 <Card
                                     key={recipe.id}
                                     id={`recipe-card-${recipe.id}`}
-                                    image={mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url}
+                                    image={
+                                        recipe?.user?.id && recipe?.image?.url
+                                            ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                                            : ''
+                                    }
                                     name={recipe.name}
                                     category={recipe.category}
                                     time={`${recipe.duration_minutes}`}

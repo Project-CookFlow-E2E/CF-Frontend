@@ -69,11 +69,10 @@ const Home = () => {
                                     <Badge
                                         key={category.id}
                                         data-testid={`category-badge-${category.name}`}
-                                        className={`cursor-pointer ${
-                                            isSelected
+                                        className={`cursor-pointer ${isSelected
                                                 ? "bg-pink-500 text-white"
                                                 : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                                        }`}
+                                            }`}
                                         onClick={() => toggleCategory(category.name)}
                                     >
                                         {category.name}
@@ -114,11 +113,15 @@ const Home = () => {
                             <Card
                                 key={recipe.id}
                                 id={`recipe-card-${recipe.id}`}
-                                image={mediaUrl + recipe.user.id + '/' + recipe.image.url}
+                                image={
+                                    recipe?.user?.id && recipe?.image?.url
+                                        ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                                        : ''
+                                }
                                 name={recipe.name}
                                 category={recipe.category}
                                 time={`${recipe.duration_minutes}`}
-                               isFavorite={favorites.includes(String(recipe.id))} 
+                                isFavorite={favorites.includes(String(recipe.id))}
                                 onToggleFavorite={() => toggleFavorite(recipe.id)}
                                 onClick={() => navigate(`/recipe/${recipe.id}`)}
                             />
