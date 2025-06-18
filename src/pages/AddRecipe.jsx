@@ -295,79 +295,54 @@ const AddRecipe = () => {
     }
 
     try {
-      // Matriz única de categorías
       const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
 
       const recipePayload = new FormData();
 
-      // 1. Añadir campos directos de la receta
       recipePayload.append("name", data.nombre);
       recipePayload.append("description", data.descripcion);
       recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
       recipePayload.append("commensals", parseInt(data.comensales, 10));
 
-      // 2. Añadir las categorías (una por una con la clave 'categories[]')
-      // Esta forma es la estándar para FormData con arrays y DRF lo maneja bien.
       categoriasUnicas.forEach((categoryId) => {
-        recipePayload.append("categories", parseInt(categoryId, 10)); // Se cambió a 'categories' sin [] para DRF si es JSON Array, pero 'categories[]' también funciona con DRF
+        recipePayload.append("categories", parseInt(categoryId, 10));
       });
 
-
-      // 3. Añadir los ingredientes como una CADENA JSON
       const formattedIngredients = data.ingredients.map(ing => ({
-        ingredient: parseInt(ing.id, 10), // ¡Usar ing.id para el ID del ingrediente base!
+        ingredient: parseInt(ing.id, 10),
         quantity: parseFloat(ing.quantity),
-        unit: parseInt(ing.unit, 10)     // ¡Usar ing.unit para el ID de la unidad!
+        unit: parseInt(ing.unit, 10) 
       }));
-      // MODIFICADO: Cambiado de "ingredients" a "ingredients_data" para coincidir con el serializador
+
       recipePayload.append("ingredients_data", JSON.stringify(formattedIngredients));
 
-      // 4. Añadir la imagen principal de la receta
       if (data.foto) {
-        recipePayload.append("photo", data.foto); // La clave es "photo"
+        recipePayload.append("photo", data.foto);
       }
 
-      // 5. Añadir los pasos como una CADENA JSON
       const formattedSteps = data.steps.map((step, idx) => ({
         description: step.text,
         order: idx + 1
       }));
-      // MODIFICADO: Cambiado de "steps" a "steps_data" para coincidir con el serializador
+
       recipePayload.append("steps_data", JSON.stringify(formattedSteps));
 
-      // 6. Añadir las imágenes de cada paso
+
       data.steps.forEach((step, idx) => {
-        if (step.image) { // `step.image` es el objeto File real
-          // La clave es "step_image_0", "step_image_1", etc.
+        if (step.image) { 
           recipePayload.append(`step_image_${idx}`, step.image);
         }
       });
-
-      // --- Verificación del contenido de FormData (para depuración) ---
-      console.log("Contenido de recipePayload para envío:");
-      for (const [key, value] of recipePayload.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
-        } else {
-          console.log(`${key}: ${value}`);
-        }
-      }
-      console.log("--- FIN de recipePayload para envío ---");
-      // --- Fin de verificación ---
 
 
       const recetaGuardada = await recipeService.createRecipe(recipePayload);
       const recetaId = recetaGuardada.id;
 
-      console.log("Receta guardada con ID:", recetaId);
-
       setRecipeId(recetaId);
       setMensaje("Receta guardada correctamente. ID: " + recetaId);
       reset();
       setValue("categoriasSeleccionadas", []);
-      setPreview(null); // Limpiar la vista previa de la imagen principal
-      // Para limpiar las vistas previas de los pasos, necesitarías iterar sobre ellos y revocar las URLs
-      // y establecer imagePreview a null para cada uno. Un reset() global lo hará.
+      setPreview(null);
 
     } catch (error) {
       let errorMsg = "Error al guardar la receta.";
