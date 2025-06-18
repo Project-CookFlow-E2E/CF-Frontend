@@ -126,7 +126,7 @@ const Profile = () => {
   if (!user) return <div>Cargando perfil...</div>;
 
   return (
-    <div className="max-w-screen-md mx-auto px-4 py-8">
+   <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex flex-col items-center text-center space-y-4">
         <h2 className="text-base font-medium leading-tight">
           {user.name} {user.surname}
@@ -300,7 +300,7 @@ const Profile = () => {
             ) : favoriteRecipes.length === 0 ? (
               <div>No tienes recetas favoritas.</div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {favoriteRecipes.map((recipe) => (
                   <Card
                     key={recipe.id}
@@ -320,7 +320,7 @@ const Profile = () => {
         ) : paginatedRecipes.length === 0 ? (
           <div>No hay recetas para mostrar.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {paginatedRecipes.map((recipe) => (
               <Card
                 key={recipe.id}
