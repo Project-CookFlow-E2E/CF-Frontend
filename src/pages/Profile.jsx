@@ -162,7 +162,7 @@ const Profile = () => {
           {editingBio ? (
             <div>
               <textarea
-                className="border rounded w-full sm:w-80 md:w-[500px] p-2 mt-1 h-32 md:h-24"
+                className="border rounded w-90 md:w-250 p-2 mt-1 h-32 md:h-50"
                 rows={3}
                 value={bio}
                 maxLength={500}
