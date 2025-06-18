@@ -15,6 +15,7 @@ import { TiShoppingCart } from "react-icons/ti";
  * Muestra la información de una receta según el ID en la URL.
  * @modified by Ana Castro
  * @modified añadir ingrendientes a la base de datos de la lista de compra
+ * @modified Ángel Áragón - Añadido manejo de errores y mensajes de éxito,
  */
 
 const Recipe = () => {
