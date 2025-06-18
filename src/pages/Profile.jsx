@@ -300,7 +300,7 @@ const Profile = () => {
             ) : favoriteRecipes.length === 0 ? (
               <div>No tienes recetas favoritas.</div>
             ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {favoriteRecipes.map((recipe) => (
                   <Card
                     key={recipe.id}
@@ -320,7 +320,7 @@ const Profile = () => {
         ) : paginatedRecipes.length === 0 ? (
           <div>No hay recetas para mostrar.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {paginatedRecipes.map((recipe) => (
               <Card
                 key={recipe.id}
