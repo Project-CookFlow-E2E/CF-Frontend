@@ -15,10 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
-// import { getUserIdFromToken } from "../services/authService";
-
-
-
 
 const AddRecipe = () => {
   const [parentCategories, setParentCategories] = useState([]);
@@ -342,11 +338,6 @@ for (const [key, value] of recipePayload.entries()) {
 console.log("Pasos formateados para el backend:", formattedSteps);
 recipePayload.append("steps", JSON.stringify(formattedSteps));
 
-
-
-
-
-
 console.log("--- FIN de recipePayload ---");
 
     const recetaGuardada = await recipeService.createRecipe(recipePayload);
@@ -389,13 +380,7 @@ console.log("--- FIN de recipePayload ---");
             {mensaje}
           </div>
         )}
-        {recipeId && (
-          <div className="mb-4 px-3 py-2 rounded-lg text-sm font-mono bg-green-100 text-green-800">
-            <strong>recipe_id generado:</strong> {recipeId}
-          </div>
-        )}
-
-        {/* Imagen de la receta */}
+       {/* Imagen de la receta */}
         <div
           className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${
             isDragOver ? "border-accent border-2 bg-accent/5" : ""
@@ -587,16 +572,7 @@ console.log("--- FIN de recipePayload ---");
                       rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
-                          {/* { <Input
-                            {...field}
-                            id={`ingredient-name-${index}`}
-                            list={`ingredientes-list-${index}`}
-                            placeholder="Ej: Harina, Leche..."
-                            className="w-full focus:outline-none"
-                            onChange={e => handleIngredientChange(e, index)}
-                            required
-                          /> 
-                          } */}
+                          
                           <select
                             {...field}
                             id={`ingredient-name-${index}`}
