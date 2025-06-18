@@ -33,7 +33,7 @@ const AddRecipe = () => {
   const [mensaje, setMensaje] = useState("");
   const [recipeId, setRecipeId] = useState(null);
   const dropdownRef = useRef(null);
-  
+
 
   const {
     control,
@@ -187,7 +187,7 @@ const AddRecipe = () => {
     setValue(`ingredients.${index}.name`, value);
     const found = allIngredients.find(i => i.name === value);
     if (found && found.unit_type_id) {
-      setValue(`ingredients.${index}.id`, found.id); 
+      setValue(`ingredients.${index}.id`, found.id);
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
@@ -237,7 +237,7 @@ const AddRecipe = () => {
     }
   };
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   // Validación de campos numéricos (no negativos ni cero)
   const validatePositive = (value) => {
     if (value === "" || value === null || value === undefined) return "Campo obligatorio";
@@ -253,7 +253,7 @@ const AddRecipe = () => {
     if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
     return true;
   };
-  
+
 
   const onSubmit = async (data) => {
     // Validación manual extra para ingredientes
@@ -281,99 +281,59 @@ const AddRecipe = () => {
     try {
       // Matriz única de categorías
       const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
-      
-// 1. Crear la receta (sin ingredientes ni pasos)
-    const recipePayload = new FormData();
-    recipePayload.append("name", data.nombre);
-    recipePayload.append("description", data.descripcion);
-    recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
-    recipePayload.append("commensals", parseInt(data.comensales, 10));
-    categoriasUnicas.forEach((category) => {
-      recipePayload.append("categories[]", parseInt(category, 10));
-    });
-    // ingredients.forEach((ingredient) => {
-    //   recipePayload.append("ingredients[]", ingredient.name);
-    // });
 
-  const formattedIngredients = data.ingredients.map(ing => ({
-  // 'ingredient' es el ID del ingrediente base (ej. el ID de 'Huevo')
-  // En tu ejemplo de consola, este es 'ing.id'
-  ingredient: parseInt(ing.id, 10),
+      // 1. Crear la receta (sin ingredientes ni pasos)
+      const recipePayload = new FormData();
+      recipePayload.append("name", data.nombre);
+      recipePayload.append("description", data.descripcion);
+      recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
+      recipePayload.append("commensals", parseInt(data.comensales, 10));
+      categoriasUnicas.forEach((category) => {
+        recipePayload.append("categories[]", parseInt(category, 10));
+      });
 
-  // 'quantity' es la cantidad (asegúrate de que sea un número si el backend lo espera así)
-  quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+      const formattedIngredients = data.ingredients.map(ing => ({
+        ingredient: parseInt(ing.id, 10),
+        quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+        unit: parseInt(ing.unit, 10)
+      }));
 
-  // 'unit' es el ID de la unidad (ej. el ID de 'unidades' o 'gramos')
-  // En tu ejemplo de consola, este es 'ing.unit'
-  unit: parseInt(ing.unit, 10)
-  }));
+      // **Paso 2: Adjunta el array formateado al FormData como un string JSON**
+      recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
+      if (data.foto) {
+        recipePayload.append("recipe_image", data.foto);
+      }
 
-// Muestra el array formateado para verificar
-console.log("Ingredientes formateados para el backend:", formattedIngredients);
+      // Steps
+      // Formatea los pasos para el backend
+      const formattedSteps = data.steps.map((step, idx) => ({
+        description: step.text,
+        order: idx + 1
+      }));
 
-// **Paso 2: Adjunta el array formateado al FormData como un string JSON**
-recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
-
-    if (data.foto) {
-      recipePayload.append("photo", data.foto);
+      recipePayload.append("steps", JSON.stringify(formattedSteps));
+      const recetaGuardada = await recipeService.createRecipe(recipePayload);
+      const recetaId = recetaGuardada.id;
+      setRecipeId(recetaId);
+      setMensaje("Receta guardada correctamente. ID: " + recetaId);
+      reset();
+      setValue("categoriasSeleccionadas", []);
+    } catch (error) {
+      let errorMsg = "Error al guardar la receta.";
+      if (error.response && error.response.data) {
+        errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+      } else if (error.message) {
+        errorMsg += "\nDetalles: " + error.message;
+      }
+      setMensaje(errorMsg);
     }
-
-    console.log("Contenido de recipePayload:");
-
-for (const [key, value] of recipePayload.entries()) {
-  if (value instanceof File) {
-    // Si es un archivo (como la foto), solo muestra su nombre y tipo
-    console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
-  } else {
-    // Para otros valores, muestra la clave y el valor
-    console.log(`${key}: ${value}`);
-  }
-}
-  // Steps
-// Formatea los pasos para el backend
-  const formattedSteps = data.steps.map((step, idx) => ({
-  // 'description' es el texto del paso
-  description: step.text, // o step.description según tu formulario
-
-  // 'order' es el número de orden del paso
-  order: idx + 1
-}));
-
-console.log("Pasos formateados para el backend:", formattedSteps);
-recipePayload.append("steps", JSON.stringify(formattedSteps));
-
-
-
-
-
-
-console.log("--- FIN de recipePayload ---");
-
-    const recetaGuardada = await recipeService.createRecipe(recipePayload);
-    const recetaId = recetaGuardada.id;
-
-    console.log("Receta guardada con ID:", recetaId);
-
-    setRecipeId(recetaId);
-    setMensaje("Receta guardada correctamente. ID: " + recetaId);
-    reset();
-    setValue("categoriasSeleccionadas", []);
-  } catch (error) {
-    let errorMsg = "Error al guardar la receta.";
-    if (error.response && error.response.data) {
-      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
-    } else if (error.message) {
-      errorMsg += "\nDetalles: " + error.message;
-    }
-    setMensaje(errorMsg);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
-        <button className="mb-4" data-testid="back-button"  onClick={() => navigate("/")}>
+        <button className="mb-4" data-testid="back-button" onClick={() => navigate("/")}>
           <span className="text-2xl">←</span>
         </button>
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
@@ -397,9 +357,8 @@ console.log("--- FIN de recipePayload ---");
 
         {/* Imagen de la receta */}
         <div
-          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${
-            isDragOver ? "border-accent border-2 bg-accent/5" : ""
-          }`}
+          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${isDragOver ? "border-accent border-2 bg-accent/5" : ""
+            }`}
           data-testid="image-upload-area"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -509,11 +468,10 @@ console.log("--- FIN de recipePayload ---");
                       <button
                         type="button"
                         key={categoria.id}
-                        className={`px-3 py-1 rounded-lg border ${
-                          (categoriasSeleccionadas || []).includes(categoria.id)
+                        className={`px-3 py-1 rounded-lg border ${(categoriasSeleccionadas || []).includes(categoria.id)
                             ? "bg-accent text-white"
                             : "bg-white text-gray-700"
-                        }`}
+                          }`}
                         onClick={() => handleCategoriaChange(categoria)}
                       >
                         {categoria.name}
@@ -611,8 +569,8 @@ console.log("--- FIN de recipePayload ---");
                               </option>
                             ))}
                           </select>
-                     
-                          
+
+
                           <datalist id={`ingredientes-list-${index}`}>
                             {allIngredients.map(i => (
                               <option key={i.id} value={i.name} />
@@ -731,9 +689,8 @@ console.log("--- FIN de recipePayload ---");
                       name={`steps.${index}`}
                       render={({ field }) => (
                         <div
-                          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${
-                            field.value?.isDragOver ? "border-accent border-2 bg-accent/5" : ""
-                          }`}
+                          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${field.value?.isDragOver ? "border-accent border-2 bg-accent/5" : ""
+                            }`}
                           data-testid={`step-image-upload-area-${index}`}
                           onDragOver={e => {
                             e.preventDefault();
