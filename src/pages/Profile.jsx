@@ -162,11 +162,15 @@ const Profile = () => {
           {editingBio ? (
             <div>
               <textarea
-                className="border rounded w-full p-2 mt-1"
+                className="border rounded w-full sm:w-80 md:w-[500px] p-2 mt-1 h-32 md:h-24"
                 rows={3}
                 value={bio}
+                maxLength={500}
                 onChange={(e) => setBio(e.target.value)}
               />
+                <div className="text-sm text-gray-500 text-right mt-1">
+                {bio.length}/500 caracteres
+              </div>
               <button
                 className="bg-emerald-700 text-white cursor-pointer px-3 py-1 rounded mt-2 mr-2"
                 onClick={handleBioSave}
@@ -182,7 +186,7 @@ const Profile = () => {
               </button>
             </div>
           ) : (
-            <div className="flex items-center">
+            <div>
               <span className="mr-2">{user.biography || "Sin biografía."}</span>
               <button
                 className="text-blue-600 cursor-pointer underline"
