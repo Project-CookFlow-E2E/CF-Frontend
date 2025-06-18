@@ -1,0 +1,16 @@
+[
+  {
+    "username": "ana456",
+    "password": "testpass456",
+    "role": "user"
+  },
+  {
+    "username": "admin_user",
+    "password": "admin_password",
+    "role": "admin"
+  },
+  {
+    "username": "invaliduser",
+    "password": "wrongpassword"
+  }
+]
