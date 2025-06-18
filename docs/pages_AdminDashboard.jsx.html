@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/AdminDashboard.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/AdminDashboard.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file AdminDashboard.jsx
+ * @description
+ * Página principal del panel de administración de CookFlow.
+ * Permite a los administradores navegar y gestionar recetas, usuarios, categorías e ingredientes desde un único panel.
+ *
+ * Funcionalidades principales:
+ * - Sidebar de navegación para acceder a las diferentes secciones de administración.
+ * - Renderizado dinámico de los componentes de gestión según la sección seleccionada.
+ * - Vista de panel de control con mensaje de bienvenida y espacio para estadísticas/resúmenes.
+ *
+ * Estados:
+ * - activeSection: controla la sección activa del dashboard ('dashboard', 'recipes', 'users', 'categories', 'ingredients').
+ *
+ * Componentes utilizados:
+ * - RecipeManagement: gestión de recetas.
+ * - UserManagement: gestión de usuarios.
+ * - CategoryManagement: gestión de categorías.
+ * - IngredientManagement: gestión de ingredientes.
+ *
+ * Uso:
+ * Esta página está pensada para ser usada por administradores.
+ * Permite gestionar todo el contenido relevante de la plataforma desde un solo lugar, con navegación lateral y renderizado condicional del contenido.
+ *
+ * @author
+ * Rubén Ortega
+ */
+
+import React, { useState } from 'react';
+
+
+
+import RecipeManagement from '../components/admin/RecipeManagement';
+import UserManagement from '../components/admin/UserManagement';
+import CategoryManagement from '../components/admin/CategoryManagement';
+import IngredientManagement from '../components/admin/IngredientManagement';
+
+const AdminDashboard = () => {
+
+  const [activeSection, setActiveSection] = useState('dashboard');
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'dashboard':
+        return (
+          &lt;div className="p-6">
+            &lt;h2 className="text-2xl font-bold text-gray-800 mb-4">Panel de Control&lt;/h2>
+            &lt;p className="text-gray-600">Bienvenido al panel de administración. Selecciona una opción del menú lateral para gestionar el contenido de CookFlow.&lt;/p>
+
+          &lt;/div>
+        );
+      case 'recipes':
+        return &lt;RecipeManagement />;
+      case 'users':
+        return &lt;UserManagement />;
+      case 'categories':
+        return &lt;CategoryManagement />;
+      case 'ingredients':
+        return &lt;IngredientManagement />;
+      default:
+        return (
+          &lt;div className="p-6">
+            &lt;h2 className="text-2xl font-bold text-gray-800 mb-4">Panel de Administración&lt;/h2>
+            &lt;p className="text-gray-600">Bienvenido al panel de administración.&lt;/p>
+          &lt;/div>
+        );
+    }
+  };
+
+  return (
+    &lt;div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      &lt;div className="w-64 bg-white shadow-lg p-6 flex flex-col">
+        &lt;div className="mb-8">
+          &lt;h1 className="text-2xl font-bold text-gray-800"> Administrador&lt;/h1>
+        &lt;/div>
+        &lt;nav className="flex-1">
+          &lt;ul>
+            &lt;li className="mb-2">
+              &lt;button
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'dashboard' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                onClick={() => setActiveSection('dashboard')}
+              >
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                  &lt;path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                &lt;/svg>
+                Panel de control
+              &lt;/button>
+            &lt;/li>
+            &lt;li className="mb-2">
+              &lt;button
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'recipes' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                onClick={() => setActiveSection('recipes')}
+              >
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                  &lt;path fillRule="evenodd" d="M9.243 3.03a1 1 0 01.024 1.408L6.4 7.618a1 1 0 01-1.424 0L2.105 4.438A1 1 0 013.52 3.014l3.149 3.15 2.574-2.574zM10.757 16.97a1 1 0 01-.024-1.408l2.868-3.18a1 1 0 011.424 0l3.871 3.181a1 1 0 01-1.424 1.408l-3.149-3.15-2.574 2.574z" clipRule="evenodd" />
+                &lt;/svg>
+                Recetas
+              &lt;/button>
+            &lt;/li>
+            &lt;li className="mb-2">
+              &lt;button
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'users' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                onClick={() => setActiveSection('users')}
+              >
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                  &lt;path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                &lt;/svg>
+                Usuarios
+              &lt;/button>
+            &lt;/li>
+            &lt;li className="mb-2">
+              &lt;button
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'categories' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                onClick={() => setActiveSection('categories')}
+              >
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                  &lt;path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm1.475 2.102a.75.75 0 00-.974 1.185L8 12.197l5.474-5.91a.75.75 0 00-.974-1.185L8 9.803l-3.475-3.701z" clipRule="evenodd" />
+                &lt;/svg>
+                Categorias
+              &lt;/button>
+            &lt;/li>
+            &lt;li className="mb-2">
+              &lt;button
+                className={`flex items-center p-2 rounded-md w-full text-left ${activeSection === 'ingredients' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                onClick={() => setActiveSection('ingredients')}
+              >
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                  &lt;path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm3.5 1h-3a.5.5 0 000 1h3a.5.5 0 000-1z" clipRule="evenodd" />
+                &lt;/svg>
+                Ingredientes
+              &lt;/button>
+            &lt;/li>
+          &lt;/ul>
+        &lt;/nav>
+
+      &lt;/div>
+
+
+      &lt;div className="flex-1 p-8 bg-gray-100">
+        {renderContent()}
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default AdminDashboard;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

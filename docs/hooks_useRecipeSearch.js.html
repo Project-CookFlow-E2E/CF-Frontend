@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hooks/useRecipeSearch.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hooks/useRecipeSearch.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file useRecipeSearch.js
+ * @description Hook personalizado que unifica toda la lógica de filtrado, búsqueda y visualización de recetas.
+ * Utiliza hooks internos (`useCategories` y `useRecipes`) y controla la interacción con la URL (parámetro de categoría),
+ * además de aplicar una selección por defecto si no hay filtros activos. Maneja también el control de visibilidad de filtros
+ * y la gestión de los resultados mostrados tras aplicar búsqueda o filtrado.
+ *
+ * @author Ana Castro, basado en el código original de Saray
+ */
+
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import useCategories from "./useCategories";
+import useRecipes from "./useRecipes";
+
+const useRecipeSearch = () => {
+    const { categories, loading: loadingGeneral } = useCategories(2);
+    const { categories: typeCategories, loading: loadingType } = useCategories(3);
+    const { categories: originCategories, loading: loadingOrigin } = useCategories(4);
+    const { recipes, loading: loadingRecipes } = useRecipes();
+    const [selectedCategory, setSelectedCategory] = useState([]);
+    const [selectedType, setSelectedType] = useState([]);
+    const [selectedOrigin, setSelectedOrigin] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [showingAll, setShowingAll] = useState(false);
+
+    const [searchParams] = useSearchParams();
+    useEffect(() => {
+        const categoryParam = searchParams.get("category");
+        if (categoryParam &amp;&amp; categories.length > 0) {
+            const selected = categories.filter(
+                (cat) => cat.slug === categoryParam || cat.name.toLowerCase() === categoryParam.toLowerCase()
+            );
+            if (selected.length > 0) {
+                setSelectedCategory([selected[0].id]);
+            }
+        }
+    }, [searchParams, categories]);
+
+    const toggleMostrarTodo = () => {
+        setShowingAll((prev) => !prev);
+    };
+
+    const recipesToShow = useMemo(() => {
+        if (showingAll) return recipes;
+
+        const noFilters =
+            selectedCategory.length === 0 &amp;&amp;
+            selectedType.length === 0 &amp;&amp;
+            selectedOrigin.length === 0 &amp;&amp;
+            searchTerm.trim() === "";
+
+        if (noFilters) return [];
+
+        let result = recipes;
+        if (selectedCategory.length > 0) {
+            result = result.filter((recipe) => recipe.categories?.some((catId) => selectedCategory.includes(catId)));
+        }
+        if (selectedType.length > 0) {
+            result = result.filter((recipe) => recipe.categories?.some((catId) => selectedType.includes(catId)));
+        }
+        if (selectedOrigin.length > 0) {
+            result = result.filter((recipe) => recipe.categories?.some((catId) => selectedOrigin.includes(catId)));
+        }
+        if (searchTerm.trim() !== "") {
+            result = result.filter((recipe) => recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+        return result;
+    }, [recipes, selectedCategory, selectedType, selectedOrigin, searchTerm, showingAll]);
+
+    return {
+        loadingAll: loadingGeneral || loadingType || loadingOrigin || loadingRecipes,
+        categories,
+        typeCategories,
+        originCategories,
+        recipesToShow,
+        searchTerm,
+        setSearchTerm,
+        selectedCategory,
+        setSelectedCategory,
+        selectedType,
+        setSelectedType,
+        selectedOrigin,
+        setSelectedOrigin,
+        showingAll,
+        toggleMostrarTodo,
+    };
+};
+
+export default useRecipeSearch;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

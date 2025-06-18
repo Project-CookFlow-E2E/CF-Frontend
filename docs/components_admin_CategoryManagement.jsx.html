@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/admin/CategoryManagement.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/admin/CategoryManagement.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file CategoryManagement.jsx
+ * @description
+ * Componente de administración de categorías para el panel de administración.
+ * Permite visualizar, buscar, añadir, editar y borrar categorías de recetas.
+ *
+ * Funcionalidades principales:
+ * - Listar todas las categorías existentes.
+ * - Buscar categorías por nombre mediante un input de búsqueda.
+ * - Añadir nuevas categorías mediante un modal conectado al backend.
+ * - Editar el nombre y la categoría padre de una categoría mediante un modal.
+ * - Borrar categorías con confirmación mediante modal (pregunta antes de borrar y elimina en la BBDD).
+ * - Acciones de edición y borrado para cada categoría, con overlays semitransparentes que dejan visible el panel de fondo.
+ * - Paginación: muestra 5 categorías por página, con navegación entre páginas.
+ * - Ordena las categorías de la más reciente a la más antigua según la fecha de creación.
+ *
+ * Estados:
+ * - categories: array de categorías obtenidas del backend.
+ * - loading: booleano para mostrar el estado de carga.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición.
+ * - addModal: controla la visibilidad del modal de añadir categoría.
+ * - addForm: almacena los valores del formulario de añadir categoría.
+ * - deleteModal: controla la visibilidad y datos del modal de confirmación de borrado.
+ * - page: página actual de la paginación.
+ * - search: término de búsqueda para filtrar categorías por nombre.
+ *
+ * Servicios utilizados:
+ * - categoryService.getAllCategories(): obtiene todas las categorías.
+ * - categoryService.createCategoryAdmin(data): crea una nueva categoría.
+ * - categoryService.updateCategoryAdmin(id, data): actualiza una categoría.
+ * - categoryService.deleteCategoryAdmin(id): elimina una categoría.
+ *
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite buscar, añadir, modificar y borrar categorías de forma sencilla y segura,
+ * con confirmación visual y overlays que no ocultan completamente el panel de administración.
+ *
+ * Cambios recientes:
+ * - Añadida funcionalidad para añadir categorías desde el panel (modal y conexión a backend).
+ * - Añadida funcionalidad de borrado con confirmación y modal (incluye overlay semitransparente).
+ * - Mejorada la experiencia visual de los modales para dejar visible el panel de fondo.
+ *
+ * @author Lorena Martínez, Noemi Casaprima
+ * @modifiedBy Noemi Casaprima  (añadido: alta y borrado de categorías, overlays y experiencia de usuario en modales)
+ */
+
+import { useState, useEffect } from "react";
+import { categoryService } from "../../services/categoryService";
+
+const PAGE_SIZE = 5;
+
+const CategoryManagement = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [editModal, setEditModal] = useState({ open: false, category: null });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    parent_category_id: "",
+  });
+
+  const [addModal, setAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", parent_category_id: "" });
+
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const [deleteModal, setDeleteModal] = useState({ open: false, category: null });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoryService.getAllCategories();
+
+        const sorted = [...data].sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        setCategories(sorted);
+      } catch (error) {
+        {
+          error;
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const openEditModal = (category) => {
+    setEditForm({
+      name: category.name || "",
+      parent_category_id: category.parent_category_id || "",
+    });
+    setEditModal({ open: true, category });
+  };
+
+  const closeEditModal = () => setEditModal({ open: false, category: null });
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const id = editModal.category.id;
+    const updatedData = {
+      name: editForm.name,
+      parent_category_id: editForm.parent_category_id || null,
+    };
+    await categoryService.updateCategoryAdmin(id, updatedData);
+    setCategories((prev) =>
+      prev.map((cat) => (cat.id === id ? { ...cat, ...updatedData } : cat))
+    );
+    closeEditModal();
+  };
+
+  const openDeleteModal = (category) => setDeleteModal({ open: true, category });
+  const closeDeleteModal = () => setDeleteModal({ open: false, category: null });
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.category.id;
+    await categoryService.deleteCategoryAdmin(id);
+    setCategories((prev) => prev.filter((cat) => cat.id !== id));
+    closeDeleteModal();
+  };
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
+  const paginatedCategories = filteredCategories.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
+  const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
+
+  return (
+    &lt;div className="bg-white p-6 rounded-lg shadow-md">
+      &lt;div className="flex justify-between items-center mb-4">
+        &lt;h2 className="text-2xl font-bold text-gray-800">
+          Administrador de categorías
+        &lt;/h2>
+        &lt;button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center" onClick={() => setAddModal(true)}>
+          &lt;svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            &lt;path
+              fillRule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clipRule="evenodd"
+            />
+          &lt;/svg>
+          Añadir categoría
+        &lt;/button>
+      &lt;/div>
+      &lt;div className="mb-4">
+        &lt;input
+          type="text"
+          placeholder="Buscar categorías..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      &lt;/div>
+      &lt;div className="overflow-x-auto">
+        &lt;table className="min-w-full bg-white border border-gray-200">
+          &lt;thead>
+            &lt;tr>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Nombre
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Creador
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Categoría padre
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Fecha de creación
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Acciones
+              &lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {loading ? (
+              &lt;tr>
+                &lt;td colSpan={7} className="text-center py-4">
+                  Cargando...
+                &lt;/td>
+              &lt;/tr>
+            ) : paginatedCategories.length === 0 ? (
+              &lt;tr>
+                &lt;td colSpan={7} className="text-center py-4">
+                  No se encontraron categorias.
+                &lt;/td>
+              &lt;/tr>
+            ) : (
+              paginatedCategories.map((category) => (
+                &lt;tr key={category.id}>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {category.name}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {category.user_id}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {category.parent_category_id}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {category.created_at}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm">
+                    &lt;button
+                      className="text-yellow-600 hover:text-yellow-900 mr-2"
+                      onClick={() => openEditModal(category)}
+                    >
+                      Editar
+                    &lt;/button>
+                    &lt;button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(category)}>
+                      Borrar
+                    &lt;/button>
+                  &lt;/td>
+                &lt;/tr>
+              ))
+            )}
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+      &lt;div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+        &lt;button
+          className="px-3 py-1 border rounded-md mr-1"
+          onClick={handlePrev}
+          disabled={page === 1}
+        >
+          Anterior
+        &lt;/button>
+        &lt;span>
+          Página {page} de {totalPages}
+        &lt;/span>
+        &lt;button
+          className="px-3 py-1 border rounded-md"
+          onClick={handleNext}
+          disabled={page === totalPages || totalPages === 0}
+        >
+          Siguiente
+        &lt;/button>
+      &lt;/div>
+
+      {editModal.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeEditModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Editar Categoría&lt;/h3>
+            &lt;form onSubmit={handleEditSubmit} className="space-y-4">
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre&lt;/label>
+                &lt;input
+                  type="text"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Nombre de la categoría"
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">
+                  Categoría Padre (ID)
+                &lt;/label>
+                &lt;input
+                  type="text"
+                  name="parent_category_id"
+                  value={editForm.parent_category_id}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="ID de la categoría padre"
+                />
+              &lt;/div>
+              &lt;div className="flex justify-end space-x-2">
+                &lt;button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                &lt;/button>
+                &lt;button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Guardar
+                &lt;/button>
+              &lt;/div>
+            &lt;/form>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {/* Modal de AÑADIR categoría */}
+      {addModal &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={() => setAddModal(false)} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Añadir Categoría&lt;/h3>
+            &lt;form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const newCategory = await categoryService.createCategoryAdmin(addForm);
+                setCategories((prev) => [newCategory, ...prev]);
+                setAddModal(false);
+                setAddForm({ name: "", parent_category_id: "" });
+              } catch (err) {
+                let msg = "Error al crear categoría";
+                if (err &amp;&amp; err.response &amp;&amp; err.response.data) {
+                  if (typeof err.response.data === 'string') msg += ": " + err.response.data;
+                  else if (typeof err.response.data.detail === 'string') msg += ": " + err.response.data.detail;
+                  else msg += ": " + JSON.stringify(err.response.data);
+                }
+                alert(msg);
+              }
+            }} className="space-y-4">
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre&lt;/label>
+                &lt;input type="text" name="name" value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Categoría Padre (ID)&lt;/label>
+                &lt;input type="text" name="parent_category_id" value={addForm.parent_category_id} onChange={e => setAddForm(f => ({ ...f, parent_category_id: e.target.value }))} className="w-full border p-2 rounded" placeholder="ID de la categoría padre (opcional)" />
+              &lt;/div>
+              &lt;div className="flex justify-end space-x-2">
+                &lt;button type="button" onClick={() => setAddModal(false)} className="bg-gray-300 px-4 py-2 rounded">Cancelar&lt;/button>
+                &lt;button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Crear&lt;/button>
+              &lt;/div>
+            &lt;/form>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {/* Modal de CONFIRMACIÓN de borrado */}
+      {deleteModal.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeDeleteModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">¿Seguro que quieres borrar esta categoría?&lt;/h3>
+            &lt;div className="mb-4">Esta acción no se puede deshacer.&lt;/div>
+            &lt;div className="flex justify-end space-x-2">
+              &lt;button onClick={closeDeleteModal} className="bg-gray-300 px-4 py-2 rounded">Cancelar&lt;/button>
+              &lt;button onClick={handleDeleteConfirm} className="bg-red-500 text-white px-4 py-2 rounded">Borrar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};
+
+export default CategoryManagement;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

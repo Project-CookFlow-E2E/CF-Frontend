@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/userService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/userService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import api from "./api";
+
+/**
+ * src/services/userService.js
+ *
+ * Provides service methods for interacting with user-related API endpoints.
+ * This includes fetching user profiles (current and by ID), updating profiles,
+ * and administrative operations (listing, creating, updating, deleting users).
+ *
+ * @module userService
+ * @requires ./api - The configured Axios instance for making API requests.
+ * @author Saturnino Mendez
+ */
+
+/**
+ * Base URL for regular user-related API endpoints.
+ * Corresponds to `/api/users/` in the backend.
+ *
+ * @type {string}
+ */
+const BASE_URL = "/users";
+/**
+ * Base URL for administrator-specific user API endpoints.
+ * Corresponds to `/api/admin/users/` in the backend.
+ *
+ * @type {string}
+ */
+const ADMIN_BASE_URL = "/admin/users";
+
+/**
+ * Service for interacting with favorite API endpoints.
+ * Provides methods for managing user favorites and administrative favorite operations.
+ */
+export const userService = {
+
+    /**
+    * Fetches the profile of the currently authenticated user.
+    * GET /api/users/me/
+    * 
+    * @returns {Promise&lt;object>} A promise that resolves with the authenticated user's profile data.
+    * @throws {Error} If the API request fails (e.g., 401 Unauthorized if not logged in).
+    */
+    getMe: async () => {
+        const response = await api.get(`${BASE_URL}/me/`);
+        return response.data;
+    },
+
+    /**
+    * Updates the profile of the currently authenticated user.
+    * Uses PATCH for partial updates, but can be changed to PUT if full updates are required.
+    * PATCH /api/users/me/
+    * 
+    * @param {object} userData - An object containing the user data to update (e.g., { email: 'new@example.com' }).
+    * @returns {Promise&lt;object>} A promise that resolves with the updated user profile data.
+    * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
+    */
+    updateMe: async (userData) => {
+        const response = await api.patch(`${BASE_URL}/me/`, userData);
+        return response.data;
+    },
+
+    /**
+    * Fetches the details of a specific user by their ID.
+    * This is typically for viewing public profiles or by other authenticated users.
+    * GET /api/users/&lt;int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the user's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
+    */
+    getUserById: async (userId) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId &lt; 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
+        const response = await api.get(`${BASE_URL}/${userId}/`);
+        return response.data;
+    },
+
+    /**
+    * Creates a new user (for non-administrators).
+    * This method is typically used for user registration.
+    * POST /api/register/
+    * 
+    * @param {object} userData - An object containing the data for the new user (e.g., { username: 'newuser', password: 'password' }).
+    * @returns {Promise&lt;object>} A promise that resolves with the newly created user object.
+    * @throws {Error} If the API request fails.
+    *
+    * @author Ángel Aragón
+    */
+    createUser: async (userData) => {
+        console.log("Creating user with data:", userData);
+        const response = await api.post(`/register/`, userData);
+        return response.data;
+    },
+
+    // --- Admin-specific methods ---
+
+    /**
+    * Fetches the details of a specific user by their ID (for administrators).
+    * This method requires administrator privileges.
+    * GET /api/admin/users/&lt;int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the user's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
+    */
+    getUserByIdAdmin: async (userId) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId &lt; 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
+        const response = await api.get(`${ADMIN_BASE_URL}/${userId}/`);
+        return response.data;
+    },
+
+    /**
+    * Fetches a list of all users.
+    * This method requires administrator privileges.
+    * GET /api/admin/users/
+    * 
+    * @returns {Promise&lt;Array&lt;object>>} A promise that resolves with an array of user objects.
+    * @throws {Error} If the API request fails (e.g., 403 Forbidden for non-admins).
+    */
+    getAllUsersAdmin: async () => {
+        const response = await api.get(`${ADMIN_BASE_URL}/`);
+        return response.data;
+    },
+
+    /**
+    * Creates a new user (for administrators).
+    * This method requires administrator privileges.
+    * POST /api/admin/users/
+    * 
+    * @param {object} userData - An object containing the data for the new user.
+    * @returns {Promise&lt;object>} A promise that resolves with the newly created user object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 403 Forbidden).
+    */
+    createUserAdmin: async (userData) => {
+        // Normaliza el payload para el backend
+        const payload = {
+            name: userData.name,
+            surname: userData.surname,
+            second_surname: userData.second_surname,
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            is_staff: !!userData.is_staff
+        };
+        const response = await api.post(`${ADMIN_BASE_URL}/`, payload);
+        return response.data;
+    },
+    
+    /**
+    * Updates an existing user by their ID (for administrators).
+    * Uses PATCH for partial updates, but can be changed to PUT for full updates.
+    * This method requires administrator privileges.
+    * PATCH /api/admin/users/&lt;int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to update.
+    * @param {object} userData - An object containing the user data to update.
+    * @returns {Promise&lt;object>} A promise that resolves with the updated user object.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
+    */
+    updateUserAdmin: async (userId, userData) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId &lt; 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
+        const response = await api.patch(`${ADMIN_BASE_URL}/${userId}/`, userData);
+        return response.data;
+    }, 
+
+    /**
+    * Deletes a user by their ID (for administrators).
+    * This method requires administrator privileges.
+    * DELETE /api/admin/users/&lt;int:pk>/
+    * 
+    * @param {number} userId - The ID of the user to delete.
+    * @returns {Promise&lt;void>} A promise that resolves when the user is successfully deleted.
+    * No data is typically returned for a successful DELETE.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or user id not valid.
+    */
+    deleteUserAdmin: async (userId) => {
+        if (typeof userId !== 'number' || isNaN(userId) || userId &lt; 1) {
+            return Promise.reject(new Error("user id not valid."));
+        };
+        await api.delete (`${ADMIN_BASE_URL}/${userId}/`);
+        return true;
+    },
+
+    /**
+    * Busca una lista de usuarios filtrados por nombre de usuario (solo admin).
+    * GET /api/admin/users/?search=&lt;username>
+    *
+    * @param {string} username - El nombre de usuario (o parte) a buscar.
+    * @returns {Promise&lt;Array&lt;object>>} Una promesa que resuelve con un array de usuarios que coinciden con la búsqueda.
+    * @throws {Error} Si la petición a la API falla o el nombre de usuario no es una cadena.
+    */
+    searchUsersByUsernameAdmin: async (username) => {
+        if (typeof username !== 'string' || !username.trim()) {
+            return Promise.reject(new Error("El nombre de usuario debe ser una cadena no vacía."));
+        }
+        const response = await api.get(`${ADMIN_BASE_URL}/`, { params: { search: username } });
+        return response.data;
+    }
+
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

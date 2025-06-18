@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/InspireMe.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/InspireMe.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file InspireMe.jsx
+ * @description Página de inspiración culinaria tipo "Tinder de recetas".
+ * Permite a los usuarios ver recetas una por una y marcarlas como favoritas o saltarlas.
+ * Utiliza datos reales desde el backend para las recetas aleatorias y la gestión de favoritos.
+ *
+ * El componente `SwipeCard` representa visualmente cada receta con acciones de swipe.
+ *
+ * @module pages/InspireMe
+ */
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+import SwipeCard from '../components/SwipeCard';
+import { recipeService } from '../services/recipeService';
+import { favoriteService } from '../services/favoriteService';
+
+const PROCESSED_RECIPES_STORAGE_KEY = 'processedRecipeIds_inspireme_local';
+
+const InspireMe = () => {
+    const [recipes, setRecipes] = useState([]);
+    const [currentRecipeIndex, setCurrentRecipeIndex] = useState(0);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [userFavoriteEntries, setUserFavoriteEntries] = useState([]);
+    const [favoritesLoading, setFavoritesLoading] = useState(true);
+    const [fetchingMoreRecipes, setFetchingMoreRecipes] = useState(false);
+    const [allRecipesExhausted, setAllRecipesExhausted] = useState(false);
+
+    const [processedRecipeIds, setProcessedRecipeIdsState] = useState(() => {
+        try {
+            const stored = localStorage.getItem(PROCESSED_RECIPES_STORAGE_KEY);
+            return stored ? new Set(JSON.parse(stored)) : new Set();
+        } catch (error) {
+            console.error("Error al cargar processedRecipeIds de localStorage:", error);
+            return new Set();
+        }
+    });
+
+    const hasFetchedInitialData = useRef(false);
+
+    const RECIPES_BATCH_SIZE = 5;
+    const THRESHOLD_TO_FETCH_MORE = 1;
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(PROCESSED_RECIPES_STORAGE_KEY, JSON.stringify(Array.from(processedRecipeIds)));
+        } catch (error) {
+            console.error("Error al guardar processedRecipeIds en localStorage:", error);
+        }
+    }, [processedRecipeIds]);
+
+    const updateProcessedRecipeIds = useCallback((id) => {
+        setProcessedRecipeIdsState(prev => {
+            const newSet = new Set(prev);
+            newSet.add(id);
+            return newSet;
+        });
+    }, []);
+
+    const fetchRecipes = useCallback(async (count) => {
+        if (fetchingMoreRecipes) {
+            return;
+        }
+        setFetchingMoreRecipes(true);
+
+        try {
+            const fetched = await recipeService.getRandomRecipes(count);
+
+            if (fetched &amp;&amp; fetched.length > 0) {
+                setRecipes(prevRecipes => {
+                    const newUniqueRecipes = fetched.filter(
+                        (newRecipe) =>
+                            !prevRecipes.some((existingRecipe) => existingRecipe.id === newRecipe.id) &amp;&amp;
+                            !processedRecipeIds.has(newRecipe.id)
+                    );
+
+                    if (newUniqueRecipes.length > 0) {
+                        setAllRecipesExhausted(false);
+                        return [...prevRecipes, ...newUniqueRecipes];
+                    } else {
+                        setAllRecipesExhausted(true);
+                        return prevRecipes;
+                    }
+                });
+            } else {
+                setAllRecipesExhausted(true);
+            }
+        } catch (error) {
+            console.error("InspireMe: Error al obtener recetas aleatorias:", error);
+            setAllRecipesExhausted(true);
+        } finally {
+            setFetchingMoreRecipes(false);
+        }
+    }, [fetchingMoreRecipes, processedRecipeIds]);
+
+    useEffect(() => {
+        if (hasFetchedInitialData.current) {
+            return;
+        }
+
+        const performInitialDataFetch = async () => {
+            setInitialLoading(true);
+            setFavoritesLoading(true);
+
+            try {
+                const fetchedFavoriteEntries = await favoriteService.getUserFavorites();
+                setUserFavoriteEntries(fetchedFavoriteEntries);
+            } catch (error) {
+                console.error("InspireMe: Error al cargar los favoritos del usuario:", error);
+            } finally {
+                setFavoritesLoading(false);
+            }
+
+            await fetchRecipes(RECIPES_BATCH_SIZE);
+
+            setInitialLoading(false);
+        };
+
+        performInitialDataFetch();
+        hasFetchedInitialData.current = true;
+
+    }, [fetchRecipes]);
+
+    const displayableRecipes = recipes.filter(recipe => !processedRecipeIds.has(recipe.id));
+    
+    useEffect(() => {
+        if (currentRecipeIndex >= displayableRecipes.length &amp;&amp; displayableRecipes.length > 0) {
+            setCurrentRecipeIndex(0);
+        } else if (displayableRecipes.length === 0 &amp;&amp; currentRecipeIndex !== 0) {
+            setCurrentRecipeIndex(0);
+        }
+    }, [displayableRecipes.length, currentRecipeIndex]);
+
+    useEffect(() => {
+        if (!initialLoading &amp;&amp; !favoritesLoading &amp;&amp; !fetchingMoreRecipes &amp;&amp; 
+            displayableRecipes.length > 0 &amp;&amp;
+            !allRecipesExhausted &amp;&amp;
+            currentRecipeIndex >= displayableRecipes.length - THRESHOLD_TO_FETCH_MORE) {
+            fetchRecipes(RECIPES_BATCH_SIZE);
+        }
+    }, [currentRecipeIndex, displayableRecipes.length, initialLoading, favoritesLoading, fetchingMoreRecipes, fetchRecipes, allRecipesExhausted]);
+
+    const currentRecipe = displayableRecipes[currentRecipeIndex];
+
+    const handleToggleFavorite = async (recipeId) => {
+        const idNum = Number(recipeId);
+        const favoriteEntry = userFavoriteEntries.find(entry => entry.recipe_id === idNum);
+        const isFavorite = !!favoriteEntry;
+
+        try {
+            if (isFavorite) {
+                await favoriteService.removeFavorite(favoriteEntry.id);
+                setUserFavoriteEntries(prevEntries =>
+                    prevEntries.filter(entry => entry.recipe_id !== idNum)
+                );
+            } else {
+                const newFavorite = await favoriteService.addFavorite(idNum);
+                setUserFavoriteEntries(prevEntries => [...prevEntries, newFavorite]);
+            }
+            updateProcessedRecipeIds(idNum);
+            goToNextRecipe(); 
+        } catch (error) {
+            console.error("InspireMe: Error al alternar favorito:", error);
+        }
+    };
+
+    const handleSkip = () => {
+        if (currentRecipe) { 
+            updateProcessedRecipeIds(currentRecipe.id);
+        }
+        goToNextRecipe();
+    };
+
+    const goToNextRecipe = useCallback(() => {
+        if (currentRecipeIndex &lt; displayableRecipes.length - 1) {
+            setCurrentRecipeIndex(prev => prev + 1);
+        } else {
+            if (!fetchingMoreRecipes &amp;&amp; !allRecipesExhausted) {
+                fetchRecipes(RECIPES_BATCH_SIZE);
+            } else if (allRecipesExhausted &amp;&amp; displayableRecipes.length === 0) {
+                setCurrentRecipeIndex(0);
+            }
+        }
+    }, [currentRecipeIndex, displayableRecipes.length, allRecipesExhausted, fetchingMoreRecipes, fetchRecipes]);
+
+
+    if (initialLoading || favoritesLoading || (recipes.length === 0 &amp;&amp; fetchingMoreRecipes &amp;&amp; !allRecipesExhausted)) {
+        return (
+            &lt;div
+                className="min-h-screen flex items-center justify-center flex-col"
+                data-testid="loading-state"
+            >
+                &lt;div
+                    className="animate-pulse bg-gray-200 h-64 w-80 rounded-lg"
+                    id="loading-placeholder"
+                >&lt;/div>
+                &lt;p className="mt-4 text-gray-700">Cargando recetas y tus favoritos...&lt;/p>
+            &lt;/div>
+        );
+
+    }
+
+    if (displayableRecipes.length === 0 &amp;&amp; (!initialLoading || allRecipesExhausted) &amp;&amp; !fetchingMoreRecipes) {
+        return (
+            &lt;div
+                className="min-h-screen flex items-center justify-center flex-col"
+                data-testid="no-recipes-message"
+            >
+                &lt;p className="text-lg text-gray-800 mb-2">No hay más recetas disponibles por el momento.&lt;/p>
+                &lt;p className="text-md text-gray-600">¡Vuelve más tarde o añade más recetas para que te inspiremos!&lt;/p>
+            &lt;/div>
+        );
+    }
+
+    if (!currentRecipe) {
+        if (displayableRecipes.length > 0) {
+            setCurrentRecipeIndex(0);
+            return (
+                &lt;div
+                    className="min-h-screen flex items-center justify-center flex-col"
+                    data-testid="loading-state"
+                >
+                    &lt;div
+                        className="animate-pulse bg-gray-200 h-64 w-80 rounded-lg"
+                        id="loading-placeholder"
+                    >&lt;/div>
+                    &lt;p className="mt-4 text-gray-700">Ajustando recetas...&lt;/p>
+                &lt;/div>
+            );
+        } else {
+            return (
+                &lt;div className="min-h-screen flex items-center justify-center">
+                    &lt;p>No se encontraron recetas para mostrar. No hay más inspiraciones disponibles.&lt;/p>
+                &lt;/div>
+            );
+        }
+    }
+
+    return (
+        &lt;div
+            className="min-h-screen py-8 px-4"
+            style={{ backgroundColor: '#FDF3E8' }}
+            data-testid="inspire-me-page"
+            id="inspire-me-container"
+
+        >
+            &lt;div className="max-w-md mx-auto">
+                &lt;h1
+                    className="text-2xl sm:text-3xl md:text-4xl text-center mb-6 sm:mb-8 text-gray-900"
+                    data-testid="page-title"
+                    id="inspire-title"
+                >
+                    Swipe the card
+                &lt;/h1>
+                &lt;SwipeCard
+                    recipe={{
+                        ...currentRecipe,
+                        is_favorite: userFavoriteEntries.some(entry => entry.recipe_id === currentRecipe.id),
+                    }}
+                    onToggleFavorite={handleToggleFavorite}
+                    onSkip={handleSkip}
+                    data-testid="swipe-card"
+                    id="swipe-card"
+                />
+            &lt;/div>
+        &lt;/div>
+    );
+};
+
+export default InspireMe;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

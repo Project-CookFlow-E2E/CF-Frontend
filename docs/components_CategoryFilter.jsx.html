@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/CategoryFilter.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/CategoryFilter.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useMemo, startTransition } from 'react';
+
+/**
+ * CategoryFilter es un componente visual e interactivo que permite al usuario seleccionar
+ * una o varias categorías de una lista, ideal para sistemas de filtros (por ejemplo: recetas, productos).
+ *
+ * Muestra un listado de categorías disponibles, permite marcar/desmarcar, y expande el listado si hay muchas.
+ *
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {Array&lt;{ id: string|number, label: string, available: boolean }>} props.categories - Lista de categorías disponibles para seleccionar.
+ * @param {Array&lt;string|number>} [props.initialSelected=[]] - Lista de IDs de categorías preseleccionadas al cargar.
+ * @param {Function} props.onSelectionChange - Callback que se ejecuta cada vez que cambia la selección. Recibe un array de IDs seleccionados.
+ * @param {string} [props.className] - Clases CSS adicionales para aplicar al contenedor.
+ * @param {boolean} [props.loading=false] - Si está activado, muestra un estado de carga (skeleton).
+ * @param {string} [props.title="Categories"] - Título que se muestra arriba del filtro.
+ * @param {number} [props.maxRowsWhenCollapsed=4] - Máximo de filas visibles cuando el filtro está colapsado.
+ * @param {number} [props.itemsPerRow=2] - Cantidad de items por fila (para calcular cuántos mostrar cuando está colapsado).
+ * @returns {JSX.Element} Filtro visual por categorías con opción de expandir y seleccionar múltiples.
+ */
+export default function CategoryFilter({
+  categories = [],
+  initialSelected = [],
+  onSelectionChange,
+  className = "",
+  loading = false,
+  title = "Categories",
+  maxRowsWhenCollapsed = 4,
+  itemsPerRow = 2
+}) {
+  const [checkedIds, setCheckedIds] = useState(new Set(initialSelected));
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const availableCategories = useMemo(
+    () => categories.filter(cat => cat.available),
+    [categories]
+  );
+
+  const maxItemsWhenCollapsed = maxRowsWhenCollapsed * itemsPerRow;
+  const needsExpansion = availableCategories.length > maxItemsWhenCollapsed;
+
+  const itemsToShow = useMemo(() => {
+    if (!needsExpansion || isExpanded) return availableCategories.length;
+    return maxItemsWhenCollapsed;
+  }, [availableCategories.length, isExpanded, needsExpansion, maxItemsWhenCollapsed]);
+
+  const handleChange = (id) => {
+    startTransition(() => {
+      const newChecked = new Set(checkedIds);
+      if (newChecked.has(id)) {
+        newChecked.delete(id);
+      } else {
+        newChecked.add(id);
+      }
+
+      setCheckedIds(newChecked);
+      onSelectionChange?.(Array.from(newChecked));
+    });
+  };
+
+  const handleToggleExpand = () => {
+    setIsExpanded(prev => !prev);
+  };
+
+  const renderLoading = () => (
+    &lt;div className="animate-pulse space-y-3">
+      {Array.from({ length: maxItemsWhenCollapsed }, (_, i) => (
+        &lt;div key={i} className="h-5 bg-gray-200 rounded w-3/4" />
+      ))}
+    &lt;/div>
+  );
+
+  if (!loading &amp;&amp; availableCategories.length === 0) {
+    return (
+      &lt;div className={`bg-white p-6 rounded-lg shadow-sm border border-gray-200 ${className}`}>
+        &lt;h3 className="text-lg font-semibold text-gray-900">{title}&lt;/h3>
+        &lt;p className="text-gray-500 italic">No categories available&lt;/p>
+      &lt;/div>
+    );
+  }
+
+  return (
+    &lt;div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
+      &lt;div className="p-4 flex justify-between items-center">
+        &lt;h3 className="text-lg font-semibold text-gray-900">{title}&lt;/h3>
+        {needsExpansion &amp;&amp; (
+          &lt;button
+            type="button"
+            onClick={handleToggleExpand}
+            className="flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+            aria-label={isExpanded ? "Collapse categories" : "Expand categories"}
+          >
+            &lt;svg
+              className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              &lt;path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            &lt;/svg>
+          &lt;/button>
+        )}
+      &lt;/div>
+
+      &lt;div className={`px-4 pb-4 transition-all duration-300 ${
+        isExpanded ? 'max-h-[1000px]' : 'max-h-[140px] overflow-hidden'
+      }`}>
+        {loading ? renderLoading() : (
+          &lt;div className="flex flex-wrap gap-2">
+            {availableCategories.slice(0, itemsToShow).map(cat => {
+              const isChecked = checkedIds.has(cat.id);
+              return (
+                &lt;button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleChange(cat.id)}
+                  className={`
+                    px-3 py-1 rounded-full text-sm font-medium transition-colors
+                    ${isChecked
+                      ? 'bg-[#F37A7E] border border-[#F37A7E] text-white'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-500 hover:bg-gray-50'}
+                  `}
+                  aria-pressed={isChecked}
+                >
+                  {cat.label}
+                &lt;/button>
+              );
+            })}
+          &lt;/div>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

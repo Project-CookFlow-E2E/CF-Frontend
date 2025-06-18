@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Sidebar.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Sidebar.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from "react";
+import { Link } from "react-router-dom";
+import Button from "./Button";
+import LogoTitle from "./LogoTitle";
+import { X, Shield } from "lucide-react";
+import { getToken } from "../services/authService";
+
+/**
+ * Componente Sidebar que muestra un menú lateral con opciones de navegación en dispositivos móviles.
+ *
+ * Características:
+ * - Muestra enlaces de navegación según el estado de autenticación del usuario.
+ * - Si el usuario está logueado (`isLoggedIn`), muestra enlaces a perfil y cerrar sesión.
+ * - Si el usuario es administrador (según el JWT), muestra un botón con icono de escudo y texto "Administrador" que enlaza al panel de administración (`/admin-dashboard`).
+ *   El botón de administrador solo es visible si el token JWT contiene alguno de los siguientes campos:
+ *     - `is_staff: true`
+ *     - `is_admin: true`
+ *     - `role: "admin"`
+ * - Si el usuario no está logueado, muestra enlaces para iniciar sesión y registrarse.
+ *
+ * @param {{ open: boolean; onClose: () => void; isLoggedIn: boolean; onLogout: () => void; }} param0
+ * @param {boolean} param0.open
+ * @param {() => void} param0.onClose
+ * @param {boolean} param0.isLoggedIn
+ * @param {() => void} param0.onLogout
+ * @returns {JSX.Element}
+ * @author Ángel Aragón
+ * @modifiedby Noemi Casaprima
+ * @modified Añadido botón de acceso al panel de administración visible solo para administradores.
+ */
+const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
+  const isAdmin = () => {
+    try {
+      const token = getToken();
+      if (!token) return false;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.is_staff || payload.is_admin;
+    } catch {
+      return false;
+    }
+  };
+
+  return (
+    &lt;div
+      className={`fixed inset-0 z-50 flex transition-colors duration-300 ${
+        open
+          ? "bg-black/80 pointer-events-auto"
+          : "bg-black/0 pointer-events-none"
+      }`}
+      style={{ transitionProperty: "background-color" }}
+      aria-hidden={!open}
+    >
+      &lt;aside
+        className={`
+          bg-background w-64 h-full shadow-lg flex flex-col p-6
+          transform transition-transform duration-300
+          ${open ? "translate-x-0" : "-translate-x-full"}
+        `}
+        style={{ willChange: "transform" }}
+      >
+        &lt;div className="flex justify-between items-center mb-8">
+          &lt;LogoTitle />
+          &lt;button
+            onClick={onClose}
+            className="text-accent focus:outline-none"
+            aria-label="Cerrar menú"
+          >
+            &lt;X size={32} />
+          &lt;/button>
+        &lt;/div>
+        &lt;nav className="flex flex-col gap-4">
+          {isLoggedIn ? (
+            &lt;>
+              {isAdmin() &amp;&amp; (
+                &lt;Link
+                  to="/admin-dashboard"
+                  data-testid="admin-dashboard-link"
+                  title="Panel de administración"
+                  onClick={onClose}
+                >
+                  &lt;Button
+                    className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
+                    ariaLabel="Panel de administración"
+                  >
+                    &lt;Shield size={20} className="mr-2" />
+                    Administrador
+                  &lt;/Button>
+                &lt;/Link>
+              )}
+              &lt;Link to="/profile" data-testid="profile-link" onClick={onClose}>
+                &lt;Button
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
+                  data-testid="profile-button"
+                >
+                  Mi Perfil
+                &lt;/Button>
+              &lt;/Link>
+              &lt;Link to="/" data-testid="logout-link" onClick={onClose}>
+                &lt;Button
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
+                  data-testid="logout-button"
+                  onClick={onLogout}
+                >
+                  Cerrar Sesión
+                &lt;/Button>
+              &lt;/Link>
+            &lt;/>
+          ) : (
+            &lt;>
+              &lt;Link to="/login" data-testid="login-link" onClick={onClose}>
+                &lt;Button
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
+                  data-testid="login-button"
+                >
+                  Iniciar Sesión
+                &lt;/Button>
+              &lt;/Link>
+              &lt;Link
+                to="/register"
+                data-testid="register-link"
+                onClick={onClose}
+              >
+                &lt;Button
+                  className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
+                  data-testid="register-button"
+                >
+                  Registrarse
+                &lt;/Button>
+              &lt;/Link>
+            &lt;/>
+          )}
+        &lt;/nav>
+      &lt;/aside>
+      &lt;div
+        className="flex-1"
+        onClick={onClose}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+    &lt;/div>
+  );
+};
+
+export default Sidebar;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

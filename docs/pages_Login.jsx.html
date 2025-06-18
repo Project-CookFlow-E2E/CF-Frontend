@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/Login.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/Login.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Login.jsx
+ * @description Página de inicio de sesión (Login) para usuarios registrados.
+ * Permite al usuario introducir su correo electrónico y contraseña, y simula
+ * la autenticación redirigiendo al home.
+ *
+ * Componentes utilizados:
+ * - Input: Campo reutilizable con icono (correo y contraseña)
+ * - Button: Botón reutilizable para enviar el formulario
+ * - Icons: Mail y Lock (de Lucide React)
+ *
+ * Navegación:
+ * - Al hacer clic en "Iniciar sesión" se redirige al home (`/`)
+ * - Enlace para redirigir a la página de registro (`/signup`)
+ *
+ * @module pages/Login
+ */
+
+import React from "react";
+import Input from "../components/Input";
+import Button from "../components/Button";
+import { Lock, PersonStanding } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { login, getToken } from "../services/authService";
+import SuccessMsg from "../components/SuccessMsg";
+import ErrorMsg from "../components/ErrorMsg";
+
+/**
+ * Página de inicio de sesión para acceder a la app.
+ * Contiene imagen decorativa, formulario con campos de email y contraseña,
+ * y un botón para simular login.
+ *
+ * @returns {JSX.Element} Vista de login
+ * @modifiedby Ángel Aragón
+ * @modified Arreglado componente Button, añadido SuccessMsg, usamos login de authService para manejar el inicio de sesión.
+ */
+const Login = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [apiError, setApiError] = React.useState("");
+  const [successMsg] = React.useState(location.state?.successMsg || "");
+
+  const { register, handleSubmit, setError } = useForm();
+
+  const onSubmit = async (data) => {
+    console.log("🔍 Datos del formulario:", data);
+    setApiError("");
+    try {
+      await login(data.username, data.password);
+      console.log("✅ Token guardado:", getToken());
+      navigate("/main");
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      setApiError("Credenciales inválidas");
+      setError("username", { type: "manual", message: " " });
+      setError("password", { type: "manual", message: " " });
+    }
+  };
+
+  return (
+    &lt;div
+      className="min-h-screen flex bg-[#FDF3E8]"
+      data-testid="login-page"
+      id="login-page"
+    >
+      &lt;div
+        className="hidden md:block w-1/2"
+        data-testid="login-image-container"
+        id="login-image-container"
+      >
+        &lt;img
+          src="/login.png"
+          alt="Login Illustration"
+          className="h-full w-full object-cover"
+          data-testid="login-image"
+          id="login-image"
+        />
+      &lt;/div>
+
+      &lt;div
+        className="w-full md:w-1/2 flex justify-center items-start pt-20"
+        data-testid="login-form-container"
+        id="login-form-container"
+      >
+        &lt;form
+          className="w-[320px] flex flex-col items-center px-4"
+          data-testid="login-form"
+          id="login-form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
+          &lt;h2
+            className="text-3xl font-bold mb-2 text-black whitespace-nowrap"
+            data-testid="login-title"
+            id="login-title"
+          >
+            ¡Bienvenido de nuevo!
+          &lt;/h2>
+          {successMsg &amp;&amp; &lt;SuccessMsg>{successMsg}&lt;/SuccessMsg>}
+          {apiError &amp;&amp; &lt;ErrorMsg>{apiError}&lt;/ErrorMsg>}
+          &lt;h4
+            className="text-sm mb-12 text-black"
+            data-testid="login-subtitle"
+            id="login-subtitle"
+          >
+            Introduce tu información
+          &lt;/h4>
+          &lt;div
+            className="flex flex-col mb-4 w-full"
+            data-testid="username-input-group"
+            id="username-input-group"
+          >
+            &lt;label
+              className="text-xs mb-2 font-bold text-black"
+              htmlFor="username-input"
+            >
+              Nombre de usuario
+            &lt;/label>
+            &lt;div className="peer border rounded-md">
+              &lt;Input
+                placeholder="Nombre de usuario"
+                type="text"
+                icon={PersonStanding}
+                id="username-input"
+                data-testid="username-input"
+                {...register("username", {
+                  required: "Este campo es obligatorio",
+                })}
+              />
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div
+            className="flex flex-col mb-12 w-full"
+            data-testid="password-input-group"
+            id="password-input-group"
+          >
+            &lt;label
+              className="text-xs mb-2 font-bold text-black"
+              htmlFor="password-input"
+            >
+              Contraseña
+            &lt;/label>
+            &lt;div className="peer border rounded-md">
+              &lt;Input
+                placeholder="Contraseña"
+                type="password"
+                icon={Lock}
+                id="password-input"
+                data-testid="password-input"
+                {...register("password", {
+                  required: "La contraseña es obligatoria",
+                })}
+              />
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div data-testid="login-button-container" id="login-button-container">
+            &lt;Button
+              type="submit"
+              className="mb-3 w-40 py-2 rounded-xl"
+              data-testid="login-button"
+              id="login-button"
+            >
+              Iniciar sesión
+            &lt;/Button>
+          &lt;/div>
+
+          &lt;h4
+            className="text-xs mb-12 text-black"
+            data-testid="signup-redirect-text"
+            id="signup-redirect-text"
+          >
+            ¿No tienes cuenta? Regístrate aquí:{" "}
+            &lt;Link
+              to="/signup"
+              className="text-blue-600 hover:underline"
+              data-testid="signup-link"
+              id="signup-link"
+            >
+              Sign Up
+            &lt;/Link>
+          &lt;/h4>
+        &lt;/form>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default Login;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

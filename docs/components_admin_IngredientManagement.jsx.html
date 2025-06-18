@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/admin/IngredientManagement.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/admin/IngredientManagement.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file IngredientManagement.jsx
+ * @description
+ * Componente de administración de ingredientes para el panel de administración.
+ * Permite visualizar, buscar, filtrar, aprobar, editar y eliminar ingredientes.
+ *
+ * Funcionalidades principales:
+ * - Listar todos los ingredientes obtenidos del backend.
+ * - Filtrar ingredientes por estado (todos, pendientes, aprobados) y por búsqueda.
+ * - Aprobar, rechazar/eliminar y editar ingredientes.
+ * - Editar ingredientes mediante un modal (nombre, categorías, unidad y estado de aprobación).
+ * - Botón para añadir nuevos ingredientes (funcionalidad pendiente de implementar).
+ * - Paginación: muestra 5 ingredientes por página, con navegación entre páginas.
+ * - Ordena los ingredientes por nombre alfabéticamente.
+ *
+ * Estados:
+ * - ingredients: array de ingredientes obtenidos del backend.
+ * - loading: booleano para mostrar el estado de carga.
+ * - activeTab: controla el filtro de pestañas (todos, pendientes, aprobados).
+ * - search: almacena el texto de búsqueda.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición.
+ * - page: página actual de la paginación.
+ *
+ * Servicios utilizados:
+ * - ingredientService.getAllIngredientsAdmin(): obtiene todos los ingredientes.
+ * - ingredientService.updateIngredientAdmin(id, data): actualiza un ingrediente.
+ * - ingredientService.deleteIngredientAdmin(id): elimina un ingrediente.
+ *
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite gestionar ingredientes y su estado de aprobación de forma sencilla.
+ *
+ * @author
+ * Noemi Casaprima, Lorena Martínez
+ */
+
+import React, { useState, useEffect } from "react";
+import { ingredientService } from "../../services/ingredientService";
+
+const PAGE_SIZE = 5;
+
+const IngredientManagement = () => {
+  const [ingredients, setIngredients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [activeTab, setActiveTab] = useState("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const [editModal, setEditModal] = useState({ open: false, ingredient: null });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    categories: "",
+    unit_type: "",
+    is_approved: false,
+  });
+
+  const [addModal, setAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: "",
+    description: "",
+    quantity: 1,
+    unit: "",
+    unit_type: "",
+    categories: "", // ids separados por coma
+    is_checked: false,
+    is_approved: false,
+  });
+  const [addError, setAddError] = useState("");
+
+  const [deleteModal, setDeleteModal] = useState({ open: false, ingredient: null });
+
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      setLoading(true);
+      try {
+        const data = await ingredientService.getAllIngredientsAdmin();
+        const sorted = [...data].sort((a, b) => a.name.localeCompare(b.name));
+        setIngredients(sorted);
+      } catch (error) {
+        console.error("Error loading ingredients:", error);
+      }
+      setLoading(false);
+    };
+    fetchIngredients();
+  }, []);
+
+  const handleApprove = async (id) => {
+    await ingredientService.updateIngredientAdmin(id, { is_approved: true });
+    setIngredients((prev) =>
+      prev.map((ing) => (ing.id === id ? { ...ing, is_approved: true } : ing))
+    );
+  };
+
+  const handleReject = async (id) => {
+    await ingredientService.deleteIngredientAdmin(id);
+    setIngredients((prev) => prev.filter((ing) => ing.id !== id));
+  };
+
+  const handleDelete = handleReject;
+
+  const openEditModal = (ingredient) => {
+    setEditForm({
+      name: ingredient.name || "",
+      categories: Array.isArray(ingredient.categories)
+        ? ingredient.categories.map((c) => c.name).join(", ")
+        : "",
+      unit_type: ingredient.unit_type?.name || "",
+      is_approved: ingredient.is_approved || false,
+    });
+    setEditModal({ open: true, ingredient });
+  };
+
+  const closeEditModal = () => setEditModal({ open: false, ingredient: null });
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const id = editModal.ingredient.id;
+    const updatedData = {
+      name: editForm.name,
+      categories: editForm.categories.split(",").map((s) => s.trim()),
+      unit_type: editForm.unit_type,
+      is_approved: editForm.is_approved,
+    };
+    await ingredientService.updateIngredientAdmin(id, updatedData);
+    setIngredients((prev) =>
+      prev.map((ing) => (ing.id === id ? { ...ing, ...updatedData } : ing))
+    );
+    closeEditModal();
+  };
+
+  const filteredIngredients = ingredients
+    .filter((ing) => {
+      if (activeTab === "pending") return !ing.is_approved;
+      if (activeTab === "approved") return ing.is_approved;
+      return true;
+    })
+    .filter((ing) => ing.name.toLowerCase().includes(search.toLowerCase()));
+
+  const totalPages = Math.ceil(filteredIngredients.length / PAGE_SIZE);
+  const paginatedIngredients = filteredIngredients.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
+  const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
+
+  const pendingCount = ingredients.filter((ing) => !ing.is_approved).length;
+  const approvedCount = ingredients.filter((ing) => ing.is_approved).length;
+
+  const openDeleteModal = (ingredient) => setDeleteModal({ open: true, ingredient });
+  const closeDeleteModal = () => setDeleteModal({ open: false, ingredient: null });
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.ingredient.id;
+    await ingredientService.deleteIngredientAdmin(id);
+    setIngredients((prev) => prev.filter((ing) => ing.id !== id));
+    closeDeleteModal();
+  };
+
+  return (
+    &lt;div className="bg-white p-6 rounded-lg shadow-md">
+      &lt;div className="flex justify-between items-center mb-4">
+        &lt;h2 className="text-2xl font-bold text-gray-800">
+          Administrador de Ingredientes
+        &lt;/h2>
+        &lt;button
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center"
+          onClick={() => setAddModal(true)}
+        >
+          &lt;svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            &lt;path
+              fillRule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clipRule="evenodd"
+            />
+          &lt;/svg>
+          Añadir Ingrediente(s)
+        &lt;/button>
+      &lt;/div>
+
+      &lt;div className="mb-4">
+        &lt;span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
+          {pendingCount} ingrediente{pendingCount !== 1 ? "s" : ""} pendiente de
+          aprobación
+        &lt;/span>
+      &lt;/div>
+
+      &lt;div className="border-b border-gray-200 mb-6">
+        &lt;nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          &lt;button
+            className={`${
+              activeTab === "all"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => {
+              setActiveTab("all");
+              setPage(1);
+            }}
+          >
+            Todos los Ingredientes ({ingredients.length})
+          &lt;/button>
+          &lt;button
+            className={`${
+              activeTab === "pending"
+                ? "border-yellow-500 text-yellow-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => {
+              setActiveTab("pending");
+              setPage(1);
+            }}
+          >
+            Pendiente de probación
+          &lt;/button>
+          &lt;button
+            className={`${
+              activeTab === "approved"
+                ? "border-green-500 text-green-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => {
+              setActiveTab("approved");
+              setPage(1);
+            }}
+          >
+            Aprobado ({approvedCount})
+          &lt;/button>
+        &lt;/nav>
+      &lt;/div>
+
+      &lt;div className="mb-4">
+        &lt;input
+          type="text"
+          placeholder="Buscando Ingredientes..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
+      &lt;/div>
+
+      &lt;div className="overflow-x-auto">
+        &lt;table className="min-w-full bg-white border border-gray-200">
+          &lt;thead>
+            &lt;tr>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Nombre de Ingrediente
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Categoria
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Unidad
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Añadido por...
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Estado
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Acciones
+              &lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {loading ? (
+              &lt;tr>
+                &lt;td colSpan="6" className="text-center py-4">
+                  Loading...
+                &lt;/td>
+              &lt;/tr>
+            ) : paginatedIngredients.length === 0 ? (
+              &lt;tr>
+                &lt;td colSpan="6" className="text-center py-4">
+                  No se han encontrado ingredientes.
+                &lt;/td>
+              &lt;/tr>
+            ) : (
+              paginatedIngredients.map((ing) => (
+                &lt;tr key={ing.id}>
+                  &lt;td className="py-2 px-4 border-b">{ing.name}&lt;/td>
+                  &lt;td className="py-2 px-4 border-b">
+                    {ing.categories?.map((c) => c.name).join(", ")}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b">
+                    {ing.unit_type?.name || "-"}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b">
+                    {ing.user_id
+                      ? ing.user_id.username || ing.user_id.email || "-"
+                      : "-"}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b">
+                    {ing.is_approved ? (
+                      &lt;span className="text-green-600 font-medium">
+                        Approved
+                      &lt;/span>
+                    ) : (
+                      &lt;span className="text-yellow-600 font-medium">
+                        Pending
+                      &lt;/span>
+                    )}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b space-x-2">
+                    {!ing.is_approved &amp;&amp; (
+                      &lt;>
+                        &lt;button
+                          onClick={() => handleApprove(ing.id)}
+                          className="text-green-600 hover:underline"
+                        >
+                          Approve
+                        &lt;/button>
+                        &lt;button
+                          onClick={() => handleReject(ing.id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Reject
+                        &lt;/button>
+                      &lt;/>
+                    )}
+                    &lt;button
+                      onClick={() => openEditModal(ing)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Edit
+                    &lt;/button>
+                    &lt;button
+                      onClick={() => openDeleteModal(ing)}
+                      className="text-red-600 hover:underline"
+                    >
+                      Delete
+                    &lt;/button>
+                  &lt;/td>
+                &lt;/tr>
+              ))
+            )}
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+      &lt;div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+        &lt;button
+          className="px-3 py-1 border rounded-md mr-1"
+          onClick={handlePrev}
+          disabled={page === 1}
+        >
+          Anterior
+        &lt;/button>
+        &lt;span>
+          Página {page} de {totalPages}
+        &lt;/span>
+        &lt;button
+          className="px-3 py-1 border rounded-md"
+          onClick={handleNext}
+          disabled={page === totalPages || totalPages === 0}
+        >
+          Siguiente
+        &lt;/button>
+      &lt;/div>
+
+      {editModal.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeEditModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Editar Ingrediente&lt;/h3>
+            &lt;form onSubmit={handleEditSubmit} className="space-y-4">
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre&lt;/label>
+                &lt;input
+                  type="text"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Nombre"
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Categorías (separadas por coma)&lt;/label>
+                &lt;input
+                  type="text"
+                  name="categories"
+                  value={editForm.categories}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Categorías"
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Tipo de unidad&lt;/label>
+                &lt;input
+                  type="text"
+                  name="unit_type"
+                  value={editForm.unit_type}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Tipo de unidad"
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Aprobado&lt;/label>
+                &lt;select
+                  name="is_approved"
+                  value={editForm.is_approved ? "true" : "false"}
+                  onChange={e => setEditForm({ ...editForm, is_approved: e.target.value === "true" })}
+                  className="w-full border p-2 rounded"
+                >
+                  &lt;option value="true">Sí&lt;/option>
+                  &lt;option value="false">No&lt;/option>
+                &lt;/select>
+              &lt;/div>
+              &lt;div className="flex justify-end space-x-2">
+                &lt;button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                &lt;/button>
+                &lt;button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Guardar
+                &lt;/button>
+              &lt;/div>
+            &lt;/form>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {addModal &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div
+            className="fixed inset-0 z-0"
+            style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
+            onClick={() => setAddModal(false)}
+          />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Añadir Ingrediente&lt;/h3>
+            &lt;form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setAddError("");
+                // Validación básica
+                if (!addForm.name || !addForm.quantity || !addForm.unit || !addForm.unit_type || !addForm.categories) {
+                  setAddError("Por favor, completa todos los campos obligatorios.");
+                  return;
+                }
+                // Validar que categories sea array de números
+                const categoriesArr = addForm.categories.split(",").map((id) => id.trim()).filter(Boolean);
+                if (!categoriesArr.every((id) => /^\d+$/.test(id))) {
+                  setAddError("Las categorías deben ser IDs numéricos separados por coma. Ejemplo: 1,2,3");
+                  return;
+                }
+                try {
+                  const payload = {
+                    name: addForm.name,
+                    description: addForm.description,
+                    quantity: Number(addForm.quantity),
+                    unit: addForm.unit,
+                    unit_type: addForm.unit_type,
+                    categories: categoriesArr.map(Number),
+                    is_checked: addForm.is_checked,
+                    is_approved: addForm.is_approved,
+                  };
+                  await ingredientService.createIngredientAdmin(payload);
+                  setAddModal(false);
+                  setAddForm({
+                    name: "",
+                    description: "",
+                    quantity: 1,
+                    unit: "",
+                    unit_type: "",
+                    categories: "",
+                    is_checked: false,
+                    is_approved: false,
+                  });
+                  // Refresca ingredientes
+                  setLoading(true);
+                  const data = await ingredientService.getAllIngredientsAdmin();
+                  setIngredients([...data].sort((a, b) => a.name.localeCompare(b.name)));
+                  setLoading(false);
+                } catch (err) {
+                  let msg = "Error al crear ingrediente";
+                  if (err &amp;&amp; err.response &amp;&amp; err.response.data) {
+                    if (typeof err.response.data === "string")
+                      msg += ": " + err.response.data;
+                    else if (typeof err.response.data === "object")
+                      msg += ": " + Object.values(err.response.data).join(" ");
+                  }
+                  setAddError(msg);
+                }
+              }}
+              className="space-y-4"
+            >
+              {addError &amp;&amp; (
+                &lt;div className="text-red-600 text-sm mb-2">{addError}&lt;/div>
+              )}
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre *&lt;/label>
+                &lt;input
+                  type="text"
+                  name="name"
+                  value={addForm.name}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Nombre del ingrediente"
+                  required
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">
+                  Descripción
+                &lt;/label>
+                &lt;textarea
+                  name="description"
+                  value={addForm.description}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Descripción"
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Cantidad *&lt;/label>
+                &lt;input
+                  type="number"
+                  name="quantity"
+                  value={addForm.quantity}
+                  min={1}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, quantity: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Cantidad"
+                  required
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Unidad *&lt;/label>
+                &lt;input
+                  type="text"
+                  name="unit"
+                  value={addForm.unit}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, unit: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="g, ml, unidad, etc."
+                  required
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">
+                  Tipo de unidad *
+                &lt;/label>
+                &lt;input
+                  type="text"
+                  name="unit_type"
+                  value={addForm.unit_type}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, unit_type: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="peso, volumen, etc."
+                  required
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">
+                  Categorías (IDs, separadas por coma) *
+                &lt;/label>
+                &lt;input
+                  type="text"
+                  name="categories"
+                  value={addForm.categories}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, categories: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Ej: 1,2,3"
+                  required
+                />
+              &lt;/div>
+              &lt;div className="flex gap-4">
+                &lt;label className="flex items-center gap-2">
+                  &lt;input
+                    type="checkbox"
+                    checked={addForm.is_checked}
+                    onChange={(e) =>
+                      setAddForm((f) => ({ ...f, is_checked: e.target.checked }))
+                    }
+                  />
+                  Revisado
+                &lt;/label>
+                &lt;label className="flex items-center gap-2">
+                  &lt;input
+                    type="checkbox"
+                    checked={addForm.is_approved}
+                    onChange={(e) =>
+                      setAddForm((f) => ({ ...f, is_approved: e.target.checked }))
+                    }
+                  />
+                  Aprobado
+                &lt;/label>
+              &lt;/div>
+              &lt;div className="flex justify-end space-x-2">
+                &lt;button
+                  type="button"
+                  onClick={() => setAddModal(false)}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                &lt;/button>
+                &lt;button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Crear
+                &lt;/button>
+              &lt;/div>
+            &lt;/form>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
+      {deleteModal.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeDeleteModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">¿Seguro que quieres borrar este ingrediente?&lt;/h3>
+            &lt;div className="mb-4">Esta acción no se puede deshacer.&lt;/div>
+            &lt;div className="flex justify-end space-x-2">
+              &lt;button onClick={closeDeleteModal} className="bg-gray-300 px-4 py-2 rounded">Cancelar&lt;/button>
+              &lt;button onClick={handleDeleteConfirm} className="bg-red-500 text-white px-4 py-2 rounded">Borrar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};
+
+export default IngredientManagement;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

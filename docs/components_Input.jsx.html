@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Input.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Input.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import PropTypes from "prop-types";
+import React from "react";
+import { MdError } from "react-icons/md";
+
+/**
+ * Input es un campo de texto reutilizable con soporte para íconos.
+ *
+ * Diseñado para usarse en formularios o filtros, con estilos personalizados y opcionalmente un ícono a la izquierda.
+ *
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {string} props.type - Tipo del input (por ejemplo: "text", "email", "password").
+ * @param {function} props.onChange - Función que se ejecuta cuando el valor del input cambia.
+ * @param {string} props.placeholder - Texto de ayuda que aparece dentro del input.
+ * @param {string} props.value - Valor actual del input (controlado externamente).
+ * @param {string} [props.name] - Nombre del input, útil para formularios.
+ * @param {string} [props.error] - Mensaje de error que se muestra debajo del input si existe.
+ * @param {React.ComponentType} [props.icon] - Componente de ícono (por ejemplo: un ícono de búsqueda o usuario).
+ * @returns {JSX.Element} Campo de entrada con estilos y funcionalidad personalizables.
+ *
+ * @modifiedby Ángel Aragón, Saturnino Méndez
+ * @modified Agregado PropTypes, error, error icon (MdError), name como propiedades opcionales y añadidas propiedades faltantes para los test.
+ */
+const Input = ({
+  type,
+  onChange,
+  placeholder,
+  value,
+  icon: Icon,
+  name,
+  error,
+  inputTestId,
+  iconTestId,
+  ...rest
+}) => {
+  return (
+    &lt;div className="flex flex-col w-full">
+      &lt;div className="flex items-center bg-white rounded-lg border border-gray-300 px-4 py-3 w-full">
+        {Icon &amp;&amp; &lt;Icon className="mr-3 text-black w-5 h-5" data-testid={iconTestId} />}
+        &lt;input
+          type={type}
+          name={name}
+          onChange={onChange}
+          value={value}
+          placeholder={placeholder}
+          className="outline-none w-full bg-transparent"
+          data-testid={inputTestId}
+          {...rest}
+        />
+      &lt;/div>
+      {error &amp;&amp; (
+        &lt;span className="text-xs text-red-500 mt-1" data-testid="input-error">
+          &lt;MdError size={16} className="inline-block mr-1 mb-1" /> {error}
+        &lt;/span>
+      )}
+    &lt;/div>
+  );
+};
+
+/**
+ * PropTypes para el componente Input.
+ * Define los tipos de las propiedades esperadas y sus requisitos.
+ * @typedef {Object} PropTypes.Input
+ * @property {string} type - Tipo del input (requerido).
+ * @property {function} onChange - Función que se ejecuta al cambiar el valor del input (requerido).
+ * @property {string} placeholder - Texto de ayuda que aparece dentro del input (requerido).
+ * @property {string} value - Valor actual del input (requerido).
+ * @property {React.ComponentType} [icon] - Componente de ícono opcional.
+ * @property {string} [name] - Nombre del input, útil para formularios.
+ * @property {string} [error] - Mensaje de error que se muestra debajo del input si existe.
+ *
+ * @author Ángel Aragón
+ */
+PropTypes.Input = {
+  type: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  icon: PropTypes.elementType,
+  name: PropTypes.string,
+  error: PropTypes.string,
+};
+
+export default Input;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

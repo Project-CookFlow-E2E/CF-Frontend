@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/SwipeCard.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/SwipeCard.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// src/components/SwipeCard.jsx
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import TimerBadge from "./TimerBadge";
+import Button from "./Button";
+import { IoMdClose } from "react-icons/io";
+import { BsBookmarkFill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
+import { categoryService } from "../services/categoryService";
+
+/**
+ * Componente SwipeCard para mostrar una tarjeta de receta con opciones de interacción.
+ * Permite marcar como favorito, saltar a la siguiente receta y ver detalles de la receta.
+ * Incorpora funcionalidad de swipe para interactuar con las recetas (favorito/saltar).
+ * Muestra múltiples categorías recibidas como array de objetos {id, name}.
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {Object} props.recipe - Objeto de receta con detalles como id, nombre, imagen, duración, descripción, y un array de objetos de categorías ({id, name}).
+ * @param {Function} props.onToggleFavorite - Función para manejar el cambio de estado de favorito.
+ * @param {Function} props.onSkip - Función para manejar el salto a la siguiente receta.
+ * @returns {JSX.Element} Tarjeta de receta con imagen, título, descripción, categorías y botones de acción.
+ * @author Hema Priya
+ *
+ * @modifiedby Ángel Aragón
+ * @modified
+ * - Creada documentación.
+ * - Cambiado el componente de FavoriteButton por el componente reutilizable Button e implementado ReactIcons para los íconos de favorito y cerrar.
+ * - Cambiado el componente de SkipButton por el componente reutilizable Button e implementado ReactIcons para el ícono de cerrar.
+ * - Agregado botón para ver detalles de la receta que redirige a la página de detalles de la receta usando Navigate de react-router-dom.
+ * @modifiedby Saturnino Mendez
+ * @modified
+ * - Añadida funcionalidad de swipe para rechazar (izquierda) o añadir a favoritos (derecha).
+ * - Implementado el renderizado de múltiples categorías (asumiendo `recipe.categories` es un array de objetos `{id, name}`).
+ * - Refactorizado el HTML para usar `useRef` y manipular el estilo directamente para las animaciones de swipe.
+ */
+const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
+    const navigate = useNavigate();
+    const cardRef = useRef(null);
+    const [startX, setStartX] = useState(0);
+    const [currentX, setCurrentX] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const [initialTransform, setInitialTransform] = useState({ x: 0, rotate: 0 });
+    const [isSwipingOut, setIsSwipingOut] = useState(false);
+
+    const THRESHOLD = 100;
+    const ROTATION_FACTOR = 0.08;
+
+    useEffect(() => {
+        if (cardRef.current) {
+            cardRef.current.style.transition = 'transform 0.3s ease-out';
+            cardRef.current.style.transform = `translateX(0px) rotate(0deg)`;
+            setIsSwipingOut(false);
+        }
+        setInitialTransform({ x: 0, rotate: 0 });
+    }, [recipe.id]);
+
+    const handlePointerDown = useCallback((e) => {
+        if (isSwipingOut) return;
+
+        setIsDragging(true);
+        setStartX(e.clientX || (e.touches &amp;&amp; e.touches[0] ? e.touches[0].clientX : 0));
+        setCurrentX(e.clientX || (e.touches &amp;&amp; e.touches[0] ? e.touches[0].clientX : 0));
+
+        if (cardRef.current) {
+            const style = window.getComputedStyle(cardRef.current);
+            const matrix = new DOMMatrixReadOnly(style.transform);
+            const rotateMatch = style.transform.match(/rotate\(([^deg]+)deg\)/);
+            const currentRotation = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+
+            setInitialTransform({ x: matrix.m41, rotate: currentRotation });
+            cardRef.current.style.transition = 'none';
+        }
+    }, [isSwipingOut]);
+
+    const handlePointerMove = useCallback((e) => {
+        if (!isDragging || isSwipingOut) return;
+
+        e.preventDefault(); 
+
+        const clientX = e.clientX || (e.touches &amp;&amp; e.touches[0] ? e.touches[0].clientX : 0);
+        setCurrentX(clientX);
+
+        const deltaX = clientX - startX;
+        const rotate = deltaX * ROTATION_FACTOR;
+
+        if (cardRef.current) {
+            cardRef.current.style.transform = `translateX(${deltaX}px) rotate(${rotate}deg)`;
+        }
+    }, [isDragging, startX, isSwipingOut]);
+
+    const handlePointerUp = useCallback(() => {
+        if (!isDragging || isSwipingOut) return;
+        setIsDragging(false);
+
+        const deltaX = currentX - startX;
+
+        if (Math.abs(deltaX) > THRESHOLD) {
+            setIsSwipingOut(true);
+            if (deltaX > 0) {
+                if (cardRef.current) {
+                    cardRef.current.style.transition = 'transform 0.5s ease-out';
+                    cardRef.current.style.transform = `translateX(100vw) rotate(30deg)`;
+                }
+                setTimeout(() => {
+                    onToggleFavorite(recipe.id);
+                }, 300);
+            } else {
+                if (cardRef.current) {
+                    cardRef.current.style.transition = 'transform 0.5s ease-out';
+                    cardRef.current.style.transform = `translateX(-100vw) rotate(-30deg)`;
+                }
+                setTimeout(() => {
+                    onSkip();
+                }, 300); 
+            }
+        } else {
+            if (cardRef.current) {
+                cardRef.current.style.transition = 'transform 0.3s ease-out';
+                cardRef.current.style.transform = `translateX(0px) rotate(0deg)`;
+            }
+        }
+    }, [isDragging, currentX, startX, recipe.id, onToggleFavorite, onSkip, isSwipingOut]);
+
+    useEffect(() => {
+        const cardElement = cardRef.current;
+        if (!cardElement) return;
+
+        cardElement.addEventListener('pointerdown', handlePointerDown);
+
+        document.addEventListener('pointermove', handlePointerMove);
+        document.addEventListener('pointerup', handlePointerUp);
+        document.addEventListener('pointercancel', handlePointerUp);
+        document.addEventListener('pointerleave', handlePointerUp); 
+
+        return () => {
+            cardElement.removeEventListener('pointerdown', handlePointerDown);
+            document.removeEventListener('pointermove', handlePointerMove);
+            document.removeEventListener('pointerup', handlePointerUp);
+            document.removeEventListener('pointercancel', handlePointerUp);
+            document.removeEventListener('pointerleave', handlePointerUp);
+        };
+    }, [handlePointerDown, handlePointerMove, handlePointerUp]);
+
+    const handleFavoriteToggle = () => {
+        onToggleFavorite(recipe.id);
+    };
+
+    const handleSkipClick = () => {
+        onSkip();
+    };
+
+    const [categoriesToDisplay, setCategoriesToDisplay] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            if (Array.isArray(recipe.categories)) {
+                const categoryData = await Promise.all(
+                    recipe.categories.map(async (catId) => {
+                        if (typeof catId === 'object' &amp;&amp; catId.name) return catId;
+                        const fetched = await categoryService.getCategoryById(catId);
+                        return fetched;
+                    })
+                );
+                setCategoriesToDisplay(categoryData);
+            }
+        };
+        fetchCategories();
+    }, [recipe.categories]);
+
+    return (
+        &lt;div
+            ref={cardRef}
+            className="flex flex-col items-center w-full px-4 pb-6 bg-[#FDF3E8] rounded-lg shadow-lg relative"
+            style={{
+                cursor: isDragging ? 'grabbing' : 'grab',
+                transition: isSwipingOut ? 'transform 0.5s ease-out' : 'none',
+                touchAction: 'none'
+            }}
+            data-testid="swipe-card"
+        >
+            &lt;div
+                className="relative w-full mb-4 aspect-[4/3] max-h-80"
+                data-testid="recipe-image-container"
+            >
+                &lt;div className="bg-gray-100 rounded-xl w-full h-full flex items-center justify-center overflow-hidden shadow-sm">
+                    {recipe.image_url ? (
+                        &lt;img
+                            src={recipe.image_url}
+                            alt={recipe.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            data-testid="recipe-image"
+                        />
+                    ) : (
+                        &lt;div
+                            className="border border-gray-200 rounded-xl w-full h-full flex items-center justify-center bg-white"
+                            data-testid="no-image-placeholder"
+                        >
+                            &lt;span className="text-gray-400">Recipe Image&lt;/span>
+                        &lt;/div>
+                    )}
+                &lt;/div>
+            &lt;/div>
+
+            &lt;div className="w-full mb-6 px-2" data-testid="recipe-content">
+                &lt;div className="hidden sm:flex justify-between items-start mb-1">
+                    &lt;h2
+                        className="text-xl font-semibold text-gray-900 flex-1 mr-4"
+                        data-testid="recipe-title"
+                    >
+                        {recipe.name}
+                    &lt;/h2>
+                    &lt;TimerBadge minutes={recipe.duration_minutes} />
+                &lt;/div>
+
+                &lt;div className="hidden sm:block">
+                    {recipe.description &amp;&amp; (
+                        &lt;p
+                            className="text-gray-600 text-base mb-3"
+                            data-testid="recipe-description"
+                        >
+                            {recipe.description}
+                        &lt;/p>
+                    )}
+                    {categoriesToDisplay.length > 0 &amp;&amp; (
+                        &lt;div className="mb-3">
+                            &lt;h3 className="text-sm font-medium text-gray-700 mb-1">Categorías:&lt;/h3>
+                            &lt;div className="flex flex-wrap gap-2">
+                                {categoriesToDisplay.map((category) => (
+                                    &lt;span
+                                        key={category.id}
+                                        className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                                    >
+                                        {category.name}
+                                    &lt;/span>
+                                ))}
+                            &lt;/div>
+                        &lt;/div>
+                    )}
+                &lt;/div>
+
+                &lt;div className="sm:hidden">
+                    &lt;h2
+                        className="text-lg font-semibold text-gray-900 mb-2 text-center"
+                        data-testid="recipe-title-mobile"
+                    >
+                        {recipe.name}
+                    &lt;/h2>
+
+                    {recipe.description &amp;&amp; (
+                        &lt;p
+                            className="text-gray-600 text-sm mb-3 text-center"
+                            data-testid="recipe-description-mobile"
+                        >
+                            {recipe.description}
+                        &lt;/p>
+                    )}
+
+                    {categoriesToDisplay.length > 0 &amp;&amp; (
+                        &lt;div className="flex justify-center flex-wrap gap-2 mb-3">
+                             {categoriesToDisplay.map((category) => (
+                                 &lt;span
+                                     key={category.id}
+                                     className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                                 >
+                                     {category.name}
+                                 &lt;/span>
+                            ))}
+                        &lt;/div>
+                    )}
+
+                    &lt;div className="flex justify-between items-center">
+                        &lt;span />
+                        &lt;TimerBadge minutes={recipe.duration_minutes} />
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+
+            &lt;div className="flex justify-center w-full mb-8 gap-20">
+                &lt;Button
+                    onClick={handleSkipClick}
+                    aria-label="Saltar receta"
+                    hoverColor="hover:bg-gray-300"
+                    className="px-2 py-2 rounded-full hover:border-gray-500 bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border-1 border-gray-300"
+                >
+                    &lt;IoMdClose size={28} color="#6B7280" />
+                &lt;/Button>
+                &lt;Button
+                    onClick={handleFavoriteToggle}
+                    aria-label="Agregar a Favoritos"
+                    hoverColor="hover:bg-rose-100"
+                    className="px-3 py-2 rounded-full bg-white shadow-md hover:shadow-lg hover:border-accent transition-shadow duration-200 border-1 border-gray-300"
+                >
+                    &lt;BsBookmarkFill size={20} color="#F37A7E" />
+                &lt;/Button>
+            &lt;/div>
+
+            &lt;div
+                className="w-full sm:max-w-[140px] mx-auto mb-2"
+                data-testid="open-recipe-button-wrapper"
+            >
+                &lt;Button
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
+                    type="button"
+                    className="w-full px-4 py-2 rounded-lg"
+                    aria-label="Ver receta"
+                >
+                    Ver receta
+                &lt;/Button>
+            &lt;/div>
+        &lt;/div>
+    );
+};
+
+export default SwipeCard;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

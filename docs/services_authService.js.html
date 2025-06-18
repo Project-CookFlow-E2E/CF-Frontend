@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/authService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/authService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * authService.js
+ *
+ * Provides authentication utility functions for login, logout, token storage,
+ * and JWT validation (expiration check) for client-side auth flows.
+ *
+ * Features:
+ * - Stores JWT tokens in localStorage under a fixed key.
+ * - Decodes and validates token expiration using `jwt-decode`.
+ * - Interfaces with an Axios instance (`api`) to perform login requests.
+ *
+ * Example usage:
+ * import * as authService from './authService';
+ *
+ * // To log in:
+ * const authData = await authService.login('username', 'password');
+ * console.log('Access JWT:', authData.access);
+ *
+ * // To get tokens:
+ * const accessToken = authService.getToken();
+ * const refreshToken = authService.getRefreshToken();
+ *
+ * // To validate the access token:
+ * const isValid = authService.isTokenValid();
+ *
+ * // To refresh the access token:
+ * const newAccessToken = await authService.refreshAuthToken();
+ *
+ * // To log out:
+ * authService.logout();
+ *
+ * @module authService
+ * @requires ./api
+ * @requires jwt-decode
+ * @author Nico
+ * @modified by Saturnino
+ * @modified by Ana Castro  
+ * @modified Added function getUserIdFromToken() to obtain user ID through token
+ *
+ */
+import api from "./api";
+import { jwtDecode } from "jwt-decode";
+
+/**
+ * Key used to store the JWT access token in localStorage.
+ *
+ * @type {"cookflow_accessToken"}
+ */
+const ACCESS_TOKEN_KEY = "cookflow_accessToken";
+/**
+ * Key used to store the JWT refresh token in localStorage.
+ *
+ * @type {"cookflow_refreshToken"}
+ */
+const REFRESH_TOKEN_KEY = "cookflow_refreshToken";
+
+/**
+ * Performs a login request to the backend to obtain JWT tokens.
+ * Stores the access token and refresh token in localStorage upon successful authentication.
+ *
+ * @async
+ * @param {string} username - The username/email for login.
+ * @param {string} password - The user's password.
+ * @returns {Promise&lt;object>} An object containing the access and refresh tokens, along with any other data from the backend.
+ * @throws {object} If the server responds with validation errors (HTTP 4xx/5xx status),
+ * the error object will be the `error.response.data` from Axios,
+ * containing specific error messages (e.g., `{ "password": ["..."], "detail": "..." }`).
+ * @throws {Error} If no response is received from the server (e.g., network error),
+ * or if an unexpected error occurs during the request setup.
+ */
+export const login = async (username, password) => {
+  try {
+    const res = await api.post("/token/", { username, password });
+    const accessToken = res.data.access;
+    const refreshToken = res.data.refresh;
+    if (res.status === 200 &amp;&amp; accessToken) {
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      window.dispatchEvent(new Event("authchange"));
+    }
+    return res.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Authentication error or backend validation failed:",
+        error.response.data
+      );
+      console.error("Status code:", error.response.status);
+      const errorMessage = error.response.data.detail || JSON.stringify(error.response.data) || "Authentication failed.";
+      const customError = new Error(errorMessage);
+      customError.response = error.response;
+      throw customError;
+    } else if (error.request) {
+      console.error("No response received from the server:", error.request);
+      throw new Error(
+        "No response received from the server. Please check your network connection."
+      );
+    } else {
+      console.error("Error during authentication request:", error.message);
+      throw new Error("An error occurred during the authentication request.");
+    }
+  }
+};
+
+/**
+ * Retrieves the JWT access token from localStorage.
+ *
+ * @returns {string | null} The access token if it exists, otherwise null.
+ */
+export const getToken = () => {
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+};
+
+/**
+ * Retrieves the JWT refresh token from localStorage.
+ *
+ * @returns {string | null} The refresh token if it exists, otherwise null.
+ */
+export const getRefreshToken = () => {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+};
+
+/**
+ * Checks if the stored JWT access token is valid and has not expired.
+ *
+ * @returns {boolean} `true` if the token is valid and not expired.
+ */
+export const isTokenValid = () => {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const { exp } = jwtDecode(token);
+    return Date.now() &lt; exp * 1000;
+  } catch (error) {
+    console.error("Error decoding or validating token:", error);
+    return false;
+  }
+};
+
+/**
+ * Logs out the user by removing both access and refresh tokens from localStorage.
+ * This function does not perform a backend call, as JWTs are inherently stateless.
+ * It is recommended to add backend logic to invalidate the refresh token if necessary
+ * for enhanced security (e.g., refresh token blocklisting).
+ *
+ * @async
+ * @returns {void}
+ */
+export const logout = async () => {
+  const refreshToken = getRefreshToken();
+
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  window.dispatchEvent(new Event("authchange"));
+
+  if (refreshToken) {
+    try {
+      await api.post("/logout/", { refresh: refreshToken });
+    } catch (err) {
+      console.error("Error blacklisting refresh token on the server:", err);
+    }
+  } else {
+    console.warn("No refresh token found for server-side logout.");
+  }
+};
+
+/**
+ * Attempts to refresh the access token using the stored refresh token.
+ * If successful, it updates the access token in localStorage.
+ * If it fails (e.g., invalid or expired refresh token), it logs out the user.
+ *
+ * @async
+ * @returns {Promise&lt;string | boolean>} The new access token if successfully refreshed,
+ * or `false` if no refresh token is available.
+ * @throws {Error} If the token refresh request fails for other reasons.
+ */
+export const refreshAuthToken = async () => {
+  try {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      console.warn("No refresh token available.");
+      return false;
+    }
+    const res = await api.post("/token/refresh/", { refresh: refreshToken });
+    const newAccessToken = res.data.access;
+    localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+    return newAccessToken;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    logout();
+    throw error;
+  }
+};
+
+/**
+ * Decodes the stored access token to extract and return the user's ID.
+ *
+ * @returns {number} The user ID from the token.
+ * @throws {Error} If no token is found in localStorage.
+ */
+export const getUserIdFromToken = () => {
+  const token = localStorage.getItem("cookflow_accessToken");
+  if (!token) {
+    throw new Error("Token not found");
+  }
+
+  const decoded = jwtDecode(token); 
+  return decoded.user_id;
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/AutocompleteInput.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/AutocompleteInput.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState } from "react";
+/**
+ * Componente de input con autocompletado a partir de una lista de sugerencias.
+ * Muestra un desplegable con coincidencias conforme se escribe, y permite seleccionar una opción.
+ *
+ * @component
+ * @param {Object} props - Propiedades del componente.
+ * @param {string} props.label - Etiqueta que se muestra sobre el input.
+ * @param {string[]} props.suggestions - Lista de opciones disponibles para el autocompletado.
+ * @param {string} [props.placeholder] - Texto de ejemplo que se muestra dentro del input.
+ * @param {function} [props.onChange] - Función que se ejecuta al cambiar o seleccionar el valor.
+ *
+ * @example
+ * &lt;AutocompleteInput
+ *   label="Ingrediente"
+ *   suggestions={['Leche', 'Huevos', 'Harina']}
+ *   placeholder="Añade un ingrediente"
+ *   onChange={(value) => console.log(value)}
+ * />
+ *
+ * @author Nico
+ */
+export default function AutocompleteInput({
+  label,
+  suggestions,
+  placeholder = "",
+  onChange,
+}) {
+  const [value, setValue] = useState("");
+  const [filtered, setFiltered] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleChange = (e) => {
+    const input = e.target.value;
+    setValue(input);
+    onChange?.(input);
+
+    if (input.length > 0) {
+      const results = suggestions.filter((s) =>
+        s.toLowerCase().includes(input.toLowerCase()),
+      );
+      setFiltered(results);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleSelect = (item) => {
+    setValue(item);
+    onChange?.(item);
+    setShowDropdown(false);
+  };
+
+  return (
+    &lt;div className="relative w-full" data-testid="autocomplete-input-wrapper">
+      {label &amp;&amp; (
+        &lt;label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          data-testid="autocomplete-input-label"
+        >
+          {label}
+        &lt;/label>
+      )}
+      &lt;input
+        type="text"
+        value={value}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className="bg-white rounded-lg border border-gray-300 px-6 py-3 w-full"
+        data-testid="autocomplete-input"
+      />
+      {showDropdown &amp;&amp; filtered.length > 0 &amp;&amp; (
+        &lt;ul
+          className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md"
+          data-testid="autocomplete-dropdown"
+        >
+          {filtered.map((item) => (
+            &lt;li
+              key={item}
+              onClick={() => handleSelect(item)}
+              className="px-6 py-3 hover:bg-gray-100 cursor-pointer"
+              data-testid={`autocomplete-option-${item}`}
+            >
+              {item}
+            &lt;/li>
+          ))}
+        &lt;/ul>
+      )}
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

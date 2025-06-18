@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/Landing.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/Landing.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Landing.jsx
+ * @description Página de bienvenida (Landing Page) para usuarios no registrados.
+ * Presenta la propuesta de valor de CookFlow con una introducción visual, problemas comunes
+ * relacionados con la cocina y una sección de recetas destacadas.
+ *
+ * Esta página actúa como punto de entrada para que los usuarios nuevos entiendan el objetivo
+ * de la plataforma y se registren para empezar a usarla.
+ *
+ * Componentes utilizados:
+ * - Button: Botón reutilizable
+ * - Card: Vista individual de receta
+ * - useFavorites: Hook para gestionar recetas favoritas
+ * - mockRecipes: Datos simulados de recetas destacadas
+ * Navegación:
+ * - Los botones redirigen a la ruta `/signup` para incentivar el registro.
+ *
+ * @module pages/Landing
+ */
+
+import { Button, Card } from "../components";
+import { Link, useNavigate } from "react-router-dom";
+import useLatestRecipesCookflow from "../hooks/useLatestRecipesCookflow";
+import { FaGear } from "react-icons/fa6";
+import useCategories from "../hooks/useCategories";
+
+/**
+ * Renderiza una receta individual dentro del carrusel de recetas destacadas.
+ * Si el usuario hace clic en el icono de favorito, se le redirige al registro.
+ *
+ * @param {Object} props
+ * @param {number} props.id - ID de la receta
+ * @author Yuliia Martynovych
+ * @modifiedby Ána Castro, Ángel Aragón
+ * @modified - Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
+ * - Agregado el icono de engranaje para representar la receta y arreglado tiempo en card.
+ * - Carga las últimas 3 recetas del usuario cookflow desde la API.
+ * @returns {JSX.Element} Componente de tarjeta de receta
+ */
+
+/**
+ * Página principal de entrada para nuevos usuarios.
+ * Contiene:
+ * - Sección Hero con llamada a la acción
+ * - Descripción de problemas comunes al cocinar
+ * - Propuesta de solución con recetas destacadas
+ *
+ * @returns {JSX.Element}
+ */
+
+const Landing = () => {
+  const { latestRecipes, loading } = useLatestRecipesCookflow();
+  const navigate = useNavigate();
+  const mediaUrl = import.meta.env.VITE_MEDIA_URL;
+  const { categories } = useCategories(2);
+
+  return (
+    &lt;div
+      className="flex flex-col items-center justify-center w-full font-sans"
+      data-testid="landing-page"
+      id="landing-page-container"
+    >
+      &lt;div
+        className="w-full h-[500px] bg-cover bg-center flex flex-col items-center justify-center text-center px-4"
+        style={{ backgroundImage: "url('/landing.png')" }}
+        data-testid="hero-section"
+        id="hero-section"
+      >
+        &lt;h1
+          className="text-5xl font-serif font-bold text-black mb-4"
+          data-testid="hero-title"
+          id="hero-title"
+        >
+          CookFlow
+        &lt;/h1>
+        &lt;p
+          className="text-lg text-black mb-6"
+          data-testid="hero-subtitle"
+          id="hero-subtitle"
+        >
+          Redescubre el placer de cocinar
+        &lt;/p>
+        &lt;Link to="/login" data-testid="hero-signup-link" id="hero-signup-link">
+          &lt;Button>Empezar →&lt;/Button>
+        &lt;/Link>
+      &lt;/div>
+
+      &lt;div
+        className="bg-[#e9e6d7] w-full py-16 text-center"
+        data-testid="problem-section"
+        id="problem-section"
+      >
+        &lt;h2
+          className="text-2xl font-semibold mb-12"
+          data-testid="problem-title"
+          id="problem-title"
+        >
+          De la frustración a la diversión
+        &lt;/h2>
+        &lt;div
+          className="flex flex-col md:flex-row justify-center gap-6 md:gap-4 px-4"
+          data-testid="problem-cards-container"
+          id="problem-cards-container"
+        >
+          &lt;div
+            className="bg-white p-6 rounded-lg shadow-md max-w-sm mx-auto"
+            data-testid="problem-card-1"
+            id="problem-card-1"
+          >
+            &lt;div className="text-2xl mb-2 flex justify-center">
+              &lt;FaGear />
+            &lt;/div>
+            &lt;h3 className="font-semibold text-lg mb-2">¿Que cocinamos hoy?&lt;/h3>
+            &lt;p className="text-gray-600 text-sm">
+              Despídete del estrés diario de decidir qué comer. Planifica tus
+              comidas de forma fácil, rápida y sin frustraciones
+            &lt;/p>
+          &lt;/div>
+          &lt;div
+            className="bg-white p-6 rounded-lg shadow-md max-w-sm mx-auto"
+            data-testid="problem-card-2"
+            id="problem-card-2"
+          >
+            &lt;div className="text-2xl mb-2 flex justify-center">
+              &lt;FaGear />
+            &lt;/div>
+            &lt;h3 className="font-semibold text-lg mb-2">
+              No planifiques. Solo cocina.
+            &lt;/h3>
+            &lt;p className="text-gray-600 text-sm">
+              Recetas que se pierden, compras a última hora y cenas caóticas.
+              ¿Te suena? Te ayudamos a recuperar el control.
+            &lt;/p>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;div
+        className="bg-[#fdf2f2] w-full py-16 px-4 text-center"
+        data-testid="solution-section"
+        id="solution-section"
+      >
+        &lt;h2
+          className="text-2xl font-semibold mb-4"
+          data-testid="solution-title"
+          id="solution-title"
+        >
+          La solución CookFlow
+        &lt;/h2>
+        &lt;p
+          className="max-w-2xl mx-auto text-gray-700 mb-8 text-sm"
+          data-testid="solution-description"
+          id="solution-description"
+        >
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        &lt;/p>
+        &lt;div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-12"
+          data-testid="recipe-cards-grid"
+          id="recipe-cards-grid"
+        >
+          {loading ? (
+            &lt;p>Cargando recetas...&lt;/p>
+          ) : Array.isArray(latestRecipes) &amp;&amp; latestRecipes.length > 0 ? (
+            latestRecipes.map((recipe) => (
+              &lt;Card
+                key={recipe.id}
+                id={`recipe-card-${recipe.id}`}
+                image={
+                  recipe?.user?.id &amp;&amp; recipe?.image?.url
+                    ? mediaUrl + recipe.user.id + "/" + recipe.image.url
+                    : "https://placehold.co/800?text=Placeholder+Image&amp;font=playfair-display"
+                }
+                name={recipe.name}
+                category={
+                    Array.isArray(recipe.categories)
+                        ? recipe.categories
+                                .map((cat) => {
+                                    const catId = typeof cat === "object" ? cat.id : cat;
+                                    const fullCat = categories.find((c) => c.id === catId);
+                                    return fullCat?.name;
+                                })
+                                .filter(Boolean)
+                        : ["Sin categoría"]
+                }
+                time={`${recipe.duration_minutes}`}
+                onToggleFavorite={() => navigate("/login")}
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
+              />
+            ))
+          ) : (
+            &lt;p>No hay recetas disponibles.&lt;/p>
+          )}
+        &lt;/div>
+        &lt;div
+          className="pb-20"
+          data-testid="signup-button-container"
+          id="signup-button-container"
+        >
+          &lt;Link to="/login" data-testid="signup-link" id="signup-link">
+            &lt;Button>A cocinar&lt;/Button>
+          &lt;/Link>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default Landing;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
