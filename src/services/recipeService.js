@@ -23,6 +23,34 @@ const BASE_URL = "/recipes/recipes";
  * Service for interacting with recipe API endpoints.
  */
 export const recipeService = {
+
+    /**
+    * Fetches a list of all recipes.
+    * GET /api/recipes/recipes/
+    *
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of recipe objects.
+    * @throws {Error} If the API request fails.
+    */
+    getAllRecipes: async () => {
+        const response = await api.get(`${BASE_URL}/`);
+        return response.data;
+    },
+
+    /**
+    * Fetches the details of a specific recipe by its ID.
+    * GET /api/recipes/recipes/<int:pk>/
+    *
+    * @param {number} recipeId - The ID of the recipe to fetch.
+    * @returns {Promise<object>} A promise that resolves with the recipe's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found).
+    */
+    getRecipeById: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
+        const response = await api.get(`${BASE_URL}/${recipeId}/`);
+        return response.data;
+    },
   /**
    * Fetches a list of all recipes.
    * GET /api/recipes/recipes/
@@ -129,7 +157,28 @@ export const recipeService = {
    */
   getRecipeByUserId: async (userId) => {
     let finalUserId = userId;
+    /**
+    * Fetches a list of recipes filtered by a specific user ID.
+    * This utilizes the backend's filtering capabilities on the recipes list endpoint.
+    * GET /api/recipes/?user_id={userId}
+     *
+    * @param {number} userId (optional) - The unique integer ID of the user whose recipes are to be fetched.
+    * Must be a positive integer.
+    * @returns {Promise<Array<object>>} A promise that resolves with an array of recipe objects
+    * belonging to the specified user. Returns an empty array
+     * if no recipes are found for the given user ID.
+    * @throws {Error} If `userId` is not a valid positive integer, if the API request fails
+    * (e.g., network error, server error) or token doesn't have and user id.
+    */
+   getRecipeByUserId: async (userId) => {
+    let finalUserId = userId;
 
+    if (finalUserId === null || typeof finalUserId === 'undefined') {
+        try {
+            finalUserId = await getUserIdFromToken();
+        } catch (error) {
+            throw new Error("The user id is not delivered from token: " + error.message);
+        }
     if (finalUserId === null || typeof finalUserId === "undefined") {
       try {
         finalUserId = await getUserIdFromToken();
@@ -152,6 +201,70 @@ export const recipeService = {
     return response.data;
   },
 
+    /**
+    * Creates a new recipe.
+    * This typically requires user authentication.
+    * The `user` field for the recipe will be automatically assigned by the backend
+    * based on the authenticated user making the request, so it should NOT be included in `recipeData`.
+    * Also, the `steps` field is read-only on the backend, so it should NOT be included in `recipeData`.
+    * POST /api/recipes/recipes/
+    *
+    * @param {FormData} recipeData - A FormData object containing the data for the new recipe,
+    * including text fields and File objects for images.
+    * @returns {Promise<object>} A promise that resolves with the newly created recipe object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
+    */
+    createRecipe: async (recipeData) => {
+        // MODIFICADO: Añadir la configuración para asegurar que Axios envíe FormData correctamente.
+        // Si recipeData es un objeto FormData, Axios automáticamente establece el
+        // Content-Type a 'multipart/form-data' si no se especifica.
+        // Si tu instancia 'api' tiene una configuración global que fuerza 'application/json',
+        // podrías necesitar anularla explícitamente aquí.
+        const response = await api.post(`${BASE_URL}/`, recipeData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // Asegura el tipo de contenido correcto para FormData
+            },
+        });
+        return response.data;
+    },
+
+    /**
+    * Updates an existing recipe by its ID.
+    * Uses PATCH for partial updates. Requires user authentication and ownership/admin privileges.
+    * The `steps` field is read-only on the backend, so it should NOT be included in `recipeData`.
+    * PATCH /api/recipes/recipes/<int:pk>/
+    *
+    * @param {number} recipeId - The ID of the recipe to update.
+    * @param {object} recipeData - An object containing the recipe data to update.
+    * Can include `name` (str), `description` (str), `duration_minutes` (int), `commensals` (int),
+    * and `categories` (array of int IDs).
+    * @returns {Promise<object>} A promise that resolves with the updated recipe object.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
+    */
+    updateRecipe: async (recipeId, recipeData) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) { // Corregido: usaba ingredientId en lugar de recipeId
+            return Promise.reject(new Error("recipe id not valid."));
+        };
+        // Para actualizaciones, si también se envían archivos, también necesitarías un FormData
+        // y ajustar las cabeceras aquí de manera similar.
+        const response = await api.patch(`${BASE_URL}/${recipeId}/`, recipeData);
+        return response.data;
+    },
+
+    /**
+    * Deletes a recipe by its ID. Requires user authentication and ownership/admin privileges.
+    * DELETE /api/recipes/recipes/<int:pk>/
+    *
+    * @param {number} recipeId - The ID of the recipe to delete.
+    * @returns {Promise<boolean>} A promise that resolves with `true` if the recipe is successfully deleted.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
+    */
+    deleteRecipe: async (recipeId) => {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) {
+            return Promise.reject(new Error("recipe id not valid."));
+        };
+        await api.delete(`${BASE_URL}/${recipeId}/`);
+        return true;
   /**
    * Fetches a specified number of random recipes from the backend.
    * This function enforces a maximum limit of 5 recipes per request to optimize database petition.
