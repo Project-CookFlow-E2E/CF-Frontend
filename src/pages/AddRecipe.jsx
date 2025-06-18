@@ -362,10 +362,13 @@ const AddRecipe = () => {
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
-        <h2 className="text-3xl font-semibold text-center mb-4" data-testid="add-recipe-title">Añadir Receta</h2>
+        <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
         <button className="mb-4" data-testid="back-button" onClick={() => navigate("/main")}>
           <span className="text-2xl">←</span>
         </button>
+        <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
+          Añadir receta
+        </h1>
 
         {mensaje && (
           <div
