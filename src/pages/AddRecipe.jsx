@@ -14,10 +14,6 @@ import { categoryService } from "../services/categoryService";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
-// import { getUserIdFromToken } from "../services/authService";
-
-
-
 
 const AddRecipe = () => {
   const [parentCategories, setParentCategories] = useState([]);
@@ -47,7 +43,7 @@ const AddRecipe = () => {
       comensales: "",
       categoriasSeleccionadas: [],
       foto: null,
-      ingredients: [{ name: "", quantity: "", unit: "" }],
+      ingredients: [{ name: "", quantity: "", unit: "" }], // `unit` aquí es el ID
       steps: [{ text: "", image: null, imagePreview: null, isDragOver: false }],
     },
   });
@@ -120,9 +116,11 @@ const AddRecipe = () => {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 2 * 1024 * 1024;
     if (!tiposPermitidos.includes(file.type)) {
+      setMensaje("Tipo de archivo no permitido. Solo JPEG, PNG, WEBP.");
       return false;
     }
     if (file.size > maxSize) {
+      setMensaje("El archivo es demasiado grande. Máximo 2MB.");
       return false;
     }
     return true;
@@ -132,6 +130,7 @@ const AddRecipe = () => {
     if (!file) return;
     if (!validateImageFile(file)) return;
     setValue("foto", file);
+    setMensaje(""); // Limpiar mensaje si la validación es exitosa
   };
 
   const handleFileChange = (e) => {
@@ -165,6 +164,7 @@ const AddRecipe = () => {
   const deleteImg = () => {
     setValue("foto", null);
     setPreview(null);
+    setMensaje(""); // Limpiar mensaje al eliminar imagen
   };
 
   const categoriasSeleccionadas = watch("categoriasSeleccionadas") || [];
@@ -185,14 +185,16 @@ const AddRecipe = () => {
     setValue(`ingredients.${index}.name`, value);
     const found = allIngredients.find(i => i.name === value);
     if (found && found.unit_type_id) {
-      setValue(`ingredients.${index}.id`, found.id); 
+      setValue(`ingredients.${index}.id`, found.id); // Guardar el ID del ingrediente encontrado
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
           setUnitsByType(prev => ({ ...prev, [found.unit_type_id]: units }));
+          // Si hay unidades, establecer el ID de la primera unidad por defecto
           if (units && units.length > 0) {
-            setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
+            setValue(`ingredients.${index}.unit`, units[0].id); // ¡MODIFICADO: Guardar el ID de la unidad!
           } else {
+            // Fallback si no hay unidades, intentar obtener el nombre del tipo de unidad
             let unitTypeName = "";
             if (unitTypeCache[found.unit_type_id]) {
               unitTypeName = unitTypeCache[found.unit_type_id].name;
@@ -205,15 +207,17 @@ const AddRecipe = () => {
                 unitTypeName = "";
               }
             }
-            setValue(`ingredients.${index}.unit`, unitTypeName);
+            // Aquí podrías dejar el campo de unidad vacío o con un mensaje de error si no hay unidades válidas
+            setValue(`ingredients.${index}.unit`, "");
           }
         } catch {
           setValue(`ingredients.${index}.unit`, "");
         }
       } else {
         const units = unitsByType[found.unit_type_id];
+        // Si hay unidades, establecer el ID de la primera unidad por defecto
         if (units && units.length > 0) {
-          setValue(`ingredients.${index}.unit`, units[0].abbreviation || units[0].name || "");
+          setValue(`ingredients.${index}.unit`, units[0].id); // ¡MODIFICADO: Guardar el ID de la unidad!
         } else {
           let unitTypeName = "";
           if (unitTypeCache[found.unit_type_id]) {
@@ -227,13 +231,16 @@ const AddRecipe = () => {
               unitTypeName = "";
             }
           }
-          setValue(`ingredients.${index}.unit`, unitTypeName);
+          setValue(`ingredients.${index}.unit`, "");
         }
       }
     } else {
+      // Limpiar ID y unidad si el ingrediente no se encuentra o no tiene tipo de unidad
+      setValue(`ingredients.${index}.id`, null);
       setValue(`ingredients.${index}.unit`, "");
     }
   };
+
 
   // Validación de campos numéricos (no negativos ni cero)
   const validatePositive = (value) => {
@@ -254,7 +261,7 @@ const AddRecipe = () => {
   const onSubmit = async (data) => {
     // Validación manual extra para ingredientes
     for (const ing of data.ingredients) {
-      if (!ing.name || !ing.quantity || !ing.unit) {
+      if (!ing.name || !ing.quantity || !ing.unit) { // Asegúrate de que ing.unit ahora sea un ID
         setMensaje("Todos los ingredientes deben tener nombre, cantidad y unidad.");
         return;
       }
@@ -274,96 +281,104 @@ const AddRecipe = () => {
       return;
     }
 
+    // Validación para asegurarse de que haya al menos un paso
+    if (!data.steps || data.steps.length === 0) {
+        setMensaje("La receta debe tener al menos un paso.");
+        return;
+    }
+    // Validación de texto de los pasos
+    for (const step of data.steps) {
+        if (!step.text || step.text.trim() === "") {
+            setMensaje("Cada paso debe tener una descripción.");
+            return;
+        }
+    }
+
     try {
       // Matriz única de categorías
       const categoriasUnicas = Array.from(new Set(data.categoriasSeleccionadas));
-      
-// 1. Crear la receta (sin ingredientes ni pasos)
-    const recipePayload = new FormData();
-    recipePayload.append("name", data.nombre);
-    recipePayload.append("description", data.descripcion);
-    recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
-    recipePayload.append("commensals", parseInt(data.comensales, 10));
-    categoriasUnicas.forEach((category) => {
-      recipePayload.append("categories[]", parseInt(category, 10));
-    });
-    // ingredients.forEach((ingredient) => {
-    //   recipePayload.append("ingredients[]", ingredient.name);
-    // });
 
-  const formattedIngredients = data.ingredients.map(ing => ({
-  // 'ingredient' es el ID del ingrediente base (ej. el ID de 'Huevo')
-  // En tu ejemplo de consola, este es 'ing.id'
-  ingredient: parseInt(ing.id, 10),
+      const recipePayload = new FormData();
 
-  // 'quantity' es la cantidad (asegúrate de que sea un número si el backend lo espera así)
-  quantity: parseFloat(ing.quantity), // Usamos parseFloat por si hay decimales, si siempre es entero, usa parseInt
+      // 1. Añadir campos directos de la receta
+      recipePayload.append("name", data.nombre);
+      recipePayload.append("description", data.descripcion);
+      recipePayload.append("duration_minutes", parseInt(data.tiempo, 10));
+      recipePayload.append("commensals", parseInt(data.comensales, 10));
 
-  // 'unit' es el ID de la unidad (ej. el ID de 'unidades' o 'gramos')
-  // En tu ejemplo de consola, este es 'ing.unit'
-  unit: parseInt(ing.unit, 10)
-  }));
+      // 2. Añadir las categorías (una por una con la clave 'categories[]')
+      // Esta forma es la estándar para FormData con arrays y DRF lo maneja bien.
+      categoriasUnicas.forEach((categoryId) => {
+        recipePayload.append("categories", parseInt(categoryId, 10)); // Se cambió a 'categories' sin [] para DRF si es JSON Array, pero 'categories[]' también funciona con DRF
+      });
 
-// Muestra el array formateado para verificar
-console.log("Ingredientes formateados para el backend:", formattedIngredients);
 
-// **Paso 2: Adjunta el array formateado al FormData como un string JSON**
-recipePayload.append("ingredients", JSON.stringify(formattedIngredients));
+      // 3. Añadir los ingredientes como una CADENA JSON
+      const formattedIngredients = data.ingredients.map(ing => ({
+        ingredient: parseInt(ing.id, 10), // ¡Usar ing.id para el ID del ingrediente base!
+        quantity: parseFloat(ing.quantity),
+        unit: parseInt(ing.unit, 10)     // ¡Usar ing.unit para el ID de la unidad!
+      }));
+      // MODIFICADO: Cambiado de "ingredients" a "ingredients_data" para coincidir con el serializador
+      recipePayload.append("ingredients_data", JSON.stringify(formattedIngredients));
 
-    if (data.foto) {
-      recipePayload.append("photo", data.foto);
+      // 4. Añadir la imagen principal de la receta
+      if (data.foto) {
+        recipePayload.append("photo", data.foto); // La clave es "photo"
+      }
+
+      // 5. Añadir los pasos como una CADENA JSON
+      const formattedSteps = data.steps.map((step, idx) => ({
+        description: step.text,
+        order: idx + 1
+      }));
+      // MODIFICADO: Cambiado de "steps" a "steps_data" para coincidir con el serializador
+      recipePayload.append("steps_data", JSON.stringify(formattedSteps));
+
+      // 6. Añadir las imágenes de cada paso
+      data.steps.forEach((step, idx) => {
+        if (step.image) { // `step.image` es el objeto File real
+          // La clave es "step_image_0", "step_image_1", etc.
+          recipePayload.append(`step_image_${idx}`, step.image);
+        }
+      });
+
+      // --- Verificación del contenido de FormData (para depuración) ---
+      console.log("Contenido de recipePayload para envío:");
+      for (const [key, value] of recipePayload.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
+        } else {
+          console.log(`${key}: ${value}`);
+        }
+      }
+      console.log("--- FIN de recipePayload para envío ---");
+      // --- Fin de verificación ---
+
+
+      const recetaGuardada = await recipeService.createRecipe(recipePayload);
+      const recetaId = recetaGuardada.id;
+
+      console.log("Receta guardada con ID:", recetaId);
+
+      setRecipeId(recetaId);
+      setMensaje("Receta guardada correctamente. ID: " + recetaId);
+      reset();
+      setValue("categoriasSeleccionadas", []);
+      setPreview(null); // Limpiar la vista previa de la imagen principal
+      // Para limpiar las vistas previas de los pasos, necesitarías iterar sobre ellos y revocar las URLs
+      // y establecer imagePreview a null para cada uno. Un reset() global lo hará.
+
+    } catch (error) {
+      let errorMsg = "Error al guardar la receta.";
+      if (error.response && error.response.data) {
+        errorMsg += "\nDetalles del error del servidor: " + JSON.stringify(error.response.data, null, 2);
+      } else if (error.message) {
+        errorMsg += "\nDetalles del error: " + error.message;
+      }
+      setMensaje(errorMsg);
     }
-
-    console.log("Contenido de recipePayload:");
-
-for (const [key, value] of recipePayload.entries()) {
-  if (value instanceof File) {
-    // Si es un archivo (como la foto), solo muestra su nombre y tipo
-    console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} bytes)`);
-  } else {
-    // Para otros valores, muestra la clave y el valor
-    console.log(`${key}: ${value}`);
-  }
-}
-  // Steps
-// Formatea los pasos para el backend
-  const formattedSteps = data.steps.map((step, idx) => ({
-  // 'description' es el texto del paso
-  description: step.text, // o step.description según tu formulario
-
-  // 'order' es el número de orden del paso
-  order: idx + 1
-}));
-
-console.log("Pasos formateados para el backend:", formattedSteps);
-recipePayload.append("steps", JSON.stringify(formattedSteps));
-
-
-
-
-
-
-console.log("--- FIN de recipePayload ---");
-
-    const recetaGuardada = await recipeService.createRecipe(recipePayload);
-    const recetaId = recetaGuardada.id;
-
-    console.log("Receta guardada con ID:", recetaId);
-
-    setRecipeId(recetaId);
-    setMensaje("Receta guardada correctamente. ID: " + recetaId);
-    reset();
-    setValue("categoriasSeleccionadas", []);
-  } catch (error) {
-    let errorMsg = "Error al guardar la receta.";
-    if (error.response && error.response.data) {
-      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
-    } else if (error.message) {
-      errorMsg += "\nDetalles: " + error.message;
-    }
-    setMensaje(errorMsg);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
@@ -635,6 +650,7 @@ console.log("--- FIN de recipePayload ---");
                           render={({ field }) => {
                             const ingName = watch(`ingredients.${index}.name`);
                             const found = allIngredients.find(i => i.name === ingName);
+                            // Las unidades ahora deben ser los objetos completos con 'id', 'name', 'abbreviation'
                             const units = found && found.unit_type_id ? (unitsByType[found.unit_type_id] || []) : [];
 
                             return units.length > 0 ? (
@@ -643,10 +659,12 @@ console.log("--- FIN de recipePayload ---");
                                 id={`ingredient-unit-${index}`}
                                 className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                                 required
+                                onChange={(e) => field.onChange(parseInt(e.target.value, 10))} // Asegurarse de que el valor sea un número (ID)
+                                value={field.value || ""} // Asegura que el valor coincida con el option.value
                               >
                                 <option value="">Selecciona unidad</option>
                                 {units.map(u => (
-                                  <option key={u.id} value={u.id}>
+                                  <option key={u.id} value={u.id}> {/* ¡El valor es el ID de la unidad! */}
                                     {u.name} {u.abbreviation && `(${u.abbreviation})`}
                                   </option>
                                 ))}
@@ -657,7 +675,7 @@ console.log("--- FIN de recipePayload ---");
                                 id={`ingredient-unit-${index}`}
                                 placeholder="Unidad"
                                 className="w-full focus:outline-none"
-                                readOnly
+                                readOnly // Si no hay unidades disponibles, el campo es solo de lectura
                                 required
                               />
                             );
@@ -706,46 +724,49 @@ console.log("--- FIN de recipePayload ---");
                     {/* Área de imagen del paso */}
                     <Controller
                       control={control}
-                      name={`steps.${index}`}
-                      render={({ field }) => (
+                      name={`steps.${index}.image`} // ¡Controlamos directamente el campo 'image' del paso!
+                      render={({ field: imageField }) => ( // Renombramos 'field' a 'imageField' para evitar conflictos
                         <div
                           className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${
-                            field.value?.isDragOver ? "border-accent border-2 bg-accent/5" : ""
+                            watch(`steps.${index}.isDragOver`) ? "border-accent border-2 bg-accent/5" : "" // Usar watch para isDragOver
                           }`}
                           data-testid={`step-image-upload-area-${index}`}
                           onDragOver={e => {
                             e.preventDefault();
                             e.stopPropagation();
-                            field.onChange({ ...field.value, isDragOver: true });
+                            setValue(`steps.${index}.isDragOver`, true); // Actualizar isDragOver
                           }}
                           onDragLeave={e => {
                             e.preventDefault();
                             e.stopPropagation();
-                            field.onChange({ ...field.value, isDragOver: false });
+                            setValue(`steps.${index}.isDragOver`, false); // Actualizar isDragOver
                           }}
                           onDrop={e => {
                             e.preventDefault();
                             e.stopPropagation();
                             const files = e.dataTransfer.files;
-                            let imagePreview = field.value?.imagePreview;
+                            setValue(`steps.${index}.isDragOver`, false); // Resetear isDragOver
+
                             if (files.length > 0) {
                               const file = files[0];
                               if (!validateImageFile(file)) {
-                                field.onChange({ ...field.value, isDragOver: false });
-                                return;
+                                return; // Salir si la validación falla
                               }
-                              if (imagePreview) URL.revokeObjectURL(imagePreview);
+                              // Revocar URL anterior si existe
+                              if (watch(`steps.${index}.imagePreview`)) {
+                                URL.revokeObjectURL(watch(`steps.${index}.imagePreview`));
+                              }
                               const url = URL.createObjectURL(file);
-                              field.onChange({ ...field.value, image: file, imagePreview: url, isDragOver: false });
-                            } else {
-                              field.onChange({ ...field.value, isDragOver: false });
+                              // Actualizar el objeto del paso directamente con la imagen y su vista previa
+                              setValue(`steps.${index}.image`, file);
+                              setValue(`steps.${index}.imagePreview`, url);
                             }
                           }}
                         >
-                          {field.value?.imagePreview ? (
+                          {watch(`steps.${index}.imagePreview`) ? ( // Usar watch para imagePreview
                             <>
                               <img
-                                src={field.value.imagePreview}
+                                src={watch(`steps.${index}.imagePreview`)}
                                 alt={`Imagen paso ${index + 1}`}
                                 className="object-contain w-full h-full"
                                 data-testid={`step-image-preview-${index}`}
@@ -753,8 +774,13 @@ console.log("--- FIN de recipePayload ---");
                               <button
                                 type="button"
                                 onClick={() => {
-                                  if (field.value?.imagePreview) URL.revokeObjectURL(field.value.imagePreview);
-                                  field.onChange({ ...field.value, image: null, imagePreview: null });
+                                  // Revocar la URL al eliminar
+                                  if (watch(`steps.${index}.imagePreview`)) {
+                                    URL.revokeObjectURL(watch(`steps.${index}.imagePreview`));
+                                  }
+                                  // Eliminar imagen y vista previa
+                                  setValue(`steps.${index}.image`, null);
+                                  setValue(`steps.${index}.imagePreview`, null);
                                 }}
                                 className="absolute top-2 right-2 bg-white/80 text-red-600 border border-red-300 rounded-full px-2 py-1 text-xs hover:bg-white"
                                 data-testid={`delete-step-image-${index}`}
@@ -778,14 +804,19 @@ console.log("--- FIN de recipePayload ---");
                                     const file = e.target.files[0];
                                     if (!file) return;
                                     if (!validateImageFile(file)) return;
-                                    if (field.value?.imagePreview) URL.revokeObjectURL(field.value.imagePreview);
+                                    // Revocar URL anterior si existe
+                                    if (watch(`steps.${index}.imagePreview`)) {
+                                        URL.revokeObjectURL(watch(`steps.${index}.imagePreview`));
+                                    }
                                     const url = URL.createObjectURL(file);
-                                    field.onChange({ ...field.value, image: file, imagePreview: url });
+                                    // Actualizar el objeto del paso directamente con la imagen y su vista previa
+                                    setValue(`steps.${index}.image`, file);
+                                    setValue(`steps.${index}.imagePreview`, url);
                                   }}
                                   data-testid={`step-image-input-${index}`}
                                 />
                               </label>
-                              {field.value?.isDragOver && (
+                              {watch(`steps.${index}.isDragOver`) && ( // Usar watch para isDragOver
                                 <p className="text-accent text-sm mt-2">Suelta la imagen aquí</p>
                               )}
                             </>

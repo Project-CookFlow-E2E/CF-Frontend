@@ -1,4 +1,3 @@
-
 import api from "./api";
 import { getUserIdFromToken } from "./authService";
 /**
@@ -15,7 +14,7 @@ import { getUserIdFromToken } from "./authService";
 /**
  * Base URL for recipe API endpoints.
  * Corresponds to `/api/recipes/recipes/` in the backend.
- * 
+ *
  * @type {string}
  */
 const BASE_URL = "/recipes/recipes";
@@ -24,11 +23,11 @@ const BASE_URL = "/recipes/recipes";
  * Service for interacting with recipe API endpoints.
  */
 export const recipeService = {
-    
+
     /**
     * Fetches a list of all recipes.
     * GET /api/recipes/recipes/
-    * 
+    *
     * @returns {Promise<Array<object>>} A promise that resolves with an array of recipe objects.
     * @throws {Error} If the API request fails.
     */
@@ -40,7 +39,7 @@ export const recipeService = {
     /**
     * Fetches the details of a specific recipe by its ID.
     * GET /api/recipes/recipes/<int:pk>/
-    * 
+    *
     * @param {number} recipeId - The ID of the recipe to fetch.
     * @returns {Promise<object>} A promise that resolves with the recipe's data.
     * @throws {Error} If the API request fails (e.g., 404 Not Found).
@@ -92,11 +91,11 @@ export const recipeService = {
     * (e.g., network error, server error) or token doesn't have and user id.
     */
    getRecipeByUserId: async (userId) => {
-    let finalUserId = userId; 
-    
+    let finalUserId = userId;
+
     if (finalUserId === null || typeof finalUserId === 'undefined') {
         try {
-            finalUserId = await getUserIdFromToken(); 
+            finalUserId = await getUserIdFromToken();
         } catch (error) {
             throw new Error("The user id is not delivered from token: " + error.message);
         }
@@ -142,15 +141,23 @@ export const recipeService = {
     * based on the authenticated user making the request, so it should NOT be included in `recipeData`.
     * Also, the `steps` field is read-only on the backend, so it should NOT be included in `recipeData`.
     * POST /api/recipes/recipes/
-    * 
-    * @param {object} recipeData - An object containing the data for the new recipe.
-    * Must include `name` (str), `description` (str), `duration_minutes` (int), `commensals` (int),
-    * and `categories` (array of int IDs).
+    *
+    * @param {FormData} recipeData - A FormData object containing the data for the new recipe,
+    * including text fields and File objects for images.
     * @returns {Promise<object>} A promise that resolves with the newly created recipe object.
     * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
     */
     createRecipe: async (recipeData) => {
-        const response = await api.post(`${BASE_URL}/`, recipeData);
+        // MODIFICADO: Añadir la configuración para asegurar que Axios envíe FormData correctamente.
+        // Si recipeData es un objeto FormData, Axios automáticamente establece el
+        // Content-Type a 'multipart/form-data' si no se especifica.
+        // Si tu instancia 'api' tiene una configuración global que fuerza 'application/json',
+        // podrías necesitar anularla explícitamente aquí.
+        const response = await api.post(`${BASE_URL}/`, recipeData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // Asegura el tipo de contenido correcto para FormData
+            },
+        });
         return response.data;
     },
 
@@ -159,7 +166,7 @@ export const recipeService = {
     * Uses PATCH for partial updates. Requires user authentication and ownership/admin privileges.
     * The `steps` field is read-only on the backend, so it should NOT be included in `recipeData`.
     * PATCH /api/recipes/recipes/<int:pk>/
-    * 
+    *
     * @param {number} recipeId - The ID of the recipe to update.
     * @param {object} recipeData - An object containing the recipe data to update.
     * Can include `name` (str), `description` (str), `duration_minutes` (int), `commensals` (int),
@@ -168,17 +175,19 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
     */
     updateRecipe: async (recipeId, recipeData) => {
-        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId < 1) {
+        if (typeof recipeId !== 'number' || isNaN(recipeId) || recipeId < 1) { // Corregido: usaba ingredientId en lugar de recipeId
             return Promise.reject(new Error("recipe id not valid."));
         };
+        // Para actualizaciones, si también se envían archivos, también necesitarías un FormData
+        // y ajustar las cabeceras aquí de manera similar.
         const response = await api.patch(`${BASE_URL}/${recipeId}/`, recipeData);
-        return response.data; 
+        return response.data;
     },
 
     /**
     * Deletes a recipe by its ID. Requires user authentication and ownership/admin privileges.
     * DELETE /api/recipes/recipes/<int:pk>/
-    * 
+    *
     * @param {number} recipeId - The ID of the recipe to delete.
     * @returns {Promise<boolean>} A promise that resolves with `true` if the recipe is successfully deleted.
     * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or recipe id is not valid.
