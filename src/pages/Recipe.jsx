@@ -97,7 +97,7 @@ const Recipe = () => {
           id: rawRecipeData.id,
           titulo: rawRecipeData.name,
           tiempo: rawRecipeData.duration_minutes,
-          imagen: mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url,
+          imagen: rawRecipeData.user.id?mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url:"",
           ingredientes: ingredientsWithDetails,
           pasos: rawRecipeData.steps || [],
         });
