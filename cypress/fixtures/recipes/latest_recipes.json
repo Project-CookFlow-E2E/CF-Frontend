@@ -1,0 +1,55 @@
+{
+  "count": 6,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "name": "Mushroom Risotto",
+      "category": "Vegetariana",
+      "time": 45,
+      "image": "https://example.com/images/mushroom-risotto.jpg",
+      "isFavorite": false
+    },
+    {
+      "id": 2,
+      "name": "Chicken Curry",
+      "category": "Asiática",
+      "time": 60,
+      "image": "https://example.com/images/chicken-curry.jpg",
+      "isFavorite": false
+    },
+    {
+      "id": 3,
+      "name": "Homemade Pizza",
+      "category": "Italiana",
+      "time": 30,
+      "image": "https://example.com/images/homemade-pizza.jpg",
+      "isFavorite": true
+    },
+    {
+      "id": 4,
+      "name": "Caesar Salad",
+      "category": "Ensaladas",
+      "time": 15,
+      "image": "https://example.com/images/caesar-salad.jpg",
+      "isFavorite": false
+    },
+    {
+      "id": 5,
+      "name": "Beef Stew",
+      "category": "Tradicional",
+      "time": 120,
+      "image": "https://example.com/images/beef-stew.jpg",
+      "isFavorite": false
+    },
+    {
+      "id": 6,
+      "name": "Chocolate Lava Cake",
+      "category": "Postres",
+      "time": 25,
+      "image": "https://example.com/images/lava-cake.jpg",
+      "isFavorite": false
+    }
+  ]
+}
