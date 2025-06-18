@@ -24,6 +24,9 @@ import TimerBadge from "./TimerBadge";
  *
  * @modifiedby Ana Castro
  * @modified Adaptado para que el componente Card pueda recibir props y así no tener que usar RecipeCard.jsx, cambios de estilos.
+ *
+ * @modifiedby Priya
+ * @modified Added data-testid to the favorite button for Cypress testing.
  */
 
 const Card = ({
@@ -66,7 +69,7 @@ const Card = ({
           </h3>
           {onToggleFavorite && (
             <Button
-                
+              data-testid={`favorite-button-${id}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleFavorite(id);
