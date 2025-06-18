@@ -11,6 +11,7 @@ import { Image, Plus } from "lucide-react";
 import { Button, Input } from "../components/";
 import { recipeService } from "../services/recipeService";
 import { categoryService } from "../services/categoryService";
+import { useNavigate } from "react-router-dom";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
@@ -32,6 +33,7 @@ const AddRecipe = () => {
   const [mensaje, setMensaje] = useState("");
   const [recipeId, setRecipeId] = useState(null);
   const dropdownRef = useRef(null);
+  
 
   const {
     control,
@@ -235,6 +237,7 @@ const AddRecipe = () => {
     }
   };
 
+  const navigate = useNavigate(); 
   // Validación de campos numéricos (no negativos ni cero)
   const validatePositive = (value) => {
     if (value === "" || value === null || value === undefined) return "Campo obligatorio";
@@ -250,6 +253,7 @@ const AddRecipe = () => {
     if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
     return true;
   };
+  
 
   const onSubmit = async (data) => {
     // Validación manual extra para ingredientes
@@ -369,7 +373,7 @@ console.log("--- FIN de recipePayload ---");
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
-        <button className="mb-4" data-testid="back-button">
+        <button className="mb-4" data-testid="back-button"  onClick={() => navigate("/")}>
           <span className="text-2xl">←</span>
         </button>
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
