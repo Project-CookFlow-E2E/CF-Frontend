@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Card.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Card.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Button from "./Button";
+import PropTypes from "prop-types";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import TimerBadge from "./TimerBadge";
+
+/**
+ * Card muestra una tarjeta visual con imagen, título, categoría, tiempo y botón de favorito.
+ *
+ * Ideal para listas de recetas u otros elementos seleccionables.
+ *
+ * @component
+ * @param {object} props - Props del componente.
+ * @param {number|string} props.id - ID único del ítem (usado para manejar favoritos).
+ * @param {string} props.image - URL de la imagen a mostrar.
+ * @param {string} props.name - Nombre o título del ítem.
+ * @param {string} props.category - Categoría del ítem (por ejemplo: desayuno, almuerzo...).
+ * @param {string} props.time - Tiempo estimado asociado (ej: "20 m").
+ * @param {boolean} props.isFavorite - Indica si el ítem está marcado como favorito.
+ * @param {Function} props.onToggleFavorite - Función para manejar el cambio de estado de favorito.
+ * @returns {JSX.Element} Tarjeta visual con contenido y acción de favorito.
+ *
+ * @modifiedby Ángel Aragón
+ * @modified Sustituido el componente de FavoriteButton por el componente reutilizable Button e implementado ReactIcons para los íconos de favorito.
+ *
+ * @modifiedby Ana Castro
+ * @modified Adaptado para que el componente Card pueda recibir props y así no tener que usar RecipeCard.jsx, cambios de estilos.
+ */
+
+const Card = ({
+  id,
+  image,
+  name,
+  category,
+  time,
+  isFavorite,
+  onClick,
+  onToggleFavorite,
+  className = "",
+  imageClassName = "",
+  children,
+}) => {
+  return (
+    &lt;div
+      onClick={onClick}
+      className={`cursor-pointer w-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 ${className}`}
+      data-testid="main-card-container"
+    >
+      &lt;div
+        className={`relative h-40 bg-gray-200 flex items-center justify-center ${imageClassName}`}
+        data-testid="card-image"
+      >
+        {image ? (
+          &lt;img src={image} alt={name} className="w-full h-full object-cover" />
+        ) : (
+          &lt;span className="text-gray-500">No image&lt;/span>
+        )}
+      &lt;/div>
+
+      &lt;div className="p-4 bg-secondary flex flex-col justify-between min-h-[140px] text-left">
+        &lt;div className="flex justify-between items-start mb-1">
+          &lt;h3
+            className="text-lg font-bold text-gray-900 pr-2"
+            data-testid="card-title"
+          >
+            {name || "Swamp Soup"}
+          &lt;/h3>
+          {onToggleFavorite &amp;&amp; (
+            &lt;Button
+                
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(id);
+              }}
+              aria-label={
+                isFavorite ? "Quitar de Favoritos" : "Agregar a Favoritos"
+              }
+              className={`${"hover:bg-transparent bg-transparent mt-1"}`}
+            >
+              {isFavorite ? (
+                &lt;BsBookmarkFill size={20} color="#F37A7E" />
+              ) : (
+                &lt;BsBookmark size={20} color="#F37A7E" />
+              )}
+            &lt;/Button>
+          )}
+        &lt;/div>
+
+        &lt;div className="flex justify-between items-center">
+          &lt;div className="flex flex-row gap-2 mt-1">
+  {Array.isArray(category) ? (
+    category.map((cat, idx) => (
+      &lt;span
+        key={idx}
+        className="ring ring-accent text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded-full"
+      >
+        {cat}
+      &lt;/span>
+    ))
+  ) : (
+    &lt;span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      {category || "LUNCH"}
+    &lt;/span>
+  )}
+&lt;/div>
+
+          &lt;TimerBadge minutes={time} color="text-gray-600" />
+        &lt;/div>
+        {children}
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+Card.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  image: PropTypes.string,
+  name: PropTypes.string,
+  category: PropTypes.string,
+  time: PropTypes.string,
+  isFavorite: PropTypes.bool,
+  onToggleFavorite: PropTypes.func,
+  className: PropTypes.string,
+  imageClassName: PropTypes.string,
+  children: PropTypes.node,
+  onClick: PropTypes.func,
+};
+
+Card.defaultProps = {
+  onClick: () => {},
+};
+
+export default Card;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

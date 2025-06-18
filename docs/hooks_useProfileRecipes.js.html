@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hooks/useProfileRecipes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hooks/useProfileRecipes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file useProfileRecipes.js
+ * @description Hook personalizado para gestionar las recetas en el perfil del usuario.
+ * Maneja la alternancia entre recetas guardadas y creadas, la paginación y el estado de favoritos.
+ *
+ * @function useProfileRecipes
+ * @returns {Object} Objeto con:
+ *  - `activeTab` {string}: Pestaña activa actual ("saved" o "created").
+ *  - `setActiveTab` {Function}: Cambia la pestaña activa.
+ *  - `currentPage` {number}: Página actual en la paginación.
+ *  - `setCurrentPage` {Function}: Cambia la página actual.
+ *  - `favorites` {Array&lt;string>}: IDs de recetas favoritas del usuario.
+ *  - `toggleFavorite` {Function}: Marca o desmarca una receta como favorita.
+ *  - `createdRecipesCount` {number}: Total de recetas creadas por el usuario.
+ *  - `totalPages` {number}: Total de páginas para la paginación.
+ *  - `filteredRecipes` {Array&lt;object>}: Recetas filtradas por la pestaña activa.
+ *  - `paginatedRecipes` {Array&lt;object>}: Recetas mostradas en la página actual. *
+ * 
+ * @author Ana Castro basado en el código de Yuliia Martynovych en Profile.jsx.
+ */
+import { useState, useEffect, useMemo } from "react";
+import { recipeService } from "../services/recipeService";
+import useFavorites from "./useFavorites";
+
+export default function useProfileRecipes() {
+    const [activeTab, setActiveTab] = useState("saved");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [createdRecipes, setCreatedRecipes] = useState([]);
+    const { favorites, toggleFavorite } = useFavorites();
+    const recipesPerPage = 8;
+
+    // Cargar recetas creadas por el usuario desde la base de datos
+    useEffect(() => {
+        const fetchCreatedRecipes = async () => {
+            try {
+                const recipes = await recipeService.getRecipeByUserId();
+                setCreatedRecipes(recipes);
+            } catch (error) {
+                setCreatedRecipes([]);
+            }
+        };
+        fetchCreatedRecipes();
+    }, []);
+
+    const filteredRecipes = useMemo(() => {
+        if (activeTab === "saved") {
+            return []; // Las favoritas se gestionan en el otro hook
+        }
+        return createdRecipes;
+    }, [activeTab, createdRecipes]);
+
+    const paginatedRecipes = useMemo(() => {
+        const start = (currentPage - 1) * recipesPerPage;
+        return filteredRecipes.slice(start, start + recipesPerPage);
+    }, [filteredRecipes, currentPage]);
+
+    const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeTab]);
+
+    return {
+        activeTab,
+        setActiveTab,
+        currentPage,
+        setCurrentPage,
+        favorites,
+        toggleFavorite,
+        totalPages,
+        filteredRecipes,
+        paginatedRecipes,
+        createdRecipesCount: createdRecipes.length,
+
+    };
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

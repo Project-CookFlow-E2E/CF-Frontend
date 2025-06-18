@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/api.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/api.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * api.js
+ *
+ * Axios instance configured with baseURL from environment.
+ *
+ * - Uses the VITE_API_URL environment variable (or an empty string by default).
+ * - Serves as the centralized instance for all HTTP requests in the app.
+ *
+ * Example usage:
+ * import api from './api';
+ * api.get('/path');
+ *
+ * @module api
+ * @requires axios
+ * @author Nico
+ * @modified by Saturnino Méndez
+ */
+import axios from "axios";
+import { getToken, refreshAuthToken, isTokenValid, logout } from "../services/authService"
+
+/**
+ * The base URL for the API, obtained from environment variables.
+ * 
+ * @type {string}
+ */
+const apiUrl = import.meta.env.VITE_API_URL || "";
+
+/**
+ * Axios instance configured for API requests, handling authentication and token refreshing.
+ * 
+ * @type {import('axios').AxiosInstance}
+ */
+const api = axios.create({
+  baseURL: apiUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    }
+    else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+}
+
+/**
+ * Request Interceptor:
+ * Automatically adds the JWT Access Token to the Authorization header of outgoing requests.
+ */
+api.interceptors.request.use(
+  (config) => {
+    // Rutas que NO deben llevar un Authorization header (login, refresh)
+    const excludeAuthHeaderUrls = [
+      `${apiUrl}/token/`,
+      `/token/`,
+      `${apiUrl}/token/refresh/`,
+      `/token/refresh/`,
+    ];
+
+    const isAuthHeaderExcluded = excludeAuthHeaderUrls.some(url => config.url.includes(url));
+
+    // Si la URL no está excluida, intenta adjuntar el token
+    if (!isAuthHeaderExcluded) {
+      const token = getToken();
+      // Solo adjunta el token si existe y es válido (no ha expirado)
+      if (token &amp;&amp; isTokenValid()) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+/**
+ * Response Interceptor:
+ * Handles responses, specifically 401 Unauthorized errors for token refreshing and request retries.
+ * Logs out the user if token refresh fails.
+ */
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    const status = error.response ? error.response.status : null;
+
+    const excludeUrls = [
+      `${apiUrl}/token`,
+      `/token`,
+      `${apiUrl}/token/refresh`,
+      `/token/refresh`,
+    ];
+    const isExcludedUrl = excludeUrls.some(url => originalRequest.url.includes(url));
+    
+    if (status === 401 &amp;&amp; !isExcludedUrl &amp;&amp; !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          console.warn("Access token expired or unauthorized. Attempting to refresh token...");
+          const newAccessToken = await refreshAuthToken(); 
+          
+          if (newAccessToken === false){
+            console.error("Refresh token not available (refreshAuthToken returned false). Logging out.");
+            logout();
+            isRefreshing = false;
+            processQueue(new Error("No refresh token available."), null);
+            return Promise.reject(new Error("No refresh token available."));
+          };
+
+          isRefreshing = false; // Unlocks the refresh
+          processQueue(null, newAccessToken); 
+
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return api(originalRequest); // Resends the original
+
+        } 
+        catch (refreshError) {
+          isRefreshing = false;
+          processQueue(refreshError, null); 
+
+          console.error("Failed to refresh token. Logging out.", refreshError);
+          logout(); // Deletes stored tokens
+          return Promise.reject(refreshError); // Rejects original promse with refreshError
+        };
+      };
+
+      // If a refresh request is already in progress, the current request is added to the queue.
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then(token => {
+        // When the refresh is complete, this promise will be called with the new token
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api(originalRequest);
+      }).catch(err => {
+        // Promise reject if refresh fails
+        return Promise.reject(err);
+      });
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

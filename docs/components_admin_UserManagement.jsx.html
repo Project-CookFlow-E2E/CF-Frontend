@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/admin/UserManagement.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/admin/UserManagement.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file UserManagement.jsx
+ * @description
+ * Componente de administración de usuarios para el panel de administración.
+ * Permite visualizar, buscar, editar y gestionar usuarios.
+ *
+ * Funcionalidades principales:
+ * - Listar todos los usuarios existentes (conectados al backend con userService.getAllUsersAdmin).
+ * - Buscar usuarios por nombre de usuario (username) mediante un input de búsqueda (consulta siempre al backend con debounce y filtra por username, no por name).
+ * - Editar el nombre, el rol y la contraseña de un usuario mediante un modal (la contraseña solo se actualiza si se rellena el campo).
+ * - Muestra un mensaje de éxito o error tras editar un usuario (incluido el cambio de contraseña).
+ * - Botón para añadir nuevos usuarios (funcionalidad pendiente de implementar).
+ * - Acciones de edición y borrado para cada usuario (no disponibles para usuarios admin/staff).
+ * - Paginación: muestra 5 usuarios por página, con navegación entre páginas.
+ *
+ * Estados:
+ * - users: array de usuarios obtenidos del backend (ya filtrados por username si hay búsqueda).
+ * - loading: booleano para mostrar el estado de carga.
+ * - editModal: controla la visibilidad y datos del modal de edición.
+ * - editForm: almacena los valores del formulario de edición (incluye password).
+ * - editMsg: mensaje de éxito tras editar usuario.
+ * - editError: mensaje de error tras editar usuario.
+ * - page: página actual de la paginación.
+ * - search: término de búsqueda para filtrar usuarios por nombre de usuario.
+ *
+ * Servicios utilizados:
+ * - userService.getAllUsersAdmin(): obtiene todos los usuarios.
+ * - userService.searchUsersByUsernameAdmin(username): busca usuarios por nombre de usuario en el backend.
+ * - userService.updateUserAdmin(id, data): actualiza un usuario (incluida la contraseña si se indica).
+ *
+ * Uso:
+ * Este componente está pensado para ser usado por administradores.
+ * Permite buscar y modificar los campos "Nombre", "Rol" y "Contraseña" de cada usuario,
+ * navegar entre páginas y gestionar la información de usuarios de forma sencilla.
+ *
+ * Cambios recientes:
+ * - La búsqueda de usuarios consulta siempre al backend (con debounce) y filtra solo por username.
+ * - Se eliminó el filtrado local por name.
+ * - Se añadió un filtrado extra por username en frontend para asegurar coincidencia si el backend no filtra correctamente.
+ * - Ahora el administrador puede cambiar la contraseña de los usuarios desde el modal de edición.
+ * - Se muestra un mensaje de éxito o error tras editar un usuario.
+ *
+ * @author
+ * Lorena Martínez, Noemi Casaprima
+ */
+
+import { useState, useEffect, useRef } from "react";
+import { userService } from "../../services/userService";
+
+const PAGE_SIZE = 5;
+
+const UserManagement = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [editModal, setEditModal] = useState({ open: false, user: null });
+  const [editForm, setEditForm] = useState({ name: "", is_staff: false, password: "" });
+  const [editMsg, setEditMsg] = useState("");
+  const [editError, setEditError] = useState("");
+
+  const [viewModal, setViewModal] = useState({ open: false, user: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, user: null });
+  const [addModal, setAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", surname: "", second_surname: "", username: "", email: "", password: "", is_staff: false });
+
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const searchTimeout = useRef();
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setLoading(true);
+      userService
+        .getAllUsersAdmin()
+        .then((data) => {
+          setUsers(data);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+      return;
+    }
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        // Filtra SOLO por username exacto o parcial (case-insensitive) en el backend
+        const data = await userService.searchUsersByUsernameAdmin(search);
+        // Si el backend no filtra correctamente, filtra aquí SOLO por username
+        const filtered = data.filter((user) =>
+          user.username &amp;&amp; user.username.toLowerCase().includes(search.toLowerCase())
+        );
+        setUsers(filtered);
+        setPage(1);
+      } catch (err) {
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 350);
+    return () => clearTimeout(searchTimeout.current);
+  }, [search]);
+
+  const openEditModal = (user) => {
+    setEditForm({
+      name: user.name || "",
+      is_staff: !!user.is_staff,
+      password: ""
+    });
+    setEditModal({ open: true, user });
+  };
+
+  const closeEditModal = () => setEditModal({ open: false, user: null });
+
+  const openViewModal = (user) => {
+    setViewModal({ open: true, user });
+  };
+
+  const closeViewModal = () => setViewModal({ open: false, user: null });
+
+  const openDeleteModal = (user) => {
+    setDeleteModal({ open: true, user });
+  };
+
+  const closeDeleteModal = () => setDeleteModal({ open: false, user: null });
+
+  const handleEditChange = (e) => {
+    const { name, value, type } = e.target;
+    setEditForm({
+      ...editForm,
+      [name]: type === "checkbox" ? e.target.checked : value,
+    });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditMsg("");
+    setEditError("");
+    const id = editModal.user.id;
+    const updatedData = {
+      name: editForm.name,
+      is_staff: editForm.is_staff,
+    };
+    if (editForm.password) {
+      updatedData.password = editForm.password;
+    }
+    try {
+      await userService.updateUserAdmin(id, updatedData);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, ...updatedData } : u))
+      );
+      setEditMsg("Usuario actualizado correctamente.");
+      setTimeout(() => {
+        setEditMsg("");
+        closeEditModal();
+      }, 1500);
+    } catch (err) {
+      let msg = "Error al actualizar usuario";
+      if (err &amp;&amp; err.response &amp;&amp; err.response.data) {
+        if (typeof err.response.data === "string") msg += ": " + err.response.data;
+        else if (typeof err.response.data.detail === "string") msg += ": " + err.response.data.detail;
+        else msg += ": " + JSON.stringify(err.response.data);
+      }
+      setEditError(msg);
+      setTimeout(() => setEditError(""), 3500);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.user.id;
+    await userService.deleteUserAdmin(id);
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    closeDeleteModal();
+  };
+
+  // Elimina el filtrado local por name, solo usa los resultados del backend (ya filtrados por username)
+  // const filteredUsers = users.filter((user) =>
+  //   user.name.toLowerCase().includes(search.toLowerCase())
+  // );
+  // const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
+  // const paginatedUsers = filteredUsers.slice(
+  //   (page - 1) * PAGE_SIZE,
+  //   page * PAGE_SIZE
+  // );
+  const totalPages = Math.ceil(users.length / PAGE_SIZE);
+  const paginatedUsers = users.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
+  const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
+
+  return (
+    &lt;div className="bg-white p-6 rounded-lg shadow-md">
+      &lt;div className="flex justify-between items-center mb-4">
+        &lt;h2 className="text-2xl font-bold text-gray-800">
+          Administrador de usuarios
+        &lt;/h2>
+        &lt;button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center" onClick={() => setAddModal(true)}>
+          &lt;svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            &lt;path
+              fillRule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clipRule="evenodd"
+            />
+          &lt;/svg>
+          Añadir usuario
+        &lt;/button>
+      &lt;/div>
+      &lt;div className="mb-4">
+        &lt;input
+          type="text"
+          placeholder="Buscar usuarios por nombre de usuario..."
+          className="border px-3 py-2 rounded w-full max-w-xs"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
+      &lt;/div>
+
+      &lt;div className="overflow-x-auto">
+        &lt;table className="min-w-full bg-white border border-gray-200">
+          &lt;thead>
+            &lt;tr>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Nombre
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Nombre de usuario
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Email
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Rol
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Fecha de creación
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Fecha de actualización
+              &lt;/th>
+              &lt;th className="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                Acciones
+              &lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {loading ? (
+              &lt;tr>
+                &lt;td colSpan="8" className="text-center py-4">
+                  Cargando...
+                &lt;/td>
+              &lt;/tr>
+            ) : paginatedUsers.length === 0 ? (
+              &lt;tr>
+                &lt;td colSpan="8" className="text-center py-4">
+                  No se encontraron usuarios.
+                &lt;/td>
+              &lt;/tr>
+            ) : (
+              paginatedUsers.map((user) => (
+                &lt;tr key={user.id}>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {user.name}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {user.username}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {user.email}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm">
+                    {user.is_staff ? (
+                      &lt;span className="bg-pink-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                        Admin
+                      &lt;/span>
+                    ) : (
+                      &lt;span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">
+                        Usuario
+                      &lt;/span>
+                    )}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {user.created_at}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm text-gray-700">
+                    {user.updated_at}
+                  &lt;/td>
+                  &lt;td className="py-2 px-4 border-b text-sm">
+                    {/* Solo mostrar acciones si NO es admin ni staff */}
+                    {!(user.is_staff || user.is_admin) &amp;&amp; (
+                      &lt;>
+                        &lt;button
+                          className="text-blue-600 hover:text-blue-900 mr-2"
+                          onClick={() => openViewModal(user)}
+                        >
+                          Ver
+                        &lt;/button>
+                        &lt;button
+                          className="text-yellow-600 hover:text-yellow-900 mr-2"
+                          onClick={() => openEditModal(user)}
+                        >
+                          Editar
+                        &lt;/button>
+                        &lt;button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => openDeleteModal(user)}
+                        >
+                          Borrar
+                        &lt;/button>
+                      &lt;/>
+                    )}
+                  &lt;/td>
+                &lt;/tr>
+              ))
+            )}
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+      &lt;div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+        &lt;button
+          className="px-3 py-1 border rounded-md mr-1"
+          onClick={handlePrev}
+          disabled={page === 1}
+        >
+          Anterior
+        &lt;/button>
+        &lt;span>
+          Página {page} de {totalPages}
+        &lt;/span>
+        &lt;button
+          className="px-3 py-1 border rounded-md"
+          onClick={handleNext}
+          disabled={page === totalPages || totalPages === 0}
+        >
+          Siguiente
+        &lt;/button>
+      &lt;/div>
+
+      {editModal.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: "rgba(0,0,0,0.1)" }} onClick={closeEditModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Editar Usuario&lt;/h3>
+            {editMsg &amp;&amp; &lt;div className="text-green-600 text-sm mb-2">{editMsg}&lt;/div>}
+            {editError &amp;&amp; &lt;div className="text-red-600 text-sm mb-2">{editError}&lt;/div>}
+            &lt;form onSubmit={handleEditSubmit} className="space-y-4">
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre&lt;/label>
+                &lt;input
+                  type="text"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Nombre"
+                />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Rol&lt;/label>
+                &lt;select
+                  name="is_staff"
+                  value={editForm.is_staff ? "admin" : "user"}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      is_staff: e.target.value === "admin",
+                    })
+                  }
+                  className="w-full border p-2 rounded"
+                >
+                  &lt;option value="user">Usuario&lt;/option>
+                  &lt;option value="admin">Admin&lt;/option>
+                &lt;/select>
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nueva contraseña&lt;/label>
+                &lt;input
+                  type="password"
+                  name="password"
+                  value={editForm.password}
+                  onChange={handleEditChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Dejar en blanco para no cambiar"
+                  autoComplete="new-password"
+                />
+              &lt;/div>
+              &lt;div className="flex justify-end space-x-2">
+                &lt;button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                &lt;/button>
+                &lt;button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Guardar
+                &lt;/button>
+              &lt;/div>
+            &lt;/form>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {/* Modal de VER usuario */}
+      {viewModal?.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: "rgba(0,0,0,0.1)" }} onClick={closeViewModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Detalles del Usuario&lt;/h3>
+            &lt;div className="space-y-2">
+              &lt;div>&lt;span className="font-semibold">Nombre:&lt;/span> {viewModal.user?.name}&lt;/div>
+              &lt;div>&lt;span className="font-semibold">Nombre de usuario:&lt;/span> {viewModal.user?.username}&lt;/div>
+              &lt;div>&lt;span className="font-semibold">Email:&lt;/span> {viewModal.user?.email}&lt;/div>
+              &lt;div>&lt;span className="font-semibold">Rol:&lt;/span> {viewModal.user?.is_staff ? 'Admin' : 'Usuario'}&lt;/div>
+              &lt;div>&lt;span className="font-semibold">Creado:&lt;/span> {viewModal.user?.created_at}&lt;/div>
+              &lt;div>&lt;span className="font-semibold">Actualizado:&lt;/span> {viewModal.user?.updated_at}&lt;/div>
+            &lt;/div>
+            &lt;div className="flex justify-end mt-4">
+              &lt;button onClick={closeViewModal} className="bg-gray-300 px-4 py-2 rounded">Cerrar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {/* Modal de CONFIRMACIÓN de borrado */}
+      {deleteModal?.open &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: "rgba(0,0,0,0.1)" }} onClick={closeDeleteModal} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">¿Seguro que quieres borrar este usuario?&lt;/h3>
+            &lt;div className="mb-4">Esta acción no se puede deshacer.&lt;/div>
+            &lt;div className="flex justify-end space-x-2">
+              &lt;button onClick={closeDeleteModal} className="bg-gray-300 px-4 py-2 rounded">Cancelar&lt;/button>
+              &lt;button onClick={handleDeleteConfirm} className="bg-red-500 text-white px-4 py-2 rounded">Borrar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      {/* Modal de AÑADIR usuario */}
+      {addModal &amp;&amp; (
+        &lt;div className="fixed inset-0 flex items-center justify-center z-50">
+          &lt;div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={() => setAddModal(false)} />
+          &lt;div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            &lt;h3 className="text-xl font-bold mb-4">Añadir Usuario&lt;/h3>
+            &lt;form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const newUser = await userService.createUserAdmin(addForm);
+                setUsers((prev) => [newUser, ...prev]);
+                setAddModal(false);
+                setAddForm({ name: "", surname: "", second_surname: "", username: "", email: "", password: "", is_staff: false });
+              } catch (err) {
+                let msg = "Error al crear usuario";
+                if (err &amp;&amp; err.response &amp;&amp; err.response.data) {
+                  if (typeof err.response.data === 'string') msg += ": " + err.response.data;
+                  else if (typeof err.response.data.detail === 'string') msg += ": " + err.response.data.detail;
+                  else msg += ": " + JSON.stringify(err.response.data);
+                }
+                alert(msg);
+              }
+            }} className="space-y-4">
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre&lt;/label>
+                &lt;input type="text" name="name" value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Primer apellido&lt;/label>
+                &lt;input type="text" name="surname" value={addForm.surname} onChange={e => setAddForm(f => ({ ...f, surname: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Segundo apellido&lt;/label>
+                &lt;input type="text" name="second_surname" value={addForm.second_surname} onChange={e => setAddForm(f => ({ ...f, second_surname: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Nombre de usuario&lt;/label>
+                &lt;input type="text" name="username" value={addForm.username} onChange={e => setAddForm(f => ({ ...f, username: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Email&lt;/label>
+                &lt;input type="email" name="email" value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Contraseña&lt;/label>
+                &lt;input type="password" name="password" value={addForm.password} onChange={e => setAddForm(f => ({ ...f, password: e.target.value }))} className="w-full border p-2 rounded" required />
+              &lt;/div>
+              &lt;div>
+                &lt;label className="block text-sm font-medium mb-1">Rol&lt;/label>
+                &lt;select name="is_staff" value={addForm.is_staff ? "admin" : "user"} onChange={e => setAddForm(f => ({ ...f, is_staff: e.target.value === "admin" }))} className="w-full border p-2 rounded">
+                  &lt;option value="user">Usuario&lt;/option>
+                  &lt;option value="admin">Admin&lt;/option>
+                &lt;/select>
+              &lt;/div>
+              &lt;div className="flex justify-end space-x-2">
+                &lt;button type="button" onClick={() => setAddModal(false)} className="bg-gray-300 px-4 py-2 rounded">Cancelar&lt;/button>
+                &lt;button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Crear&lt;/button>
+              &lt;/div>
+            &lt;/form>
+          &lt;/div>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};
+
+export default UserManagement;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

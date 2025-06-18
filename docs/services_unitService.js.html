@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/unitService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/unitService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import api from './api';
+/**
+ * src/services/unitService.js
+ *
+ * Provides service methods for interacting with Unit API endpoints.
+ * This service allows public access for reading units and administrator access for CRUD operations.
+ *
+ * @module unitService
+ * @requires ./api - The configured Axios instance for making API requests.
+ * @author Saturnino Mendez
+ */
+
+/**
+ * Base URL for Unit API endpoints.
+ * Corresponds to `/api/measurements/units/` in the backend router.
+ * 
+ * @type {string}
+ */
+const BASE_URL = "/measurements/units";
+
+/**
+ * Service for interacting with Unit API endpoints.
+ */
+export const unitService = {
+
+     /**
+    * Fetches a list of all measurement units.
+    * GET /api/measurements/units/
+    * 
+    * @returns {Promise&lt;Array&lt;object>>} A promise that resolves with an array of Unit objects.
+    * @throws {Error} If the API request fails.
+    */
+    getAllUnits: async () => {
+        const response = await api.get(`${BASE_URL}/`);
+        return response.data;
+    },
+
+    /**
+    * Fetches the details of a specific measurement unit by its ID.
+    * GET /api/measurements/units/&lt;int:pk>/
+    * 
+    * @param {number} unitId - The ID of the unit to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the Unit's data.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unit id is not valid.
+    */
+    getUnitById: async (unitId) => {
+        if (typeof unitId !== 'number' || isNaN(unitId) || unitId &lt; 1) {
+            return Promise.reject(new Error("unit id not valid."));
+        };
+        const response = await api.get(`${BASE_URL}/${unitId}/`);
+        return response.data;
+    },
+
+    /**
+    * Fetches the details of all units by its unit_type_id.
+    * GET /api/measurements/units/&lt;int:pk>/
+    * 
+    * @param {number} unitTypeId - The ID of the unit_type_id to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the Unit's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found) or unit_type id is not valid.
+    */
+    getUnitByUnitTypeId: async (unitTypeId) => {
+        if (typeof unitTypeId !== 'number' || isNaN(unitTypeId) || unitTypeId &lt; 1) {
+            return Promise.reject(new Error("unit_type_id not valid."));
+        }
+        const response =  await api.get(`${BASE_URL}?unit_type=${unitTypeId}`);
+        return response.data;
+    },
+
+    // --- Admin-specific methods ---
+
+    /**
+    * Creates a new measurement unit (for administrators).
+    * POST /api/measurements/units/
+    * 
+    * @param {object} unitData - An object containing the data for the new unit.
+    * Expected fields for Unit: `name` (str), `abbreviation` (str), `unit_type` (int ID of UnitType).
+    * @returns {Promise&lt;object>} A promise that resolves with the newly created Unit object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 403 Forbidden for non-admins, 401 Unauthorized if not logged in).
+    */
+    createUnit: async (unitData) => {
+        const response = await api.post(`${BASE_URL}/`, unitData);
+        return response.data;
+    },
+
+    /**
+    * Updates an existing measurement unit by its ID (for administrators).
+    * Uses PATCH for partial updates.
+    * PATCH /api/measurements/units/&lt;int:pk>/
+    * 
+    * @param {number} unitId - The ID of the unit to update.
+    * @param {object} unitData - An object containing the data to update.
+    * Can include `name` (str), `abbreviation` (str), `unit_type` (int ID).
+    * @returns {Promise&lt;object>} A promise that resolves with the updated Unit object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unitId is not valid.
+    */
+    updateUnit: async (unitId, unitData) => {
+        if (typeof unitId !== 'number' || isNaN(unitId) || unitId &lt; 1) {
+            return Promise.reject(new Error("unit id not valid."));
+        };
+        const response = await api.put(`${BASE_URL}/${unitId}/`, unitData);
+        return response.data;
+    },
+
+    /**
+    * Deletes a measurement unit by its ID (for administrators).
+    * DELETE /api/measurements/units/&lt;int:pk>/
+    * @param {number} unitId - The ID of the unit to delete.
+    * @returns {Promise&lt;boolean>} A promise that resolves with `true` if the unit is successfully deleted.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or unit id is not valid.
+    */
+    deleteUnit: async (unitId) => {
+        if (typeof unitId !== 'number' || isNaN(unitId) || unitId &lt; 1) {
+            return Promise.reject(new Error("unit id not valid."));
+        };
+        await api.delete(`${BASE_URL}/${unitId}/`);
+        return true;
+    }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

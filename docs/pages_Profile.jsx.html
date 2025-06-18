@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/Profile.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/Profile.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Profile.jsx
+ * @description Página de perfil de usuario que muestra recetas guardadas (favoritas) y recetas creadas por el usuario.
+ * Incluye paginación, navegación por pestañas y control de favoritos almacenados en localStorage.
+ *
+ * Funcionalidades:
+ * - Alternancia entre recetas guardadas y creadas por el usuario.
+ * - Visualización paginada de recetas (8 por página).
+ * - Posibilidad de marcar/desmarcar recetas como favoritas.
+ * - Muestra información del usuario con nombre y descripción.
+ * - Subir o actualizar la imagen de perfil del usuario.
+ * - Eliminar la imagen de perfil del usuario.
+ * - Editar la biografía del usuario autenticado.
+ * - Borrar la biografía del usuario.
+ *
+ * Métodos:
+ * - updateProfileImage(imageFile): Sube o actualiza la imagen de perfil del usuario autenticado.
+ * - deleteProfileImage(): Elimina la imagen de perfil del usuario autenticado.
+ * - updateBiography(bio): Actualiza la biografía del usuario autenticado.
+ * - deleteBiography(): Borra la biografía del usuario autenticado.
+ *
+ * Componentes utilizados:
+ * - Card: Vista individual de receta con botón de favorito.
+ * - Pagination: Control de cambio de página.
+ * - useProfileRecipes: Hook para gestionar lógica de perfil y recetas.
+ * - useFavorites: Hook para gestionar favoritos del usuario.
+ *
+ * @module pages/Profile
+ * @modifiedby Ana Castro
+ * @modified Adaptación del componente Card.jsx para usarlo directamente, gestión de favoritos y recetas propias a través del hook useProfileRecipes.
+ * @modifiedby Ángel Aragón
+ * @modified Agregado cursor-pointer a los botones de las pestañas.
+ * @modifiedby Lorena Martínez
+ * @modified Añadida petición al backend para obtener información del usuario autenticado, funcionalidad de modificar y borrar imagen y biografía del usuario y funcionalidad de edición de biografía del usuario .
+ * @modifiedby Saray Miguel
+ * @modified Añadida relación con los hooks useFavorites y useProfileRecipes para gestionar favoritos y recetas del perfil.
+ */
+
+import { useState, useEffect } from "react";
+import useFavorites from "../hooks/useFavorites";
+import useProfileRecipes from "../hooks/useProfileRecipes";
+import { userService } from "../services/userService";
+import { imageService } from "../services/imageService";
+import Card from "../components/Card";
+import { useNavigate } from "react-router-dom";
+import useCategories from "../hooks/useCategories";
+
+const USER_TYPE = "USER";
+
+const Profile = () => {
+  const mediaUrl = import.meta.env.VITE_MEDIA_URL;
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [bio, setBio] = useState("");
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioLoading, setBioLoading] = useState(false);
+
+  const [profileImg, setProfileImg] = useState(null);
+  const [imgModalOpen, setImgModalOpen] = useState(false);
+  const [imgLoading, setImgLoading] = useState(false);
+  const [imgFile, setImgFile] = useState(null);
+
+  const {
+    favorites,
+    favoriteRecipes,
+    loading: loadingFavorites,
+    toggleFavorite,
+  } = useFavorites();
+
+  const {
+    activeTab,
+    setActiveTab,
+    currentPage,
+    setCurrentPage,
+    paginatedRecipes,
+    totalPages,
+    filteredRecipes,
+    createdRecipesCount,
+  } = useProfileRecipes();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const data = await userService.getMe();
+      setUser(data);
+      setBio(data.biography || "");
+      setProfileImg(data.image || null);
+    };
+    fetchUser();
+  }, []);
+
+  const handleBioSave = async () => {
+    setBioLoading(true);
+    await userService.updateMe({ biography: bio });
+    setEditingBio(false);
+    setBioLoading(false);
+    const data = await userService.getMe();
+    setUser(data);
+  };
+
+  const { categories } = useCategories(2);
+
+  const handleImgSave = async () => {
+    if (!imgFile) return;
+    setImgLoading(true);
+    try {
+      await imageService.updateProfileImage(imgFile);
+      const data = await userService.getMe();
+      setUser(data);
+      setProfileImg(data.image || null);
+      setImgModalOpen(false);
+      setImgFile(null);
+    } finally {
+      setImgLoading(false);
+    }
+  };
+
+  const handleImgDelete = async () => {
+    setImgLoading(true);
+    try {
+      await imageService.deleteProfileImage();
+      const data = await userService.getMe();
+      setUser(data);
+      setProfileImg(null);
+      setImgModalOpen(false);
+      setImgFile(null);
+    } finally {
+      setImgLoading(false);
+    }
+  };
+
+  if (!user) return &lt;div>Cargando perfil...&lt;/div>;
+
+  return (
+    &lt;div className="max-w-5xl mx-auto px-4 py-8">
+      &lt;div className="flex flex-col items-center text-center space-y-4">
+        &lt;h2 className="text-base font-medium leading-tight">
+          {user.name} {user.surname}
+        &lt;/h2>
+
+        &lt;div className="flex items-center mb-4">
+          &lt;div className="relative">
+            &lt;img
+              src={
+                profileImg?.url
+                  ? "http://localhost:8000/media/img/" +
+                  user.id +
+                  "/" +
+                  profileImg.url
+                  : "https://ui-avatars.com/api/?name=" +
+                  encodeURIComponent(user.name)
+              }
+              alt="Foto de perfil"
+              className="w-24 h-24 rounded-full object-cover border"
+            />
+            &lt;button
+              className="absolute bottom-0 right-0 bg-emerald-700 text-white w-8 h-8 rounded-full"
+              onClick={() => setImgModalOpen(true)}
+              title="Editar foto de perfil"
+            >
+              ✎
+            &lt;/button>
+          &lt;/div>
+        &lt;/div>
+
+        &lt;div className="mb-4">
+          {editingBio ? (
+            &lt;div>
+              &lt;textarea
+                className="border rounded w-90 md:w-250 p-2 mt-1 h-32 md:h-50"
+                rows={3}
+                value={bio}
+                maxLength={500}
+                onChange={(e) => setBio(e.target.value)}
+              />
+                &lt;div className="text-sm text-gray-500 text-right mt-1">
+                {bio.length}/500 caracteres
+              &lt;/div>
+              &lt;button
+                className="bg-emerald-700 text-white cursor-pointer px-3 py-1 rounded mt-2 mr-2"
+                onClick={handleBioSave}
+                disabled={bioLoading}
+              >
+                Guardar
+              &lt;/button>
+              &lt;button
+                className="bg-gray-300 cursor-pointer px-3 py-1 rounded mt-2"
+                onClick={() => setEditingBio(false)}
+              >
+                Cancelar
+              &lt;/button>
+            &lt;/div>
+          ) : (
+            &lt;div>
+              &lt;span className="mr-2">{user.biography || "Sin biografía."}&lt;/span>
+              &lt;button
+                className="text-blue-600 cursor-pointer underline"
+                onClick={() => setEditingBio(true)}
+              >
+                Editar
+              &lt;/button>
+            &lt;/div>
+          )}
+        &lt;/div>
+      &lt;/div>
+
+      {imgModalOpen &amp;&amp; (
+        &lt;div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-0">
+          &lt;div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-2xl relative">
+            &lt;button
+              className="absolute top-3 right-3 text-gray-400 cursor-pointer text-xl"
+              onClick={() => setImgModalOpen(false)}
+              aria-label="Cerrar"
+            >
+              ×
+            &lt;/button>
+            &lt;h3 className="text-lg font-bold mb-6 text-center">
+              Editar foto de perfil
+            &lt;/h3>
+            &lt;div className="flex flex-col items-center">
+              &lt;img
+                src={
+                  imgFile
+                    ? URL.createObjectURL(imgFile)
+                    : profileImg?.url
+                      ? "http://localhost:8000/media/img/" +
+                      user.id +
+                      "/" +
+                      profileImg.url
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        user.name
+                      )}`
+                }
+                alt="Preview"
+                className="w-28 h-28 rounded-full object-cover border-2 border-blue-200 mb-5 shadow"
+              />
+              &lt;label className="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-4 py-2 rounded-lg border border-blue-200 transition mb-4 flex items-center gap-2">
+                &lt;svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  &lt;path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828M7 7v.01M7 7a5 5 0 017.071 0l.707.707a5 5 0 010 7.071l-6.586 6.586a5 5 0 01-7.071-7.071l.707-.707A5 5 0 017 7z"
+                  />
+                &lt;/svg>
+                Seleccionar archivo
+                &lt;input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImgFile(e.target.files[0])}
+                  className="hidden"
+                />
+              &lt;/label>
+              &lt;div className="flex gap-2 mt-2">
+                &lt;button
+                  className="bg-emerald-700 text-white cursor-pointer px-4 py-2 rounded transition"
+                  onClick={handleImgSave}
+                  disabled={imgLoading || !imgFile}
+                >
+                  {profileImg ? "Actualizar" : "Subir"}
+                &lt;/button>
+                {profileImg &amp;&amp; (
+                  &lt;button
+                    className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded transition"
+                    onClick={handleImgDelete}
+                    disabled={imgLoading}
+                  >
+                    Borrar
+                  &lt;/button>
+                )}
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      )}
+
+      &lt;div className="mb-6 flex gap-0">
+        &lt;button
+          className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "saved"
+            ? "bg-red-400 text-white scale-100"
+            : "bg-gray-200 text-gray-600 scale-90"
+            }`}
+          onClick={() => setActiveTab("saved")}
+        >
+          Recetas favoritas ({favoriteRecipes.length})
+        &lt;/button>
+        &lt;button
+          className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "created"
+              ? "bg-red-400 text-white scale-100"
+              : "bg-gray-200 text-gray-600 scale-90"
+            }`}
+          onClick={() => setActiveTab("created")}
+        >
+          Recetas creadas ({createdRecipesCount})
+        &lt;/button>
+      &lt;/div>
+
+      &lt;div className="flex flex-col items-center gap-4 pb-20">
+        {activeTab === "saved" ? (
+          &lt;>
+            {loadingFavorites ? (
+              &lt;div>Cargando recetas favoritas...&lt;/div>
+            ) : favoriteRecipes.length === 0 ? (
+              &lt;div>No tienes recetas favoritas.&lt;/div>
+            ) : (
+              &lt;div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                {favoriteRecipes.map((recipe) => (
+                  &lt;Card
+                    key={recipe.id}
+                    id={recipe.id}
+                    name={recipe.name}
+                    image={
+                      recipe?.user?.id &amp;&amp; recipe?.image?.url
+                        ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                        : 'https://placehold.co/800?text=Placeholder+Image&amp;font=playfair-display'
+                    }
+                    category={
+                        Array.isArray(recipe.categories)
+                            ? recipe.categories
+                                    .map((cat) => {
+                                        const catId = typeof cat === "object" ? cat.id : cat;
+                                        const fullCat = categories.find((c) => c.id === catId);
+                                        return fullCat?.name;
+                                    })
+                                    .filter(Boolean)
+                            : ["Sin categoría"]
+                    }
+                    time={recipe.time}
+                    isFavorite={true}
+                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
+                  />
+                ))}
+              &lt;/div>
+            )}
+          &lt;/>
+        ) : paginatedRecipes.length === 0 ? (
+          &lt;div>No hay recetas para mostrar.&lt;/div>
+        ) : (
+          &lt;div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {paginatedRecipes.map((recipe) => (
+              &lt;Card
+                key={recipe.id}
+                id={recipe.id}
+                name={recipe.name}
+                image={
+                  recipe?.user?.id &amp;&amp; recipe?.image?.url
+                    ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                    : 'https://placehold.co/800?text=Placeholder+Image&amp;font=playfair-display'
+                }
+                category={
+                    Array.isArray(recipe.categories)
+                        ? recipe.categories
+                                .map((cat) => {
+                                    const catId = typeof cat === "object" ? cat.id : cat;
+                                    const fullCat = categories.find((c) => c.id === catId);
+                                    return fullCat?.name;
+                                })
+                                .filter(Boolean)
+                        : ["Sin categoría"]
+                }
+                time={recipe.time}
+                isFavorite={favorites.includes(String(recipe.id))}
+                onToggleFavorite={() => toggleFavorite(recipe.id)}
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
+              />
+            ))}
+          &lt;/div>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default Profile;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

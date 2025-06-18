@@ -1,4 +1,32 @@
-import React, { useRef, useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/Recipe.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/Recipe.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useRef, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { RecipeIngredientsChecklist, Button } from "../components";
 import TimerBadge from "../components/TimerBadge";
@@ -100,7 +128,7 @@ const Recipe = () => {
           tiempo: rawRecipeData.duration_minutes,
           imagen: rawRecipeData.image
             ? mediaUrl + rawRecipeData.user.id + "/" + rawRecipeData.image.url
-            : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display",
+            : "https://placehold.co/800?text=Placeholder+Image&amp;font=playfair-display",
           ingredientes: ingredientsWithDetails,
           pasos: rawRecipeData.steps || [],
           userId: rawRecipeData.user.id,
@@ -126,8 +154,8 @@ const Recipe = () => {
   };
 
   const areAllChecked =
-    receta && receta.ingredientes.every((item) => checkedItems[item.id]);
-  const hasIngredientes = receta && receta.ingredientes.length > 0;
+    receta &amp;&amp; receta.ingredientes.every((item) => checkedItems[item.id]);
+  const hasIngredientes = receta &amp;&amp; receta.ingredientes.length > 0;
 
   const handleStartCooking = () => {
     if (pasosRef.current) {
@@ -147,7 +175,7 @@ const Recipe = () => {
         noSeleccionados.map((item) =>
           shoppingListItemService.createShoppingListItem({
             ingredient_id: item.ingredientId,
-            unit: item.unitId, // <-- no el string "g", sino el ID // Este debe ser el ID real del ingrediente
+            unit: item.unitId, // &lt;-- no el string "g", sino el ID // Este debe ser el ID real del ingrediente
             quantity_needed: item.quantity || 1,
             is_purchased: false,
           })
@@ -157,10 +185,10 @@ const Recipe = () => {
         setSuccess("Todos los ingredientes ya están en tu lista de compra.");
       } else {
         setSuccess(
-          <>
-            {noSeleccionados.length} ingredientes añadidos a tu lista de compra.{" "}
-            <TiShoppingCart className="inline-block ml-2" />
-          </>
+          &lt;>
+            '{noSeleccionados.length} ingredientes añadidos a tu lista de
+            compra. &lt;TiShoppingCart className="inline-block ml-2" />
+          &lt;/>
         );
       }
     } catch (error) {
@@ -171,74 +199,74 @@ const Recipe = () => {
 
   if (loading) {
     return (
-      <div data-testid="loading-recipe" className="text-center p-6">
+      &lt;div data-testid="loading-recipe" className="text-center p-6">
         Cargando receta...
-      </div>
+      &lt;/div>
     );
   }
 
   if (error) {
     return (
-      <div data-testid="recipe-error" className="text-center p-6 text-red-500">
+      &lt;div data-testid="recipe-error" className="text-center p-6 text-red-500">
         {error}
-      </div>
+      &lt;/div>
     );
   }
 
   if (!receta) {
     return (
-      <div data-testid="no-recipe-found" className="text-center p-6">
+      &lt;div data-testid="no-recipe-found" className="text-center p-6">
         Receta no encontrada
-      </div>
+      &lt;/div>
     );
   }
 
   return (
-    <div
+    &lt;div
       data-testid="recipe-screen"
       className="flex flex-col min-h-screen bg-background text-center"
     >
-      <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
-        <div className="flex items-center justify-between mb-4">
-          <div
+      &lt;main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
+        &lt;div className="flex items-center justify-between mb-4">
+          &lt;div
             data-testid="recipe-title-container"
             className="text-center flex-1"
           >
-            {error && (
-              <ErrorMsg data-testid="recipe-error-msg">{error}</ErrorMsg>
+            {error &amp;&amp; (
+              &lt;ErrorMsg data-testid="recipe-error-msg">{error}&lt;/ErrorMsg>
             )}
-            {success && (
-              <SuccessMsg data-testid="recipe-success-msg" className="">
+            {success &amp;&amp; (
+              &lt;SuccessMsg data-testid="recipe-success-msg" className="">
                 {success}
-              </SuccessMsg>
+              &lt;/SuccessMsg>
             )}
-            <h1 data-testid="recipe-title" className="text-3xl font-bold">
+            &lt;h1 data-testid="recipe-title" className="text-3xl font-bold">
               {receta.titulo}
-            </h1>
-            <TimerBadge
+            &lt;/h1>
+            &lt;TimerBadge
               data-testid="recipe-time"
               minutes={receta.tiempo}
               className="mt-2 flex justify-center"
             />
-          </div>
-        </div>
+          &lt;/div>
+        &lt;/div>
 
-        <img
+        &lt;img
           data-testid="recipe-image"
           src={receta.imagen}
           alt={receta.titulo}
           className="rounded-xl drop-shadow-xl w-full max-w-md mx-auto"
         />
 
-        <RecipeIngredientsChecklist
+        &lt;RecipeIngredientsChecklist
           data-testid="ingredients-checklist"
           ingredients={receta.ingredientes}
           checkedItems={checkedItems}
           onToggleCheck={handleToggleCheck}
         />
 
-        <div className="grid grid-cols-2 gap-3 mt-6 max-w-md mx-auto">
-          <Button
+        &lt;div className="grid grid-cols-2 gap-3 mt-6 max-w-md mx-auto">
+          &lt;Button
             data-testid="btn-add-to-shopping-list"
             onClick={handleAddToShoppingList}
             disabled={!hasIngredientes}
@@ -249,8 +277,8 @@ const Recipe = () => {
             }`}
           >
             ¡A comprar!
-          </Button>
-          <Button
+          &lt;/Button>
+          &lt;Button
             data-testid="btn-start-cooking"
             onClick={handleStartCooking}
             disabled={!areAllChecked}
@@ -261,50 +289,73 @@ const Recipe = () => {
             }`}
           >
             ¡A cocinar!
-          </Button>
-        </div>
+          &lt;/Button>
+        &lt;/div>
 
-        <div data-testid="steps-section" ref={pasosRef} className="mt-16">
-          <h2
+        &lt;div data-testid="steps-section" ref={pasosRef} className="mt-16">
+          &lt;h2
             data-testid="steps-title"
             className="text-2xl font-semibold mb-6 text-center"
           >
             Pasos de la receta
-          </h2>
-          <ol className="space-y-12">
+          &lt;/h2>
+          &lt;ol className="space-y-12">
             {receta.pasos.map((paso, index) => (
-              <li
+              &lt;li
                 key={index}
                 data-testid={`step-${index + 1}`}
                 className="flex flex-col items-center bg-background rounded-xl shadow-md p-6 max-w-2xl mx-auto"
               >
-                <span
+                &lt;span
                   data-testid={`step-number-${index + 1}`}
                   className="text-xl font-bold text-black mb-4"
                 >
                   Paso {index + 1}
-                </span>
-                {paso.image && paso.image.url && (
-                  <img
+                &lt;/span>
+                {paso.image &amp;&amp; paso.image.url &amp;&amp; (
+                  &lt;img
                     data-testid={`step-image-${index + 1}`}
                     src={mediaUrl + receta.userId + "/" + paso.image.url}
                     alt={`Paso ${index + 1}`}
                     className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
                   />
                 )}
-                <p
+                &lt;p
                   data-testid={`step-desc-${index + 1}`}
                   className="text-gray-700 text-center text-base sm:text-lg font-medium"
                 >
                   {paso.description}
-                </p>
-              </li>
+                &lt;/p>
+              &lt;/li>
             ))}
-          </ol>
-        </div>
-      </main>
-    </div>
+          &lt;/ol>
+        &lt;/div>
+      &lt;/main>
+    &lt;/div>
   );
 };
 
 export default Recipe;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

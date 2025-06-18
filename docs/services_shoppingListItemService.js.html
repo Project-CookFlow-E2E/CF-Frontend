@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/shoppingListItemService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/shoppingListItemService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import api from "./api";
+/**
+ * src/services/shoppingListItemService.js
+ *
+ * Provides service methods for interacting with ShoppingListItem API endpoints.
+ * These endpoints allow users (authenticated) to manage their personal shopping list items,
+ * and administrators to manage all shopping list items.
+ *
+ * @module shoppingListItemService
+ * @requires ./api - The configured Axios instance for making API requests.
+ * @author Saturnino Mendez
+ */
+
+/**
+ * Base URL for ShoppingListItem API endpoints.
+ * Corresponds to `/api/shopping/items/` based on your Django REST Framework router configuration.
+ * This endpoint handles both standard user and admin access based on backend permissions and serializer logic.
+ * 
+ * @type {string}
+ */
+const BASE_URL = '/shopping/items';
+
+/**
+ * Service for interacting with ShoppingListItem API endpoints.
+ */
+export const shoppingListItemService = {
+    // --- Authenticated User Methods ---
+    // All methods require user authentication, as per ShoppingListItemView's permission_classes.
+
+    /**
+    * Fetches the details of a specific shopping list item by its ID.
+    * Standard users can only fetch their own items. Administrators can fetch any item.
+    * GET /api/shopping/items/&lt;int:pk>/
+    * 
+    * @param {number} itemId - The ID of the shopping list item to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the item's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found if item doesn't exist or doesn't belong to the user/admin, 401 Unauthorized) or item id not valid.
+    */
+    getShoppingListItemById: async (itemId) => {
+        if (typeof itemId !== 'number' || isNaN(itemId) || itemId &lt; 1) {
+            return Promise.reject(new Error("item id not valid."));
+        };
+        const response = await api.get(`${BASE_URL}/${itemId}`);
+        return response.data;  
+    },
+
+    /**
+    * Fetches a list of shopping list items.
+    * For standard users, this returns only their own shopping list items.
+    * For administrators, this returns all shopping list items in the system.
+    * GET /api/shopping/items/
+    * 
+    * @returns {Promise&lt;Array&lt;object>>} A promise that resolves with an array of ShoppingListItem objects.
+    * @throws {Error} If the API request fails (e.g., 401 Unauthorized if not logged in).
+    */
+    getAllShoppingListItems: async () => {
+        const response = await api.get(`${BASE_URL}/`);
+        return response.data;
+    },
+
+    /**
+    * Creates a new shopping list item.
+    * The backend will automatically assign the `user_id` to the authenticated user.
+    * POST /api/shopping/items/
+    * 
+    * @param {object} itemData - An object containing the data for the new item.
+    * Must include `ingredient_id` (int ID of the ingredient), `quantity_needed` (int), `unit` (str), and `is_purchased` (bool).
+    * @returns {Promise&lt;object>} A promise that resolves with the newly created ShoppingListItem object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
+    */
+    createShoppingListItem: async (itemData) => {
+        const response = await api.post(`${BASE_URL}/`, itemData);
+        return response.data;
+    },
+
+    /**
+    * Updates an existing shopping list item by its ID.
+    * Users can only update their own items. Administrators can update any item.
+    * Uses PATCH for partial updates.
+    * PATCH /api/shopping/items/&lt;int:pk>/
+    * 
+    * @param {number} itemId - The ID of the shopping list item to update.
+    * @param {object} itemData - An object containing the data to update.
+    * Can include `ingredient_id` (int ID), `quantity_needed` (int), `unit` (str), `is_purchased` (bool).
+    * @returns {Promise&lt;object>} A promise that resolves with the updated ShoppingListItem object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 401 Unauthorized, 403 Forbidden) or item id not valid.
+    */
+    updateShoppingListItem: async (itemId, itemData) => {
+        if (typeof itemId !== 'number' || isNaN(itemId) || itemId &lt; 1) {
+            return Promise.reject(new Error("item id not valid."));
+        };
+        const response = await api.put(`${BASE_URL}/${itemId}/`, itemData);
+        return response.data;
+    },
+
+    /**
+    * Deletes a shopping list item by its ID.
+    * Users can only delete their own items. Administrators can delete any item.
+    * DELETE /api/shopping/items/&lt;int:pk>/
+    * 
+    * @param {number} itemId - The ID of the shopping list item to delete.
+    * @returns {Promise&lt;boolean>} A promise that resolves with `true` if the item is successfully deleted.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 401 Unauthorized, 403 Forbidden) or item id not valid.
+    */
+    deleteShoppingListItem: async (itemId) => {
+        if (typeof itemId !== 'number' || isNaN(itemId) || itemId &lt; 1) {
+            return Promise.reject(new Error("item id not valid."));
+        };
+        await api.delete(`${BASE_URL}/${itemId}/`);
+        return true;
+    }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

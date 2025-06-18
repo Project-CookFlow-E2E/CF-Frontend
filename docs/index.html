@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/LogoTitle.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Componente visual del logo y nombre de la app CookFlow. Redirige a la página principal correspondientedependiendo de si el usuario está autenticado.Utiliza el hook `useLocation` para detectar cambios en la ruta y comprobar la validez del token con `isTokenValid`.Si el usuario está logueado, el logo redirige a `/main`; si no, a `/`.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Ana Castro</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_LogoTitle.jsx.html">components/LogoTitle.jsx</a>, <a href="components_LogoTitle.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/RecipeFiltersPanel.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Componente visual para seleccionar filtros de recetas: categoría general, tipo de cocina y origen.Muestra badges interactivos reutilizando el componente <Badge />, permitiendo seleccionar múltiples opciones por grupo.Estilizado con bordes grises cuando no están seleccionados.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Ana Castro basado en el código de Saray en Search.jsx.</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_RecipeFiltersPanel.jsx.html">components/RecipeFiltersPanel.jsx</a>, <a href="components_RecipeFiltersPanel.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/admin/CategoryManagement.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Componente de administración de categorías para el panel de administración.Permite visualizar, buscar, añadir, editar y borrar categorías de recetas.Funcionalidades principales:- Listar todas las categorías existentes.- Buscar categorías por nombre mediante un input de búsqueda.- Añadir nuevas categorías mediante un modal conectado al backend.- Editar el nombre y la categoría padre de una categoría mediante un modal.- Borrar categorías con confirmación mediante modal (pregunta antes de borrar y elimina en la BBDD).- Acciones de edición y borrado para cada categoría, con overlays semitransparentes que dejan visible el panel de fondo.- Paginación: muestra 5 categorías por página, con navegación entre páginas.- Ordena las categorías de la más reciente a la más antigua según la fecha de creación.Estados:- categories: array de categorías obtenidas del backend.- loading: booleano para mostrar el estado de carga.- editModal: controla la visibilidad y datos del modal de edición.- editForm: almacena los valores del formulario de edición.- addModal: controla la visibilidad del modal de añadir categoría.- addForm: almacena los valores del formulario de añadir categoría.- deleteModal: controla la visibilidad y datos del modal de confirmación de borrado.- page: página actual de la paginación.- search: término de búsqueda para filtrar categorías por nombre.Servicios utilizados:- categoryService.getAllCategories(): obtiene todas las categorías.- categoryService.createCategoryAdmin(data): crea una nueva categoría.- categoryService.updateCategoryAdmin(id, data): actualiza una categoría.- categoryService.deleteCategoryAdmin(id): elimina una categoría.Uso:Este componente está pensado para ser usado por administradores.Permite buscar, añadir, modificar y borrar categorías de forma sencilla y segura,con confirmación visual y overlays que no ocultan completamente el panel de administración.Cambios recientes:- Añadida funcionalidad para añadir categorías desde el panel (modal y conexión a backend).- Añadida funcionalidad de borrado con confirmación y modal (incluye overlay semitransparente).- Mejorada la experiencia visual de los modales para dejar visible el panel de fondo.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Lorena Martínez, Noemi Casaprima</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_admin_CategoryManagement.jsx.html">components/admin/CategoryManagement.jsx</a>, <a href="components_admin_CategoryManagement.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/admin/IngredientManagement.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Componente de administración de ingredientes para el panel de administración.Permite visualizar, buscar, filtrar, aprobar, editar y eliminar ingredientes.Funcionalidades principales:- Listar todos los ingredientes obtenidos del backend.- Filtrar ingredientes por estado (todos, pendientes, aprobados) y por búsqueda.- Aprobar, rechazar/eliminar y editar ingredientes.- Editar ingredientes mediante un modal (nombre, categorías, unidad y estado de aprobación).- Botón para añadir nuevos ingredientes (funcionalidad pendiente de implementar).- Paginación: muestra 5 ingredientes por página, con navegación entre páginas.- Ordena los ingredientes por nombre alfabéticamente.Estados:- ingredients: array de ingredientes obtenidos del backend.- loading: booleano para mostrar el estado de carga.- activeTab: controla el filtro de pestañas (todos, pendientes, aprobados).- search: almacena el texto de búsqueda.- editModal: controla la visibilidad y datos del modal de edición.- editForm: almacena los valores del formulario de edición.- page: página actual de la paginación.Servicios utilizados:- ingredientService.getAllIngredientsAdmin(): obtiene todos los ingredientes.- ingredientService.updateIngredientAdmin(id, data): actualiza un ingrediente.- ingredientService.deleteIngredientAdmin(id): elimina un ingrediente.Uso:Este componente está pensado para ser usado por administradores.Permite gestionar ingredientes y su estado de aprobación de forma sencilla.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Noemi Casaprima, Lorena Martínez</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_admin_IngredientManagement.jsx.html">components/admin/IngredientManagement.jsx</a>, <a href="components_admin_IngredientManagement.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/admin/RecipeManagement.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Componente de administración de recetas para el panel de administración.Permite visualizar, buscar, editar y gestionar recetas.Funcionalidades principales:- Listar todas las recetas existentes (conectadas al backend con recipeService.getAllRecipes).- Buscar recetas por nombre mediante un input de búsqueda (consulta siempre al backend con debounce).- Editar todos los campos requeridos por el backend (nombre, descripción, duración, comensales, categorías) mediante un modal.- Añadir nuevas recetas con todos los campos requeridos (solo administradores).- Acciones de edición y borrado para cada receta (con confirmación y refresco de la tabla tras la acción).- Paginación: muestra 5 recetas por página, con navegación entre páginas.- Ordena las recetas de la más reciente a la más antigua según la fecha de creación.- Modal de detalles para ver la información completa de una receta.- Validación de IDs de categorías: solo permite IDs numéricos, mostrando mensaje claro si no se cumple.- Feedback visual de errores básico (alert), pendiente de mejora.Estados:- recipes: array de recetas obtenidas del backend.- loading: booleano para mostrar el estado de carga.- editModal: controla la visibilidad y datos del modal de edición.- editForm: almacena los valores del formulario de edición.- addModal: controla la visibilidad del modal de añadir receta.- addForm: almacena los valores del formulario de añadir receta.- viewModal: controla la visibilidad del modal de ver receta.- page: página actual de la paginación.- search: término de búsqueda para filtrar recetas por nombre.Servicios utilizados:- recipeService.getAllRecipes(): obtiene todas las recetas del backend.- recipeService.updateRecipe(id, data): actualiza una receta.- recipeService.createRecipe(data): crea una nueva receta.- recipeService.deleteRecipe(id): elimina una receta.Uso:Este componente está pensado para ser usado por administradores.Permite buscar y modificar los campos requeridos de cada receta,navegar entre páginas y ver las recetas ordenadas por fecha de creación.Solo los administradores pueden añadir o editar recetas (el acceso al panel ya está restringido).Cambios recientes:- La búsqueda de recetas consulta siempre al backend (con debounce), mostrando resultados actualizados.- Validación de categorías: solo permite IDs numéricos, con feedback claro.- Feedback de errores básico con alert (pendiente de mejora visual).- Modal de detalles para ver receta.- Corrección en recipeService.js para updateRecipe (usa recipeId).- Documentación actualizada y corregida la sintaxis del bloque de comentario.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Lorena Martínez, Noemi Casaprima</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_admin_RecipeManagement.jsx.html">components/admin/RecipeManagement.jsx</a>, <a href="components_admin_RecipeManagement.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/admin/UserManagement.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Componente de administración de usuarios para el panel de administración.Permite visualizar, buscar, editar y gestionar usuarios.Funcionalidades principales:- Listar todos los usuarios existentes (conectados al backend con userService.getAllUsersAdmin).- Buscar usuarios por nombre de usuario (username) mediante un input de búsqueda (consulta siempre al backend con debounce y filtra por username, no por name).- Editar el nombre, el rol y la contraseña de un usuario mediante un modal (la contraseña solo se actualiza si se rellena el campo).- Muestra un mensaje de éxito o error tras editar un usuario (incluido el cambio de contraseña).- Botón para añadir nuevos usuarios (funcionalidad pendiente de implementar).- Acciones de edición y borrado para cada usuario (no disponibles para usuarios admin/staff).- Paginación: muestra 5 usuarios por página, con navegación entre páginas.Estados:- users: array de usuarios obtenidos del backend (ya filtrados por username si hay búsqueda).- loading: booleano para mostrar el estado de carga.- editModal: controla la visibilidad y datos del modal de edición.- editForm: almacena los valores del formulario de edición (incluye password).- editMsg: mensaje de éxito tras editar usuario.- editError: mensaje de error tras editar usuario.- page: página actual de la paginación.- search: término de búsqueda para filtrar usuarios por nombre de usuario.Servicios utilizados:- userService.getAllUsersAdmin(): obtiene todos los usuarios.- userService.searchUsersByUsernameAdmin(username): busca usuarios por nombre de usuario en el backend.- userService.updateUserAdmin(id, data): actualiza un usuario (incluida la contraseña si se indica).Uso:Este componente está pensado para ser usado por administradores.Permite buscar y modificar los campos "Nombre", "Rol" y "Contraseña" de cada usuario,navegar entre páginas y gestionar la información de usuarios de forma sencilla.Cambios recientes:- La búsqueda de usuarios consulta siempre al backend (con debounce) y filtra solo por username.- Se eliminó el filtrado local por name.- Se añadió un filtrado extra por username en frontend para asegurar coincidencia si el backend no filtra correctamente.- Ahora el administrador puede cambiar la contraseña de los usuarios desde el modal de edición.- Se muestra un mensaje de éxito o error tras editar un usuario.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Lorena Martínez, Noemi Casaprima</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_admin_UserManagement.jsx.html">components/admin/UserManagement.jsx</a>, <a href="components_admin_UserManagement.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>components/index.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Barrel file que centraliza las exportaciones de todos los componentes de la aplicación.Permite importar componentes desde una única ruta (`components`) en lugar de especificar la ruta completa.Ejemplo de uso:import { Button, Header, Footer } from '../components';</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_index.js.html">components/index.js</a>, <a href="components_index.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>hooks/useRecipeSearch.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Hook personalizado que unifica toda la lógica de filtrado, búsqueda y visualización de recetas.Utiliza hooks internos (`useCategories` y `useRecipes`) y controla la interacción con la URL (parámetro de categoría),además de aplicar una selección por defecto si no hay filtros activos. Maneja también el control de visibilidad de filtrosy la gestión de los resultados mostrados tras aplicar búsqueda o filtrado.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Ana Castro, basado en el código original de Saray</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="hooks_useRecipeSearch.js.html">hooks/useRecipeSearch.js</a>, <a href="hooks_useRecipeSearch.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>hooks/useRecipes.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Hook personalizado para obtener todas las recetas desde el backend.Encapsula la lógica de llamada a la API, gestión de estado y manejo de errores.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Saray</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="hooks_useRecipes.js.html">hooks/useRecipes.js</a>, <a href="hooks_useRecipes.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>pages/AdminDashboard.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Página principal del panel de administración de CookFlow.Permite a los administradores navegar y gestionar recetas, usuarios, categorías e ingredientes desde un único panel.Funcionalidades principales:- Sidebar de navegación para acceder a las diferentes secciones de administración.- Renderizado dinámico de los componentes de gestión según la sección seleccionada.- Vista de panel de control con mensaje de bienvenida y espacio para estadísticas/resúmenes.Estados:- activeSection: controla la sección activa del dashboard ('dashboard', 'recipes', 'users', 'categories', 'ingredients').Componentes utilizados:- RecipeManagement: gestión de recetas.- UserManagement: gestión de usuarios.- CategoryManagement: gestión de categorías.- IngredientManagement: gestión de ingredientes.Uso:Esta página está pensada para ser usada por administradores.Permite gestionar todo el contenido relevante de la plataforma desde un solo lugar, con navegación lateral y renderizado condicional del contenido.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Rubén Ortega</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_AdminDashboard.jsx.html">pages/AdminDashboard.jsx</a>, <a href="pages_AdminDashboard.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>pages/Search.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Página de búsqueda de recetas. Permite aplicar filtros por categoría, tipo de cocina y origen,además de realizar búsquedas por texto.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Saray</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_Search.jsx.html">pages/Search.jsx</a>, <a href="pages_Search.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>pages/ShoppingList.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Página de Lista de la Compra. Permite visualizar, marcar, eliminar y limpiar productos de una lista.Utiliza datos reales obtenidos desde el backend.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_ShoppingList.jsx.html">pages/ShoppingList.jsx</a>, <a href="pages_ShoppingList.jsx.html#line2">line 2</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>pages/SignUp.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Página de registro de nuevos usuarios en la aplicación CookFlow.Esta vista permite al usuario crear una cuenta proporcionando los siguientes datos:- Nombre- Primer y segundo apellido- Correo electrónico- Contraseña y confirmaciónFuncionalidades:- Campos con íconos para mejor experiencia visual.- Navegación hacia la página de login si el usuario ya tiene cuenta.- Diseño responsivo con imagen lateral en pantallas grandes.Componentes utilizados:- Input: campo reutilizable con ícono.- Button: botón estilizado para envío de formulario.Navegación:- Redirecciona a la página principal ("/") al hacer clic en "Crear cuenta".- Enlace hacia la página de inicio de sesión ("/login").</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Nico</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="pages_SignUp.jsx.html">pages/SignUp.jsx</a>, <a href="pages_SignUp.jsx.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

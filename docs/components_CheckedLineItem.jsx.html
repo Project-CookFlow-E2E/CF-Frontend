@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/CheckedLineItem.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/CheckedLineItem.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * CheckedLineItem muestra un ingrediente con su nombre, cantidad y unidad, junto a un checkbox.
+ *
+ * Es ideal para listas de ingredientes donde el usuario puede marcar lo que ya tiene o ha usado.
+ *
+ * @component
+ * @param {Object} props - Props del componente.
+ * @param {string} props.name - Nombre del ingrediente (por ejemplo: "Azúcar").
+ * @param {number|string} props.quantity - Cantidad necesaria del ingrediente.
+ * @param {string} props.unit - Unidad de medida (por ejemplo: "g", "ml", "ud").
+ * @param {boolean} props.checked - Estado del checkbox (si está marcado).
+ * @param {Function} props.onChange - Función que se ejecuta al marcar o desmarcar el checkbox.
+ * @returns {JSX.Element} Elemento visual con checkbox e información del ingrediente.
+ */
+export default function CheckedLineItem({ name, quantity, unit, checked, onChange }) {
+  return (
+    &lt;li
+      className="flex items-center justify-between py-2 border-b border-gray-100"
+      data-testid="ingredient-item"
+    >
+      &lt;label className="flex items-center cursor-pointer w-full" data-testid="ingredient-label">
+        {/* Checkbox personalizado */}
+        &lt;div className="relative mr-3" data-testid="ingredient-checkbox-wrapper">
+          &lt;input
+            type="checkbox"
+            checked={checked}
+            onChange={onChange}
+            className="hidden"
+            data-testid="ingredient-checkbox"
+          />
+          &lt;div
+            className={`w-5 h-5 border-2 rounded flex items-center justify-center ${
+              checked ? 'bg-black border-black' : 'border-gray-700'
+            }`}
+            data-testid="ingredient-checkbox-box"
+          >
+            {checked &amp;&amp; (
+              &lt;svg
+                className="w-3 h-3 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                data-testid="ingredient-checkbox-checkmark"
+              >
+                &lt;path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="3"
+                  d="M5 13l4 4L19 7"
+                />
+              &lt;/svg>
+            )}
+          &lt;/div>
+        &lt;/div>
+
+        {/* Nombre + línea hasta la cantidad */}
+        &lt;div
+          className="flex-1 flex items-center border-b border-dotted border-gray-300"
+          data-testid="ingredient-name-wrapper"
+        >
+          &lt;span className="text-gray-800" data-testid="ingredient-name">{name}&lt;/span>
+        &lt;/div>
+
+        {/* Cantidad */}
+        &lt;span
+          className="text-sm text-gray-800 whitespace-nowrap ml-2"
+          data-testid="ingredient-quantity"
+        >
+          {quantity} {unit}
+        &lt;/span>
+      &lt;/label>
+    &lt;/li>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

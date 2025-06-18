@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/ingredientService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/ingredientService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import api from "./api";
+/**
+ * src/services/ingredientService.js
+ *
+ * Provides service methods for interacting with ingredient API endpoints.
+ * This includes fetching approved ingredients for general users,
+ * and comprehensive CRUD operations for all ingredients for administrators.
+ *
+ * @module ingredientService
+ * @requires ./api - The configured Axios instance for making API requests.
+ * @author Saturnino Mendez
+ */
+
+/**
+ * Base URL for general ingredient API endpoints.
+ * Corresponds to `/api/ingredients/` in the backend.
+ * This endpoint typically returns only approved ingredients.
+ * 
+ * @type {string}
+ */
+const BASE_URL = "/recipes/ingredients";
+
+/**
+ * Base URL for administrator-specific ingredient API endpoints.
+ * Corresponds to `/api/admin/ingredients/` in the backend.
+ * This endpoint typically returns all ingredients (approved and unapproved).
+ * 
+ * @type {string}
+ */
+const ADMIN_BASE_URL = "/recipes/admin/ingredients";
+
+/**
+ * Service for interacting with ingredient API endpoints.
+ */
+export const ingredientService = {
+    // --- General User/Public methods (ReadOnlyModelViewSet) ---
+    // These methods are accessible to all users (authenticated or not) and only allow GET operations.
+
+    /**
+    * Fetches a list of all APPROVED ingredients.
+    * GET /api/recipes/ingredients/
+    * 
+    * @returns {Promise&lt;Array&lt;object>>} A promise that resolves with an array of approved ingredient objects.
+    * @throws {Error} If the API request fails.
+    */
+    getAllIngredients: async () => {
+        const response = await api.get(`${BASE_URL}/`);
+        return response.data;
+    },
+
+    /**
+    * Fetches the details of a specific APPROVED ingredient by its ID.
+    * GET /api/recipes/ingredients/&lt;int:pk>/
+    * 
+    * @param {number} ingredientId - The ID of the ingredient to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the ingredient's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found if the ingredient is not found or not approved) or ingredient id not valid.
+    */
+    getIngredientById: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId &lt; 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
+        const response = await api.get(`${BASE_URL}/${ingredientId}/`);
+        return response.data;
+    },
+
+    // --- Admin-specific methods ---
+
+    /**
+    * Fetches the details of a specific ingredient by its ID (for administrators).
+    * This can fetch any ingredient, regardless of its approval status.
+    * GET /api/recipes/admin/ingredients/&lt;int:pk>/
+    * 
+    * @param {number} ingredientId - The ID of the ingredient to fetch.
+    * @returns {Promise&lt;object>} A promise that resolves with the ingredient's data.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or ingredient id not valid.
+    */
+    getIngredientByIdAdmin: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId &lt; 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
+        const response = await api.get(`${ADMIN_BASE_URL}/${ingredientId}/`);
+        return response.data;
+    },
+
+    /**
+    * Fetches a list of ALL ingredients (approved and unapproved) for administrators.
+    * GET /api/recipes/admin/ingredients/
+    * 
+    * @returns {Promise&lt;Array&lt;object>>} A promise that resolves with an array of all ingredient objects.
+    * @throws {Error} If the API request fails (e.g., 403 Forbidden for non-admins).
+    */
+    getAllIngredientsAdmin: async () => {
+        const response = await api.get(`${ADMIN_BASE_URL}/`);
+        return response.data;
+    },
+
+    /**
+    * Creates a new ingredient (for administrators).
+    * POST /api/recipes/admin/ingredients/
+    * 
+    * @param {object} ingredientData - An object containing the data for the new ingredient.
+    * Expected fields: `name` (str), `description` (str), `quantity` (int), `unit` (str), `is_checked` (bool), `is_approved` (bool, if applicable).
+    * @returns {Promise&lt;object>} A promise that resolves with the newly created ingredient object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 403 Forbidden).
+    */
+    createIngredientAdmin: async (ingredientData) => {
+        const response = await api.post(`${ADMIN_BASE_URL}/`, ingredientData);
+        return response.data;
+    },
+
+    /**
+    * Updates an existing ingredient by its ID (for administrators).
+    * Uses PATCH for partial updates.
+    * PATCH /api/recipes/admin/ingredients/&lt;int:pk>/
+    * 
+    * @param {number} ingredientId - The ID of the ingredient to update.
+    * @param {object} ingredientData - An object containing the ingredient data to update.
+    * Expected fields: `name` (str), `description` (str), `quantity` (int), `unit` (str), `is_checked` (bool), `is_approved` (bool, if applicable).
+    * @returns {Promise&lt;object>} A promise that resolves with the updated ingredient object.
+    * @throws {Error} If the API request fails (e.g., validation errors, 404 Not Found, 403 Forbidden) or ingredient id not valid.
+    */
+    updateIngredientAdmin: async (ingredientId, ingredientData) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId &lt; 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
+        const response = await api.put(`${ADMIN_BASE_URL}/${ingredientId}/`, ingredientData);
+        return response.data;
+    },
+
+    /**
+    * Deletes an ingredient by its ID (for administrators).
+    * DELETE /api/recipes/admin/ingredients/&lt;int:pk>/
+    * 
+    * @param {number} ingredientId - The ID of the ingredient to delete.
+    * @returns {Promise&lt;boolean>} A promise that resolves with `true` if the ingredient is successfully deleted.
+    * @throws {Error} If the API request fails (e.g., 404 Not Found, 403 Forbidden) or ingredient id not valid.
+    */
+    deleteIngredientAdmin: async (ingredientId) => {
+        if (typeof ingredientId !== 'number' || isNaN(ingredientId) || ingredientId &lt; 1) {
+            return Promise.reject(new Error("ingredient id not valid."));
+        };
+        await api.delete(`${ADMIN_BASE_URL}/${ingredientId}/`);
+        return true;
+    }
+
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Home.html">Home</a></li><li><a href="module-api.html">api</a></li><li><a href="module-authService.html">authService</a></li><li><a href="module-categoryService.html">categoryService</a></li><li><a href="module-favoriteService.html">favoriteService</a></li><li><a href="module-ingredientService.html">ingredientService</a></li><li><a href="module-pages_InspireMe.html">pages/InspireMe</a></li><li><a href="module-pages_Landing.html">pages/Landing</a></li><li><a href="module-pages_Login.html">pages/Login</a></li><li><a href="module-pages_Profile.html">pages/Profile</a></li><li><a href="module-pages_index.html">pages/index</a></li><li><a href="module-shoppingListItemService.html">shoppingListItemService</a></li><li><a href="module-stepService.html">stepService</a></li><li><a href="module-unitService.html">unitService</a></li><li><a href="module-unitTypeService.html">unitTypeService</a></li><li><a href="module-useLatestRecipes.html">useLatestRecipes</a></li><li><a href="module-userService.html">userService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#Header">Header</a></li><li><a href="global.html#Input">Input</a></li><li><a href="global.html#Recipe">Recipe</a></li><li><a href="global.html#Sidebar">Sidebar</a></li><li><a href="global.html#SwipeCard">SwipeCard</a></li><li><a href="global.html#TimerBadge">TimerBadge</a></li><li><a href="global.html#imageService">imageService</a></li><li><a href="global.html#useCategories">useCategories</a></li><li><a href="global.html#useProfileRecipes">useProfileRecipes</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jun 18 2025 20:40:27 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
