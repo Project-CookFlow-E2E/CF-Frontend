@@ -23,6 +23,8 @@ import { Link, useNavigate } from "react-router-dom";
 import useLatestRecipesCookflow from "../hooks/useLatestRecipesCookflow";
 import { FaGear } from "react-icons/fa6";
 import useCategories from "../hooks/useCategories";
+import { useEffect } from "react";
+import { isTokenValid } from "../services/authService";
 
 /**
  * Renderiza una receta individual dentro del carrusel de recetas destacadas.
@@ -53,6 +55,13 @@ const Landing = () => {
   const navigate = useNavigate();
   const mediaUrl = import.meta.env.VITE_MEDIA_URL;
   const { categories } = useCategories(2);
+
+  // Redirigir a Home si el usuario está logueado
+  useEffect(() => {
+    if (isTokenValid()) {
+      navigate("/main", { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div
