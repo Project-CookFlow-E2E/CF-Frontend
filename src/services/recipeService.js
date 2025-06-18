@@ -228,11 +228,7 @@ export const recipeService = {
         const response = await api.post(`${BASE_URL}/`, dataToSend, {
             headers: dataToSend instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
         });
-        const response = await api.post(`${BASE_URL}/`, recipeData, {
-            headers: {
-                'Content-Type': 'multipart/form-data', // Asegura el tipo de contenido correcto para FormData
-            },
-        });
+        // The duplicate `const response` line that caused the error has been removed.
         return response.data;
     },
 
