@@ -178,10 +178,9 @@ const Search = () => {
                   key={recipe.id}
                   id={`recipe-card-${recipe.id}`}
                   image={
-                    mediaUrl +
-                    rawRecipeData.user.id +
-                    "/" +
-                    rawRecipeData.image.url
+                    recipe?.user?.id && recipe?.image?.url
+                      ? mediaUrl + recipe.user.id + "/" + recipe.image.url
+                      : ""
                   }
                   name={recipe.name}
                   category={recipe.category}
