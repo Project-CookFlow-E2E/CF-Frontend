@@ -18,10 +18,9 @@
  * @module pages/Landing
  */
 
-import React from "react";
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
-import useLatestRecipes from "../hooks/useLatestRecipes";
+import useLatestRecipesCookflow from "../hooks/useLatestRecipesCookflow";
 import { FaGear } from "react-icons/fa6";
 
 /**
@@ -34,6 +33,7 @@ import { FaGear } from "react-icons/fa6";
  * @modifiedby Ána Castro, Ángel Aragón
  * @modified - Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
  * - Agregado el icono de engranaje para representar la receta y arreglado tiempo en card.
+ * - Carga las últimas 3 recetas del usuario cookflow desde la API.
  * @returns {JSX.Element} Componente de tarjeta de receta
  */
 
@@ -47,9 +47,8 @@ import { FaGear } from "react-icons/fa6";
  * @returns {JSX.Element}
  */
 
-
 const Landing = () => {
-  const { latestRecipes, loading } = useLatestRecipes();
+  const { latestRecipes, loading } = useLatestRecipesCookflow();
   const navigate = useNavigate();
   const mediaUrl = import.meta.env.VITE_MEDIA_URL;
 
@@ -111,8 +110,8 @@ const Landing = () => {
             </div>
             <h3 className="font-semibold text-lg mb-2">¿Que cocinamos hoy?</h3>
             <p className="text-gray-600 text-sm">
-              Despídete del estrés diario de decidir qué comer.
-              Planifica tus comidas de forma fácil, rápida y sin frustraciones
+              Despídete del estrés diario de decidir qué comer. Planifica tus
+              comidas de forma fácil, rápida y sin frustraciones
             </p>
           </div>
           <div
@@ -168,8 +167,8 @@ const Landing = () => {
                 id={`recipe-card-${recipe.id}`}
                 image={
                   recipe?.user?.id && recipe?.image?.url
-                    ? mediaUrl + recipe.user.id + '/' + recipe.image.url
-                    : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
+                    ? mediaUrl + recipe.user.id + "/" + recipe.image.url
+                    : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display"
                 }
                 name={recipe.name}
                 category={recipe.category}
