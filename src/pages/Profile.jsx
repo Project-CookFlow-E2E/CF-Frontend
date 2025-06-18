@@ -273,8 +273,8 @@ const Profile = () => {
       <div className="mb-6 flex gap-0">
         <button
           className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "saved"
-              ? "bg-red-400 text-white scale-100"
-              : "bg-gray-200 text-gray-600 scale-90"
+            ? "bg-red-400 text-white scale-100"
+            : "bg-gray-200 text-gray-600 scale-90"
             }`}
           onClick={() => setActiveTab("saved")}
         >
@@ -282,8 +282,8 @@ const Profile = () => {
         </button>
         <button
           className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "created"
-              ? "bg-red-400 text-white scale-100"
-              : "bg-gray-200 text-gray-600 scale-90"
+            ? "bg-red-400 text-white scale-100"
+            : "bg-gray-200 text-gray-600 scale-90"
             }`}
           onClick={() => setActiveTab("created")}
         >
@@ -308,7 +308,7 @@ const Profile = () => {
                     image={
                       recipe?.user?.id && recipe?.image?.url
                         ? mediaUrl + recipe.user.id + '/' + recipe.image.url
-                        : ''
+                        : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                     }
                     category={recipe.category}
                     time={recipe.time}
@@ -329,10 +329,10 @@ const Profile = () => {
                 key={recipe.id}
                 id={recipe.id}
                 name={recipe.name}
-                iimage={
+                image={
                   recipe?.user?.id && recipe?.image?.url
                     ? mediaUrl + recipe.user.id + '/' + recipe.image.url
-                    : '' // puedes cambiar esta ruta por otra imagen por defecto
+                    : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                 }
                 category={recipe.category}
                 time={recipe.time}

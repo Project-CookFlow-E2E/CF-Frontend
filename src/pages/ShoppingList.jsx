@@ -127,11 +127,10 @@ const ShoppingList = () => {
                       data-testid={`shoppinglist-checkbox-${item.id}`}
                     />
                     <span
-                      className={`ml-3 text-lg ${
-                        item.checked
+                      className={`ml-3 text-lg ${item.checked
                           ? "line-through text-gray-500"
                           : "text-gray-800"
-                      }`}
+                        }`}
                       data-testid={`shoppinglist-item-name-${item.id}`}
                     >
                       {item.ingredient?.name || "Sin nombre"}{" "}

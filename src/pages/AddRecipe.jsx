@@ -307,30 +307,30 @@ const AddRecipe = () => {
         order: idx + 1
       }));
 
-console.log("Pasos formateados para el backend:", formattedSteps);
-recipePayload.append("steps", JSON.stringify(formattedSteps));
+      console.log("Pasos formateados para el backend:", formattedSteps);
+      recipePayload.append("steps", JSON.stringify(formattedSteps));
 
-console.log("--- FIN de recipePayload ---");
+      console.log("--- FIN de recipePayload ---");
 
-    const recetaGuardada = await recipeService.createRecipe(recipePayload);
-    const recetaId = recetaGuardada.id;
+      const recetaGuardada = await recipeService.createRecipe(recipePayload);
+      const recetaId = recetaGuardada.id;
 
-    console.log("Receta guardada con ID:", recetaId);
+      console.log("Receta guardada con ID:", recetaId);
 
-    setRecipeId(recetaId);
-    setMensaje("Receta guardada correctamente. ID: " + recetaId);
-    reset();
-    setValue("categoriasSeleccionadas", []);
-  } catch (error) {
-    let errorMsg = "Error al guardar la receta.";
-    if (error.response && error.response.data) {
-      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
-    } else if (error.message) {
-      errorMsg += "\nDetalles: " + error.message;
+      setRecipeId(recetaId);
+      setMensaje("Receta guardada correctamente. ID: " + recetaId);
+      reset();
+      setValue("categoriasSeleccionadas", []);
+    } catch (error) {
+      let errorMsg = "Error al guardar la receta.";
+      if (error.response && error.response.data) {
+        errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+      } else if (error.message) {
+        errorMsg += "\nDetalles: " + error.message;
+      }
+      setMensaje(errorMsg);
     }
-    setMensaje(errorMsg);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
@@ -352,7 +352,7 @@ console.log("--- FIN de recipePayload ---");
             {mensaje}
           </div>
         )}
-       {/* Imagen de la receta */}
+        {/* Imagen de la receta */}
         <div
           className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${isDragOver ? "border-accent border-2 bg-accent/5" : ""
             }`}
@@ -466,8 +466,8 @@ console.log("--- FIN de recipePayload ---");
                         type="button"
                         key={categoria.id}
                         className={`px-3 py-1 rounded-lg border ${(categoriasSeleccionadas || []).includes(categoria.id)
-                            ? "bg-accent text-white"
-                            : "bg-white text-gray-700"
+                          ? "bg-accent text-white"
+                          : "bg-white text-gray-700"
                           }`}
                         onClick={() => handleCategoriaChange(categoria)}
                       >
@@ -542,7 +542,7 @@ console.log("--- FIN de recipePayload ---");
                       rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
-                          
+
                           <select
                             {...field}
                             id={`ingredient-name-${index}`}

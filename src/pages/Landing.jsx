@@ -169,7 +169,7 @@ const Landing = () => {
                 image={
                   recipe?.user?.id && recipe?.image?.url
                     ? mediaUrl + recipe.user.id + '/' + recipe.image.url
-                    : ''
+                    : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
                 }
                 name={recipe.name}
                 category={recipe.category}

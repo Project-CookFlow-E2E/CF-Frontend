@@ -98,7 +98,7 @@ const Recipe = () => {
           id: rawRecipeData.id,
           titulo: rawRecipeData.name,
           tiempo: rawRecipeData.duration_minutes,
-          imagen: rawRecipeData.image?mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url:"https://placehold.co/800?text=Placeholder+Image&font=playfair-display",
+          imagen: rawRecipeData.image ? mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display",
           ingredientes: ingredientsWithDetails,
           pasos: rawRecipeData.steps || [],
         });

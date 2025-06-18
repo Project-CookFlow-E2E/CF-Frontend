@@ -20,7 +20,7 @@ const InspireMe = () => {
   const [recipes, setRecipes] = useState([]);
   const [currentRecipeIndex, setCurrentRecipeIndex] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [userFavoriteEntries, setUserFavoriteEntries] = useState([]); 
+  const [userFavoriteEntries, setUserFavoriteEntries] = useState([]);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const InspireMe = () => {
     const fetchUserFavorites = async () => {
       setFavoritesLoading(true);
       try {
-        const fetchedFavoriteEntries = await favoriteService.getUserFavorites(); 
+        const fetchedFavoriteEntries = await favoriteService.getUserFavorites();
         setUserFavoriteEntries(fetchedFavoriteEntries);
       } catch (error) {
         console.error("InspireMe: Error loading user favorites:", error);
@@ -51,7 +51,7 @@ const InspireMe = () => {
       }
     };
     fetchUserFavorites();
-  }, []); 
+  }, []);
 
   const currentRecipe = recipes[currentRecipeIndex];
 
@@ -62,13 +62,13 @@ const InspireMe = () => {
 
     try {
       if (isFavorite) {
-        await favoriteService.removeFavorite(favoriteEntry.id); 
-        setUserFavoriteEntries(prevEntries => 
+        await favoriteService.removeFavorite(favoriteEntry.id);
+        setUserFavoriteEntries(prevEntries =>
           prevEntries.filter(entry => entry.recipe_id !== idNum)
         );
         console.log(`InspireMe: Recipe ${idNum} removed from favorites.`);
       } else {
-        const newFavorite = await favoriteService.addFavorite(idNum); 
+        const newFavorite = await favoriteService.addFavorite(idNum);
         setUserFavoriteEntries(prevEntries => [...prevEntries, newFavorite]);
         console.log(`InspireMe: Recipe ${idNum} added to favorites. New favorite entry:`, newFavorite);
       }
@@ -117,11 +117,11 @@ const InspireMe = () => {
   }
 
   if (!currentRecipe) {
-      return (
-          <div className="min-h-screen flex items-center justify-center">
-              <p>Error: Recipe not available to display.</p>
-          </div>
-      );
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Error: Recipe not available to display.</p>
+      </div>
+    );
   }
 
   return (
