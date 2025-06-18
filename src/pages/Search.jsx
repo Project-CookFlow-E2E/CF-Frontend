@@ -124,9 +124,6 @@ const Search = () => {
                                     setSelectedOrigin,
                                 }}
                             />
-                            <div className="flex justify-center mt-4">
-                                <Button onClick={() => {}}>Buscar</Button>
-                            </div>
                         </>
                     )}
                 </div>
