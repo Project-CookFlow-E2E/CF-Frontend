@@ -405,120 +405,341 @@ const RecipeManagement = () => {
         </div>
       )}
 
+      {/* Modal para añadir receta */}
       {addModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Añadir Receta</h3>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                // Validación de categorías: deben ser IDs numéricos
-                const categoryIds = addForm.categories.split(',').map((id) => id.trim());
-                if (!categoryIds.every((id) => /^\d+$/.test(id))) {
-                  alert("Las categorías deben ser IDs numéricos separados por coma. Ejemplo: 1,2,3");
-                  return;
-                }
-                try {
-                  await recipeService.createRecipe({
-                    name: addForm.name,
-                    description: addForm.description,
-                    duration_minutes: Number(addForm.duration_minutes),
-                    commensals: Number(addForm.commensals),
-                    categories: addForm.categories.split(',').map((id) => id.trim()),
-                  });
-                  setAddModal(false);
-                  setAddForm({ name: "", description: "", duration_minutes: "", commensals: "", categories: "" });
-                  // Refresca recetas
-                  const data = await recipeService.getAllRecipes();
-                  const sorted = [...data].sort(
-                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
-                  );
-                  setRecipes(sorted);
-                } catch (err) {
-                  alert("Error al crear la receta. Verifica los campos obligatorios.");
-                }
-              }}
-              className="space-y-4"
+        <>
+          {/* Overlay semitransparente */}
+          <div
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
+            onClick={() => setAddModal(false)}
+            aria-label="Cerrar modal"
+          />
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+              className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative overflow-y-auto max-h-[90vh]"
+              onClick={e => e.stopPropagation()}
             >
-              <div>
-                <label className="block text-sm font-medium mb-1">Nombre</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={addForm.name}
-                  onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full border p-2 rounded"
-                  placeholder="Nombre de la receta"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Descripción</label>
-                <textarea
-                  name="description"
-                  value={addForm.description}
-                  onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full border p-2 rounded"
-                  placeholder="Descripción"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Duración (minutos)</label>
-                <input
-                  type="number"
-                  name="duration_minutes"
-                  value={addForm.duration_minutes}
-                  onChange={(e) => setAddForm((f) => ({ ...f, duration_minutes: e.target.value }))}
-                  className="w-full border p-2 rounded"
-                  placeholder="Duración en minutos"
-                  min="1"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Comensales</label>
-                <input
-                  type="number"
-                  name="commensals"
-                  value={addForm.commensals}
-                  onChange={(e) => setAddForm((f) => ({ ...f, commensals: e.target.value }))}
-                  className="w-full border p-2 rounded"
-                  placeholder="Número de comensales"
-                  min="1"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Categorías (IDs, separadas por coma)</label>
-                <input
-                  type="text"
-                  name="categories"
-                  value={addForm.categories}
-                  onChange={(e) => setAddForm((f) => ({ ...f, categories: e.target.value }))}
-                  className="w-full border p-2 rounded"
-                  placeholder="Ej: 1,2,3"
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setAddModal(false)}
-                  className="bg-gray-300 px-4 py-2 rounded"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
+              <h2 className="text-xl font-bold mb-4">Añadir Receta</h2>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  // Validación de categorías: deben ser IDs numéricos
+                  const categoryIds = addForm.categories.split(',').map((id) => id.trim());
+                  if (!categoryIds.every((id) => /^\d+$/.test(id))) {
+                    alert("Las categorías deben ser IDs numéricos separados por coma. Ejemplo: 1,2,3");
+                    return;
+                  }
+                  // Validación de ingredientes
+                  if (!addForm.ingredients || addForm.ingredients.length === 0 || addForm.ingredients.some(i => !i.name || !i.quantity || !i.unit)) {
+                    alert("Debes añadir al menos un ingrediente con nombre, cantidad y unidad.");
+                    return;
+                  }
+                  // Validación de pasos
+                  if (!addForm.steps || addForm.steps.length === 0 || addForm.steps.some(s => !s.text)) {
+                    alert("Debes añadir al menos un paso de preparación con descripción.");
+                    return;
+                  }
+                  try {
+                    // Construir payload con imagen principal y pasos
+                    const payload = {
+                      name: addForm.name,
+                      description: addForm.description,
+                      duration_minutes: Number(addForm.duration_minutes),
+                      commensals: Number(addForm.commensals),
+                      categories: categoryIds,
+                      ingredients: addForm.ingredients,
+                      steps: addForm.steps,
+                    };
+                    if (addForm.image) payload.image = addForm.image;
+                    await recipeService.createRecipe(payload);
+                    setAddModal(false);
+                    setAddForm({
+                      name: "",
+                      description: "",
+                      duration_minutes: "",
+                      commensals: "",
+                      categories: "",
+                      image: null,
+                      imagePreview: null,
+                      ingredients: [{ name: "", quantity: "", type: "", unit: "" }],
+                      steps: [{ text: "", image: null, imagePreview: null }],
+                    });
+                    // Refresca recetas
+                    const data = await recipeService.getAllRecipes();
+                    const sorted = [...data].sort(
+                      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                    );
+                    setRecipes(sorted);
+                  } catch (err) {
+                    alert("Error al crear la receta. Verifica los campos obligatorios.");
+                  }
+                }}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nombre</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={addForm.name}
+                      onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))}
+                      className="w-full border p-2 rounded"
+                      placeholder="Nombre de la receta"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Duración (minutos)</label>
+                    <input
+                      type="number"
+                      name="duration_minutes"
+                      value={addForm.duration_minutes}
+                      onChange={(e) => setAddForm((f) => ({ ...f, duration_minutes: e.target.value }))}
+                      className="w-full border p-2 rounded"
+                      placeholder="Duración en minutos"
+                      min="1"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Comensales</label>
+                    <input
+                      type="number"
+                      name="commensals"
+                      value={addForm.commensals}
+                      onChange={(e) => setAddForm((f) => ({ ...f, commensals: e.target.value }))}
+                      className="w-full border p-2 rounded"
+                      placeholder="Número de comensales"
+                      min="1"
+                      required
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium mb-1">Descripción</label>
+                    <textarea
+                      name="description"
+                      value={addForm.description}
+                      onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))}
+                      className="w-full border p-2 rounded"
+                      placeholder="Descripción"
+                      required
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium mb-1">Categorías (IDs, separadas por coma)</label>
+                    <input
+                      type="text"
+                      name="categories"
+                      value={addForm.categories}
+                      onChange={(e) => setAddForm((f) => ({ ...f, categories: e.target.value }))}
+                      className="w-full border p-2 rounded"
+                      placeholder="Ej: 1,2,3"
+                      required
+                    />
+                  </div>
+                </div>
+                {/* Imagen principal */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-1">Imagen principal</label>
+                  <div className="flex items-center gap-4">
+                    {addForm.imagePreview && (
+                      <img src={addForm.imagePreview} alt="Vista previa" className="h-24 w-24 object-cover rounded" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        if (!file.type.startsWith('image/')) return;
+                        if (addForm.imagePreview) URL.revokeObjectURL(addForm.imagePreview);
+                        const url = URL.createObjectURL(file);
+                        setAddForm(f => ({ ...f, image: file, imagePreview: url }));
+                      }}
+                    />
+                    {addForm.imagePreview && (
+                      <button
+                        type="button"
+                        className="text-red-500 text-xs"
+                        onClick={() => {
+                          if (addForm.imagePreview) URL.revokeObjectURL(addForm.imagePreview);
+                          setAddForm(f => ({ ...f, image: null, imagePreview: null }));
+                        }}
+                      >
+                        Quitar imagen
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {/* Ingredientes dinámicos */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-1">Ingredientes</label>
+                  {addForm.ingredients && addForm.ingredients.map((ingredient, idx) => (
+                    <div key={idx} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder="Nombre"
+                        value={ingredient.name}
+                        onChange={e => {
+                          const newIngredients = [...addForm.ingredients];
+                          newIngredients[idx].name = e.target.value;
+                          setAddForm(f => ({ ...f, ingredients: newIngredients }));
+                        }}
+                        className="border p-2 rounded w-1/3"
+                        required
+                      />
+                      <input
+                        type="number"
+                        placeholder="Cantidad"
+                        value={ingredient.quantity}
+                        onChange={e => {
+                          const newIngredients = [...addForm.ingredients];
+                          newIngredients[idx].quantity = e.target.value;
+                          setAddForm(f => ({ ...f, ingredients: newIngredients }));
+                        }}
+                        className="border p-2 rounded w-1/4"
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="Tipo (ej. sólido, líquido)"
+                        value={ingredient.type || ''}
+                        onChange={e => {
+                          const newIngredients = [...addForm.ingredients];
+                          newIngredients[idx].type = e.target.value;
+                          setAddForm(f => ({ ...f, ingredients: newIngredients }));
+                        }}
+                        className="border p-2 rounded w-1/4"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Unidad (ej. g, ml, taza)"
+                        value={ingredient.unit}
+                        onChange={e => {
+                          const newIngredients = [...addForm.ingredients];
+                          newIngredients[idx].unit = e.target.value;
+                          setAddForm(f => ({ ...f, ingredients: newIngredients }));
+                        }}
+                        className="border p-2 rounded w-1/4"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="text-red-500 ml-2"
+                        onClick={() => {
+                          const newIngredients = addForm.ingredients.filter((_, i) => i !== idx);
+                          setAddForm(f => ({ ...f, ingredients: newIngredients.length ? newIngredients : [{ name: '', quantity: '', type: '', unit: '' }] }));
+                        }}
+                        aria-label="Eliminar ingrediente"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={() => setAddForm(f => ({ ...f, ingredients: [...(f.ingredients || []), { name: '', quantity: '', type: '', unit: '' }] }))
+                    }
+                  >
+                    Añadir ingrediente
+                  </button>
+                </div>
+                {/* Pasos dinámicos */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-1">Pasos de la preparación</label>
+                  {addForm.steps && addForm.steps.map((step, idx) => (
+                    <div key={idx} className="mb-2">
+                      <textarea
+                        placeholder={`Describe el paso ${idx + 1}`}
+                        value={step.text}
+                        onChange={e => {
+                          const newSteps = [...addForm.steps];
+                          newSteps[idx].text = e.target.value;
+                          setAddForm(f => ({ ...f, steps: newSteps }));
+                        }}
+                        className="border p-2 rounded w-full mb-1"
+                        required
+                      />
+                      {/* Imagen del paso */}
+                      <div className="flex items-center gap-2 mb-1">
+                        {step.imagePreview && (
+                          <img src={step.imagePreview} alt={`Paso ${idx + 1}`} className="h-16 w-16 object-cover rounded" />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            if (!file.type.startsWith('image/')) return;
+                            if (step.imagePreview) URL.revokeObjectURL(step.imagePreview);
+                            const url = URL.createObjectURL(file);
+                            const newSteps = [...addForm.steps];
+                            newSteps[idx].image = file;
+                            newSteps[idx].imagePreview = url;
+                            setAddForm(f => ({ ...f, steps: newSteps }));
+                          }}
+                        />
+                        {step.imagePreview && (
+                          <button
+                            type="button"
+                            className="text-red-500 text-xs"
+                            onClick={() => {
+                              if (step.imagePreview) URL.revokeObjectURL(step.imagePreview);
+                              const newSteps = [...addForm.steps];
+                              newSteps[idx].image = null;
+                              newSteps[idx].imagePreview = null;
+                              setAddForm(f => ({ ...f, steps: newSteps }));
+                            }}
+                          >
+                            Quitar imagen
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="text-red-500 text-sm"
+                        onClick={() => {
+                          const newSteps = addForm.steps.filter((_, i) => i !== idx);
+                          setAddForm(f => ({ ...f, steps: newSteps.length ? newSteps : [{ text: '', image: null, imagePreview: null }] }));
+                        }}
+                        aria-label="Eliminar paso"
+                      >
+                        Eliminar paso
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={() => setAddForm(f => ({ ...f, steps: [...(f.steps || []), { text: '', image: null, imagePreview: null }] }))
+                    }
+                  >
+                    Añadir paso
+                  </button>
+                </div>
+                <div className="flex justify-end mt-6 gap-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={() => setAddModal(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {viewModal.open && (
