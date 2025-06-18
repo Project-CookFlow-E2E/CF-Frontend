@@ -18,32 +18,44 @@
  * 
  * @author Ana Castro basado en el código de Yuliia Martynovych en Profile.jsx.
  */
-
 import { useState, useEffect, useMemo } from "react";
-import { mockRecipes } from "../data/mockData";
+import { recipeService } from "../services/recipeService";
 import useFavorites from "./useFavorites";
 
 export default function useProfileRecipes() {
-    const [activeTab, setActiveTab] = useState("saved"); 
-    const [currentPage, setCurrentPage] = useState(1); 
-    const { favorites, toggleFavorite } = useFavorites(); 
+    const [activeTab, setActiveTab] = useState("saved");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [createdRecipes, setCreatedRecipes] = useState([]);
+    const { favorites, toggleFavorite } = useFavorites();
     const recipesPerPage = 8;
 
+    // Cargar recetas creadas por el usuario desde la base de datos
+    useEffect(() => {
+        const fetchCreatedRecipes = async () => {
+            try {
+                const recipes = await recipeService.getRecipeByUserId();
+                setCreatedRecipes(recipes);
+            } catch (error) {
+                setCreatedRecipes([]);
+            }
+        };
+        fetchCreatedRecipes();
+    }, []);
+
     const filteredRecipes = useMemo(() => {
-        return mockRecipes.filter((recipe) =>
-            activeTab === "saved" ? favorites.includes(String(recipe.id)) : recipe.isCreatedByUser
-        );
-    }, [activeTab, favorites]);
+        if (activeTab === "saved") {
+            return []; // Las favoritas se gestionan en el otro hook
+        }
+        return createdRecipes;
+    }, [activeTab, createdRecipes]);
 
     const paginatedRecipes = useMemo(() => {
         const start = (currentPage - 1) * recipesPerPage;
         return filteredRecipes.slice(start, start + recipesPerPage);
     }, [filteredRecipes, currentPage]);
 
-    const createdRecipesCount = useMemo(() => mockRecipes.filter((r) => r.isCreatedByUser).length, []);
-    
     const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
-    
+
     useEffect(() => {
         setCurrentPage(1);
     }, [activeTab]);
@@ -55,9 +67,10 @@ export default function useProfileRecipes() {
         setCurrentPage,
         favorites,
         toggleFavorite,
-        createdRecipesCount,
         totalPages,
         filteredRecipes,
         paginatedRecipes,
+        createdRecipesCount: createdRecipes.length,
+
     };
 }

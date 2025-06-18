@@ -74,6 +74,7 @@ const Profile = () => {
     paginatedRecipes,
     totalPages,
     filteredRecipes,
+    createdRecipesCount,
   } = useProfileRecipes();
 
   useEffect(() => {
@@ -286,12 +287,12 @@ const Profile = () => {
         </button>
         <button
           className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "created"
-            ? "bg-red-400 text-white scale-100"
-            : "bg-gray-200 text-gray-600 scale-90"
+              ? "bg-red-400 text-white scale-100"
+              : "bg-gray-200 text-gray-600 scale-90"
             }`}
           onClick={() => setActiveTab("created")}
         >
-          Recetas creadas ({filteredRecipes.length})
+          Recetas creadas ({createdRecipesCount})
         </button>
       </div>
 
