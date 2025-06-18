@@ -24,7 +24,7 @@ const BASE_URL = "/recipes/recipes";
  * Service for interacting with recipe API endpoints.
  */
 export const recipeService = {
-    
+
     /**
     * Fetches a list of all recipes.
     * GET /api/recipes/recipes/
@@ -91,23 +91,23 @@ export const recipeService = {
     * @throws {Error} If `userId` is not a valid positive integer, if the API request fails
     * (e.g., network error, server error) or token doesn't have and user id.
     */
-   getRecipeByUserId: async (userId) => {
-    let finalUserId = userId; 
-    
-    if (finalUserId === null || typeof finalUserId === 'undefined') {
-        try {
-            finalUserId = await getUserIdFromToken(); 
-        } catch (error) {
-            throw new Error("The user id is not delivered from token: " + error.message);
+    getRecipeByUserId: async (userId) => {
+        let finalUserId = userId;
+
+        if (finalUserId === null || typeof finalUserId === 'undefined') {
+            try {
+                finalUserId = await getUserIdFromToken();
+            } catch (error) {
+                throw new Error("The user id is not delivered from token: " + error.message);
+            }
         }
-    }
 
-    if (typeof finalUserId !== 'number' || !Number.isInteger(finalUserId) || finalUserId <= 0) {
-        throw new Error("User id is not valid.");
-    }
+        if (typeof finalUserId !== 'number' || !Number.isInteger(finalUserId) || finalUserId <= 0) {
+            throw new Error("User id is not valid.");
+        }
 
-    const response = await api.get(`${BASE_URL}/?user_id=${finalUserId}`);
-    return response.data;
+        const response = await api.get(`${BASE_URL}/?user_id=${finalUserId}`);
+        return response.data;
     },
 
     /**
@@ -150,7 +150,7 @@ export const recipeService = {
     * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
     */
     createRecipe: async (recipeData) => {
-        const response = await api.post(`${BASE_URL}/`, recipeData);
+        const response = await api.post(`${BASE_URL}/`, recipeData, { headers: { 'Content-Type': 'multipart/form-data' } });
         return response.data;
     },
 
@@ -172,7 +172,7 @@ export const recipeService = {
             return Promise.reject(new Error("recipe id not valid."));
         };
         const response = await api.patch(`${BASE_URL}/${recipeId}/`, recipeData);
-        return response.data; 
+        return response.data;
     },
 
     /**
