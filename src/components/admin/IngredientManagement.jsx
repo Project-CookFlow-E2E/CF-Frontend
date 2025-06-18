@@ -56,6 +56,19 @@ const IngredientManagement = () => {
     is_approved: false,
   });
 
+  const [addModal, setAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: "",
+    description: "",
+    quantity: 1,
+    unit: "",
+    unit_type: "",
+    categories: "", // ids separados por coma
+    is_checked: false,
+    is_approved: false,
+  });
+  const [addError, setAddError] = useState("");
+
   useEffect(() => {
     const fetchIngredients = async () => {
       setLoading(true);
@@ -145,7 +158,10 @@ const IngredientManagement = () => {
         <h2 className="text-2xl font-bold text-gray-800">
           Administrador de Ingredientes
         </h2>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center">
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center"
+          onClick={() => setAddModal(true)}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 mr-2"
@@ -419,6 +435,205 @@ const IngredientManagement = () => {
                   className="bg-blue-500 text-white px-4 py-2 rounded"
                 >
                   Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {addModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div
+            className="fixed inset-0 z-0"
+            style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
+            onClick={() => setAddModal(false)}
+          />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            <h3 className="text-xl font-bold mb-4">Añadir Ingrediente</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setAddError("");
+                // Validación básica
+                if (
+                  !addForm.name ||
+                  !addForm.quantity ||
+                  !addForm.unit ||
+                  !addForm.unit_type ||
+                  !addForm.categories
+                ) {
+                  setAddError("Por favor, completa todos los campos obligatorios.");
+                  return;
+                }
+                try {
+                  const payload = {
+                    name: addForm.name,
+                    description: addForm.description,
+                    quantity: Number(addForm.quantity),
+                    unit: addForm.unit,
+                    unit_type: addForm.unit_type,
+                    categories: addForm.categories.split(",").map((id) => id.trim()),
+                    is_checked: addForm.is_checked,
+                    is_approved: addForm.is_approved,
+                  };
+                  await ingredientService.createIngredientAdmin(payload);
+                  setAddModal(false);
+                  setAddForm({
+                    name: "",
+                    description: "",
+                    quantity: 1,
+                    unit: "",
+                    unit_type: "",
+                    categories: "",
+                    is_checked: false,
+                    is_approved: false,
+                  });
+                  // Refresca ingredientes
+                  setLoading(true);
+                  const data = await ingredientService.getAllIngredientsAdmin();
+                  setIngredients([...data].sort((a, b) => a.name.localeCompare(b.name)));
+                  setLoading(false);
+                } catch (err) {
+                  let msg = "Error al crear ingrediente";
+                  if (err && err.response && err.response.data) {
+                    if (typeof err.response.data === "string")
+                      msg += ": " + err.response.data;
+                    else if (typeof err.response.data === "object")
+                      msg += ": " + Object.values(err.response.data).join(" ");
+                  }
+                  setAddError(msg);
+                }
+              }}
+              className="space-y-4"
+            >
+              {addError && (
+                <div className="text-red-600 text-sm mb-2">{addError}</div>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={addForm.name}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Nombre del ingrediente"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  name="description"
+                  value={addForm.description}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Descripción"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Cantidad *</label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={addForm.quantity}
+                  min={1}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, quantity: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Cantidad"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Unidad *</label>
+                <input
+                  type="text"
+                  name="unit"
+                  value={addForm.unit}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, unit: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="g, ml, unidad, etc."
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Tipo de unidad *
+                </label>
+                <input
+                  type="text"
+                  name="unit_type"
+                  value={addForm.unit_type}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, unit_type: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="peso, volumen, etc."
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Categorías (IDs, separadas por coma) *
+                </label>
+                <input
+                  type="text"
+                  name="categories"
+                  value={addForm.categories}
+                  onChange={(e) =>
+                    setAddForm((f) => ({ ...f, categories: e.target.value }))
+                  }
+                  className="w-full border p-2 rounded"
+                  placeholder="Ej: 1,2,3"
+                  required
+                />
+              </div>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addForm.is_checked}
+                    onChange={(e) =>
+                      setAddForm((f) => ({ ...f, is_checked: e.target.checked }))
+                    }
+                  />
+                  Revisado
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addForm.is_approved}
+                    onChange={(e) =>
+                      setAddForm((f) => ({ ...f, is_approved: e.target.checked }))
+                    }
+                  />
+                  Aprobado
+                </label>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setAddModal(false)}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Crear
                 </button>
               </div>
             </form>

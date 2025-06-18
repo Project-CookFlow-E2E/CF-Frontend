@@ -5,6 +5,7 @@ import Button from "./Button";
 import { IoMdClose } from "react-icons/io";
 import { BsBookmarkFill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
+import { categoryService } from "../services/categoryService";
 
 /**
  * Componente SwipeCard para mostrar una tarjeta de receta con opciones de interacción.
@@ -147,7 +148,23 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
         onSkip();
     };
 
-    const categoriesToDisplay = Array.isArray(recipe.categories) ? recipe.categories : [];
+    const [categoriesToDisplay, setCategoriesToDisplay] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            if (Array.isArray(recipe.categories)) {
+                const categoryData = await Promise.all(
+                    recipe.categories.map(async (catId) => {
+                        if (typeof catId === 'object' && catId.name) return catId;
+                        const fetched = await categoryService.getCategoryById(catId);
+                        return fetched;
+                    })
+                );
+                setCategoriesToDisplay(categoryData);
+            }
+        };
+        fetchCategories();
+    }, [recipe.categories]);
 
     return (
         <div

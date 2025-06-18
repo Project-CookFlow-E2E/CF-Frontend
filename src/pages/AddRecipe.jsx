@@ -11,6 +11,7 @@ import { Image, Plus } from "lucide-react";
 import { Button, Input } from "../components/";
 import { recipeService } from "../services/recipeService";
 import { categoryService } from "../services/categoryService";
+import { useNavigate } from "react-router-dom";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
@@ -28,6 +29,7 @@ const AddRecipe = () => {
   const [mensaje, setMensaje] = useState("");
   const [recipeId, setRecipeId] = useState(null);
   const dropdownRef = useRef(null);
+
 
   const {
     control,
@@ -185,7 +187,7 @@ const AddRecipe = () => {
     setValue(`ingredients.${index}.name`, value);
     const found = allIngredients.find(i => i.name === value);
     if (found && found.unit_type_id) {
-      setValue(`ingredients.${index}.id`, found.id); // Guardar el ID del ingrediente encontrado
+      setValue(`ingredients.${index}.id`, found.id);
       if (!unitsByType[found.unit_type_id]) {
         try {
           const units = await unitService.getUnitByUnitTypeId(found.unit_type_id);
@@ -241,7 +243,7 @@ const AddRecipe = () => {
     }
   };
 
-
+  const navigate = useNavigate();
   // Validación de campos numéricos (no negativos ni cero)
   const validatePositive = (value) => {
     if (value === "" || value === null || value === undefined) return "Campo obligatorio";
@@ -257,6 +259,7 @@ const AddRecipe = () => {
     if (parseFloat(value) <= 0) return "Debe ser mayor que 0";
     return true;
   };
+
 
   const onSubmit = async (data) => {
     // Validación manual extra para ingredientes
@@ -350,6 +353,7 @@ const AddRecipe = () => {
         errorMsg += "\nDetalles del error del servidor: " + JSON.stringify(error.response.data, null, 2);
       } else if (error.message) {
         errorMsg += "\nDetalles del error: " + error.message;
+
       }
       setMensaje(errorMsg);
     }
@@ -359,7 +363,7 @@ const AddRecipe = () => {
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
       <div className="max-w-md mx-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Add_recipes</h2>
-        <button className="mb-4" data-testid="back-button">
+        <button className="mb-4" data-testid="back-button" onClick={() => navigate("/main")}>
           <span className="text-2xl">←</span>
         </button>
         <h1 className="text-2xl font-semibold text-center mb-6" data-testid="add-recipe-title">
@@ -375,17 +379,10 @@ const AddRecipe = () => {
             {mensaje}
           </div>
         )}
-        {recipeId && (
-          <div className="mb-4 px-3 py-2 rounded-lg text-sm font-mono bg-green-100 text-green-800">
-            <strong>recipe_id generado:</strong> {recipeId}
-          </div>
-        )}
-
         {/* Imagen de la receta */}
         <div
-          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${
-            isDragOver ? "border-accent border-2 bg-accent/5" : ""
-          }`}
+          className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${isDragOver ? "border-accent border-2 bg-accent/5" : ""
+            }`}
           data-testid="image-upload-area"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -474,14 +471,14 @@ const AddRecipe = () => {
 
             {/* Selector de categorías padre e hijas */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría padre</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categorías</label>
               <select
                 className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                 value={selectedParent || ""}
                 onChange={e => setSelectedParent(Number(e.target.value))}
               >
                 <option value="" className="text-gray-400">
-                  Selecciona una categoría padre
+                  Selecciona una categoría
                 </option>
                 {parentCategories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -489,17 +486,16 @@ const AddRecipe = () => {
               </select>
               {childCategories.length > 0 && (
                 <>
-                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Categorías hijas</label>
+                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Subcategorías</label>
                   <div className="flex flex-wrap gap-2">
                     {childCategories.map((categoria) => (
                       <button
                         type="button"
                         key={categoria.id}
-                        className={`px-3 py-1 rounded-lg border ${
-                          (categoriasSeleccionadas || []).includes(categoria.id)
-                            ? "bg-accent text-white"
-                            : "bg-white text-gray-700"
-                        }`}
+                        className={`px-3 py-1 rounded-lg border ${(categoriasSeleccionadas || []).includes(categoria.id)
+                          ? "bg-accent text-white"
+                          : "bg-white text-gray-700"
+                          }`}
                         onClick={() => handleCategoriaChange(categoria)}
                       >
                         {categoria.name}
@@ -573,15 +569,23 @@ const AddRecipe = () => {
                       rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
-                          <Input
+
+                          <select
                             {...field}
                             id={`ingredient-name-${index}`}
-                            list={`ingredientes-list-${index}`}
-                            placeholder="Ej: Harina, Leche..."
-                            className="w-full focus:outline-none"
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                             onChange={e => handleIngredientChange(e, index)}
                             required
-                          />
+                          >
+                            <option value="">Selecciona un ingrediente</option>
+                            {allIngredients.map(i => (
+                              <option key={i.id} value={i.name}>
+                                {i.name}
+                              </option>
+                            ))}
+                          </select>
+
+
                           <datalist id={`ingredientes-list-${index}`}>
                             {allIngredients.map(i => (
                               <option key={i.id} value={i.name} />
@@ -664,6 +668,7 @@ const AddRecipe = () => {
                   type="button"
                   onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
                   className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center mt-2"
+                  style={{ width: "100%" }}
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
                 </button>
@@ -808,6 +813,7 @@ const AddRecipe = () => {
                   }
                   className="border rounded-xl px-6 py-3 h-10 flex justify-center items-center"
                   data-testid="add-step-button"
+                  style={{ width: "100%" }}
                 >
                   Añadir paso
                   <Plus className="w-5 h-5" />

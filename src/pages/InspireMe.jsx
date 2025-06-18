@@ -182,6 +182,7 @@ const InspireMe = () => {
         }
     }, [currentRecipeIndex, displayableRecipes.length, allRecipesExhausted, fetchingMoreRecipes, fetchRecipes]);
 
+
     if (initialLoading || favoritesLoading || (recipes.length === 0 && fetchingMoreRecipes && !allRecipesExhausted)) {
         return (
             <div
@@ -195,6 +196,7 @@ const InspireMe = () => {
                 <p className="mt-4 text-gray-700">Cargando recetas y tus favoritos...</p>
             </div>
         );
+
     }
 
     if (displayableRecipes.length === 0 && (!initialLoading || allRecipesExhausted) && !fetchingMoreRecipes) {
@@ -239,6 +241,7 @@ const InspireMe = () => {
             style={{ backgroundColor: '#FDF3E8' }}
             data-testid="inspire-me-page"
             id="inspire-me-container"
+
         >
             <div className="max-w-md mx-auto">
                 <h1

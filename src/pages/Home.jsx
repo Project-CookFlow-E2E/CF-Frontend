@@ -33,6 +33,7 @@ const Home = () => {
     const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(2);
     const navigate = useNavigate();
     const [userName, setUserName] = useState("");
+    const mediaUrl = import.meta.env.VITE_MEDIA_URL
 
     useEffect(() => {
         userService
@@ -45,11 +46,11 @@ const Home = () => {
         <div className="min-h-screen bg-background w-full" data-testid="home-page">
             <div className="w-full bg-background pt-7 pb-12 px-4 sm:px-6 lg:px-20" id="home-header">
                 <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                    <div className="flex flex-col ml-12 justify-center items-center lg:items-start text-center lg:text-left">
+                    <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
                         <p className="text-gray-600 mb-8 text-lg" data-testid="prompt-text">
                             {userName ? (
                                 <>
-                                    <span className="font-bold">Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
+                                    <span className="font-bold">¡Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
                                 </>
                             ) : (
                                 "¿No sabes qué elegir?"
@@ -68,11 +69,10 @@ const Home = () => {
                                     <Badge
                                         key={category.id}
                                         data-testid={`category-badge-${category.name}`}
-                                        className={`cursor-pointer ${
-                                            isSelected
+                                        className={`cursor-pointer ${isSelected
                                                 ? "bg-pink-500 text-white"
                                                 : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                                        }`}
+                                            }`}
                                         onClick={() => toggleCategory(category.name)}
                                     >
                                         {category.name}
@@ -113,11 +113,25 @@ const Home = () => {
                             <Card
                                 key={recipe.id}
                                 id={`recipe-card-${recipe.id}`}
-                                image={recipe.image_url}
+                                image={
+                                    recipe?.user?.id && recipe?.image?.url
+                                        ? mediaUrl + recipe.user.id + '/' + recipe.image.url
+                                        : 'https://placehold.co/800?text=Placeholder+Image&font=playfair-display'
+                                }
                                 name={recipe.name}
-                                category={recipe.category}
+                                category={
+                                        Array.isArray(recipe.categories)
+                                            ? recipe.categories
+                                                  .map((cat) => {
+                                                      const catId = typeof cat === "object" ? cat.id : cat;
+                                                      const fullCat = categories.find((c) => c.id === catId);
+                                                      return fullCat?.name;
+                                                  })
+                                                  .filter(Boolean)
+                                            : ["Sin categoría"]
+                                    }
                                 time={`${recipe.duration_minutes}`}
-                               isFavorite={favorites.includes(String(recipe.id))} 
+                                isFavorite={favorites.includes(String(recipe.id))}
                                 onToggleFavorite={() => toggleFavorite(recipe.id)}
                                 onClick={() => navigate(`/recipe/${recipe.id}`)}
                             />
