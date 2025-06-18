@@ -10,16 +10,19 @@
 
 import React, { useState, useEffect } from "react";
 import { shoppingListItemService } from "../services/shoppingListItemService";
+import ErrorMsg from "../components/ErrorMsg";
+import SuccessMsg from "../components/SuccessMsg";
 
 const ShoppingList = () => {
   const [items, setItems] = useState([]);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const fetchShoppingItems = async () => {
       try {
         const data = await shoppingListItemService.getAllShoppingListItems();
-        const withCheck = data.map((item) => ({ ...item, checked: false }));        
+        const withCheck = data.map((item) => ({ ...item, checked: false }));
         setItems(withCheck);
       } catch (err) {
         console.error("Error cargando lista de compra:", err);
@@ -38,34 +41,34 @@ const ShoppingList = () => {
     );
   };
 
-
   const handleDeleteItem = async (id) => {
     try {
-      console.table([items])
+      console.table([items]);
       console.log("Borrando item con ID:", id);
       await shoppingListItemService.deleteShoppingListItem(Number(id));
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));    
-        
+      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      setSuccess("Ítem eliminado de la lista.");
     } catch (err) {
       console.error("Error al eliminar el ítem:", err);
       console.log("RESPUESTA ERROR:", err.response);
-      alert("No se pudo eliminar el ingrediente de la lista.");
+      setError("No se pudo eliminar el ítem de la lista.");
     }
   };
 
   const handleClearAll = async () => {
-  try {
-    await Promise.all(
-      items.map((item) =>
-        shoppingListItemService.deleteShoppingListItem(Number(item.id))
-      )
-    );
-    setItems([]);
-  } catch (err) {
-    console.error("Error al eliminar todos los ítems:", err);
-    alert("No se pudo eliminar toda la lista.");
-  }
-};
+    try {
+      await Promise.all(
+        items.map((item) =>
+          shoppingListItemService.deleteShoppingListItem(Number(item.id))
+        )
+      );
+      setItems([]);
+      setSuccess("Todos los ítems han sido eliminados de la lista.");
+    } catch (err) {
+      console.error("Error al eliminar todos los ítems:", err);
+      setError("No se pudo eliminar toda la lista.");
+    }
+  };
 
   return (
     <div
@@ -88,14 +91,26 @@ const ShoppingList = () => {
           Lista de la Compra
         </h1>
       </div>
-
+      {error && (
+        <ErrorMsg className="mb-4" data-testid="shoppinglist-error-msg">
+          {error}
+        </ErrorMsg>
+      )}
+      {success && (
+        <SuccessMsg className="mb-4" data-testid="shoppinglist-success-msg">
+          {success}
+        </SuccessMsg>
+      )}
       <div
         className="flex-grow w-full max-w-md px-4 py-2 flex flex-col justify-between pb-8"
         data-testid="shoppinglist-main-container"
       >
         <main className="w-full" data-testid="shoppinglist-main">
           {items.length > 0 ? (
-            <div className="space-y-3" data-testid="shoppinglist-items-container">
+            <div
+              className="space-y-3"
+              data-testid="shoppinglist-items-container"
+            >
               {items.map((item) => (
                 <div
                   key={item.id}
@@ -112,7 +127,9 @@ const ShoppingList = () => {
                     />
                     <span
                       className={`ml-3 text-lg ${
-                        item.checked ? "line-through text-gray-500" : "text-gray-800"
+                        item.checked
+                          ? "line-through text-gray-500"
+                          : "text-gray-800"
                       }`}
                       data-testid={`shoppinglist-item-name-${item.id}`}
                     >
