@@ -72,6 +72,7 @@ const RecipeManagement = () => {
   const [addForm, setAddForm] = useState({ name: "", description: "", duration_minutes: "", commensals: "", categories: "" });
 
   const [viewModal, setViewModal] = useState({ open: false, recipe: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, recipe: null });
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -167,14 +168,17 @@ const RecipeManagement = () => {
   const openViewModal = (recipe) => setViewModal({ open: true, recipe });
   const closeViewModal = () => setViewModal({ open: false, recipe: null });
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Seguro que quieres borrar esta receta?')) return;
+  const openDeleteModal = (recipe) => setDeleteModal({ open: true, recipe });
+  const closeDeleteModal = () => setDeleteModal({ open: false, recipe: null });
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.recipe.id;
     try {
       await recipeService.deleteRecipe(id);
       // Refresca recetas
       const data = await recipeService.getAllRecipes();
       const sorted = [...data].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setRecipes(sorted);
+      closeDeleteModal();
     } catch (err) {
       alert('Error al borrar la receta.');
     }
@@ -289,7 +293,7 @@ const RecipeManagement = () => {
                     >
                       Editar
                     </button>
-                    <button className="text-red-600 hover:text-red-900" onClick={() => handleDelete(recipe.id)}>
+                    <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(recipe)}>
                       Borrar
                     </button>
                   </td>
@@ -319,9 +323,11 @@ const RecipeManagement = () => {
         </button>
       </div>
 
+      {/* MODAL DE EDITAR RECETA */}
       {editModal.open && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeEditModal} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
             <h3 className="text-xl font-bold mb-4">Editar Receta</h3>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
@@ -410,8 +416,7 @@ const RecipeManagement = () => {
         <>
           {/* Overlay semitransparente */}
           <div
-            className="fixed inset-0 z-40"
-            style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
+            className="fixed inset-0 z-40 bg-black/10" // Fondo claro, igual que el resto del admin
             onClick={() => setAddModal(false)}
             aria-label="Cerrar modal"
           />
@@ -540,36 +545,77 @@ const RecipeManagement = () => {
                     />
                   </div>
                 </div>
-                {/* Imagen principal */}
+                {/* Imagen principal - área visual cuadrada con drag & drop y previsualización */}
                 <div className="mt-6">
                   <label className="block text-sm font-medium mb-1">Imagen principal</label>
-                  <div className="flex items-center gap-4">
-                    {addForm.imagePreview && (
-                      <img src={addForm.imagePreview} alt="Vista previa" className="h-24 w-24 object-cover rounded" />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={e => {
-                        const file = e.target.files[0];
-                        if (!file) return;
+                  <div
+                    className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-2 overflow-hidden relative transition-all duration-200 ${addForm.isDragOver ? "border-accent border-2 bg-accent/5" : ""}`}
+                    onDragOver={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setAddForm(f => ({ ...f, isDragOver: true }));
+                    }}
+                    onDragLeave={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setAddForm(f => ({ ...f, isDragOver: false }));
+                    }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const files = e.dataTransfer.files;
+                      if (files.length > 0) {
+                        const file = files[0];
                         if (!file.type.startsWith('image/')) return;
                         if (addForm.imagePreview) URL.revokeObjectURL(addForm.imagePreview);
                         const url = URL.createObjectURL(file);
-                        setAddForm(f => ({ ...f, image: file, imagePreview: url }));
-                      }}
-                    />
-                    {addForm.imagePreview && (
-                      <button
-                        type="button"
-                        className="text-red-500 text-xs"
-                        onClick={() => {
-                          if (addForm.imagePreview) URL.revokeObjectURL(addForm.imagePreview);
-                          setAddForm(f => ({ ...f, image: null, imagePreview: null }));
-                        }}
-                      >
-                        Quitar imagen
-                      </button>
+                        setAddForm(f => ({ ...f, image: file, imagePreview: url, isDragOver: false }));
+                      } else {
+                        setAddForm(f => ({ ...f, isDragOver: false }));
+                      }
+                    }}
+                  >
+                    {addForm.imagePreview ? (
+                      <>
+                        <img
+                          src={addForm.imagePreview}
+                          alt="Vista previa"
+                          className="object-contain w-full h-full"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (addForm.imagePreview) URL.revokeObjectURL(addForm.imagePreview);
+                            setAddForm(f => ({ ...f, image: null, imagePreview: null }));
+                          }}
+                          className="absolute top-2 right-2 bg-white/80 text-red-600 border border-red-300 rounded-full px-2 py-1 text-xs hover:bg-white"
+                        >
+                          Eliminar
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12l2 2 4-4" /></svg>
+                        <label className="mt-2 px-4 py-1 border-2 border-accent rounded-xl text-accent cursor-pointer">
+                          Añadir Foto
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={e => {
+                              const file = e.target.files[0];
+                              if (!file) return;
+                              if (!file.type.startsWith('image/')) return;
+                              if (addForm.imagePreview) URL.revokeObjectURL(addForm.imagePreview);
+                              const url = URL.createObjectURL(file);
+                              setAddForm(f => ({ ...f, image: file, imagePreview: url }));
+                            }}
+                          />
+                        </label>
+                        {addForm.isDragOver && (
+                          <p className="text-accent text-sm mt-2">Suelta la imagen aquí</p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -651,7 +697,7 @@ const RecipeManagement = () => {
                 <div className="mt-6">
                   <label className="block text-sm font-medium mb-1">Pasos de la preparación</label>
                   {addForm.steps && addForm.steps.map((step, idx) => (
-                    <div key={idx} className="mb-2">
+                    <div key={idx} className="mb-6">
                       <textarea
                         placeholder={`Describe el paso ${idx + 1}`}
                         value={step.text}
@@ -660,56 +706,114 @@ const RecipeManagement = () => {
                           newSteps[idx].text = e.target.value;
                           setAddForm(f => ({ ...f, steps: newSteps }));
                         }}
-                        className="border p-2 rounded w-full mb-1"
+                        className="border p-2 rounded w-full mb-2"
                         required
                       />
-                      {/* Imagen del paso */}
-                      <div className="flex items-center gap-2 mb-1">
-                        {step.imagePreview && (
-                          <img src={step.imagePreview} alt={`Paso ${idx + 1}`} className="h-16 w-16 object-cover rounded" />
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={e => {
-                            const file = e.target.files[0];
-                            if (!file) return;
+                      {/* Imagen del paso - área visual cuadrada igual que la imagen principal */}
+                      <div
+                        className={`bg-white border border-gray-300 rounded-xl h-48 w-full flex flex-col justify-center items-center overflow-hidden relative transition-all duration-200 ${step.isDragOver ? "border-accent border-2 bg-accent/5" : ""}`}
+                        onDragOver={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const newSteps = [...addForm.steps];
+                          newSteps[idx].isDragOver = true;
+                          setAddForm(f => ({ ...f, steps: newSteps }));
+                        }}
+                        onDragLeave={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const newSteps = [...addForm.steps];
+                          newSteps[idx].isDragOver = false;
+                          setAddForm(f => ({ ...f, steps: newSteps }));
+                        }}
+                        onDrop={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const files = e.dataTransfer.files;
+                          if (files.length > 0) {
+                            const file = files[0];
                             if (!file.type.startsWith('image/')) return;
                             if (step.imagePreview) URL.revokeObjectURL(step.imagePreview);
                             const url = URL.createObjectURL(file);
                             const newSteps = [...addForm.steps];
                             newSteps[idx].image = file;
                             newSteps[idx].imagePreview = url;
+                            newSteps[idx].isDragOver = false;
                             setAddForm(f => ({ ...f, steps: newSteps }));
+                          } else {
+                            const newSteps = [...addForm.steps];
+                            newSteps[idx].isDragOver = false;
+                            setAddForm(f => ({ ...f, steps: newSteps }));
+                          }
+                        }}
+                      >
+                        {step.imagePreview ? (
+                          <>
+                            <img src={step.imagePreview} alt={`Paso ${idx + 1}`} className="object-contain w-full h-full" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (step.imagePreview) URL.revokeObjectURL(step.imagePreview);
+                                const newSteps = [...addForm.steps];
+                                newSteps[idx].image = null;
+                                newSteps[idx].imagePreview = null;
+                                setAddForm(f => ({ ...f, steps: newSteps }));
+                              }}
+                              className="absolute top-2 right-2 bg-white/80 text-red-600 border border-red-300 rounded-full px-2 py-1 text-xs hover:bg-white"
+                            >
+                              Eliminar
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12l2 2 4-4" /></svg>
+                            <label className="mt-2 px-4 py-1 border-2 border-accent rounded-xl text-accent cursor-pointer">
+                              Añadir Foto
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={e => {
+                                  const file = e.target.files[0];
+                                  if (!file) return;
+                                  if (!file.type.startsWith('image/')) return;
+                                  if (step.imagePreview) URL.revokeObjectURL(step.imagePreview);
+                                  const url = URL.createObjectURL(file);
+                                  const newSteps = [...addForm.steps];
+                                  newSteps[idx].image = file;
+                                  newSteps[idx].imagePreview = url;
+                                  setAddForm(f => ({ ...f, steps: newSteps }));
+                                }}
+                              />
+                            </label>
+                            {step.isDragOver && (
+                              <p className="text-accent text-sm mt-2">Suelta la imagen aquí</p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          type="button"
+                          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                          onClick={() => {
+                            const newSteps = addForm.steps.filter((_, i) => i !== idx);
+                            setAddForm(f => ({ ...f, steps: newSteps.length ? newSteps : [{ text: '', image: null, imagePreview: null }] }));
                           }}
-                        />
-                        {step.imagePreview && (
+                          aria-label="Eliminar paso"
+                        >
+                          Eliminar paso
+                        </button>
+                        {idx === addForm.steps.length - 1 && (
                           <button
                             type="button"
-                            className="text-red-500 text-xs"
-                            onClick={() => {
-                              if (step.imagePreview) URL.revokeObjectURL(step.imagePreview);
-                              const newSteps = [...addForm.steps];
-                              newSteps[idx].image = null;
-                              newSteps[idx].imagePreview = null;
-                              setAddForm(f => ({ ...f, steps: newSteps }));
-                            }}
+                            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                            onClick={() => setAddForm(f => ({ ...f, steps: [...(f.steps || []), { text: '', image: null, imagePreview: null }] }))}
                           >
-                            Quitar imagen
+                            Añadir paso
                           </button>
                         )}
                       </div>
-                      <button
-                        type="button"
-                        className="text-red-500 text-sm"
-                        onClick={() => {
-                          const newSteps = addForm.steps.filter((_, i) => i !== idx);
-                          setAddForm(f => ({ ...f, steps: newSteps.length ? newSteps : [{ text: '', image: null, imagePreview: null }] }));
-                        }}
-                        aria-label="Eliminar paso"
-                      >
-                        Eliminar paso
-                      </button>
                     </div>
                   ))}
                   <button
@@ -743,10 +847,16 @@ const RecipeManagement = () => {
       )}
 
       {viewModal.open && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
             <h3 className="text-xl font-bold mb-4">Detalles de la Receta</h3>
             <div className="space-y-2">
+              {/* Imagen principal visual igual que en el modal de añadir */}
+              {viewModal.recipe.image && (
+                <div className="bg-white border border-gray-300 rounded-xl h-48 w-full flex flex-col justify-center items-center mb-4 overflow-hidden relative">
+                  <img src={typeof viewModal.recipe.image === 'string' ? viewModal.recipe.image : URL.createObjectURL(viewModal.recipe.image)} alt="Imagen principal" className="object-contain w-full h-full" />
+                </div>
+              )}
               <div><span className="font-semibold">Nombre:</span> {viewModal.recipe.name}</div>
               <div><span className="font-semibold">Descripción:</span> {viewModal.recipe.description}</div>
               <div><span className="font-semibold">Duración:</span> {viewModal.recipe.duration_minutes} min</div>
@@ -758,6 +868,21 @@ const RecipeManagement = () => {
             </div>
             <div className="flex justify-end mt-4">
               <button onClick={closeViewModal} className="bg-gray-300 px-4 py-2 rounded">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeDeleteModal} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            <h3 className="text-xl font-bold mb-4">¿Seguro que quieres borrar esta receta?</h3>
+            <div className="mb-4">Esta acción no se puede deshacer.</div>
+            <div className="flex justify-end space-x-2">
+              <button onClick={closeDeleteModal} className="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+              <button onClick={handleDeleteConfirm} className="bg-red-500 text-white px-4 py-2 rounded">Borrar</button>
             </div>
           </div>
         </div>

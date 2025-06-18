@@ -198,6 +198,36 @@ export const recipeService = {
      * @throws {Error} If the API request fails (e.g., validation errors, 401 Unauthorized).
      */
     createRecipe: async (recipeData) => {
+        // Si hay imagen o archivos, convertir a FormData
+        let dataToSend = recipeData;
+        if (
+            recipeData.image ||
+            (recipeData.steps && recipeData.steps.some(s => s.image))
+        ) {
+            const formData = new FormData();
+            formData.append('name', recipeData.name);
+            formData.append('description', recipeData.description);
+            formData.append('duration_minutes', recipeData.duration_minutes);
+            formData.append('commensals', recipeData.commensals);
+            recipeData.categories.forEach((cat, i) => formData.append(`categories[${i}]`, cat));
+            if (recipeData.image) formData.append('image', recipeData.image);
+            // Ingredientes
+            recipeData.ingredients.forEach((ing, i) => {
+                formData.append(`ingredients[${i}][name]`, ing.name);
+                formData.append(`ingredients[${i}][quantity]`, ing.quantity);
+                formData.append(`ingredients[${i}][type]`, ing.type || '');
+                formData.append(`ingredients[${i}][unit]`, ing.unit);
+            });
+            // Pasos
+            recipeData.steps.forEach((step, i) => {
+                formData.append(`steps[${i}][text]`, step.text);
+                if (step.image) formData.append(`steps[${i}][image]`, step.image);
+            });
+            dataToSend = formData;
+        }
+        const response = await api.post(`${BASE_URL}/`, dataToSend, {
+            headers: dataToSend instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+        });
         const response = await api.post(`${BASE_URL}/`, recipeData, {
             headers: {
                 'Content-Type': 'multipart/form-data', // Asegura el tipo de contenido correcto para FormData

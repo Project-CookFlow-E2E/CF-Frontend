@@ -69,6 +69,8 @@ const IngredientManagement = () => {
   });
   const [addError, setAddError] = useState("");
 
+  const [deleteModal, setDeleteModal] = useState({ open: false, ingredient: null });
+
   useEffect(() => {
     const fetchIngredients = async () => {
       setLoading(true);
@@ -151,6 +153,15 @@ const IngredientManagement = () => {
 
   const pendingCount = ingredients.filter((ing) => !ing.is_approved).length;
   const approvedCount = ingredients.filter((ing) => ing.is_approved).length;
+
+  const openDeleteModal = (ingredient) => setDeleteModal({ open: true, ingredient });
+  const closeDeleteModal = () => setDeleteModal({ open: false, ingredient: null });
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.ingredient.id;
+    await ingredientService.deleteIngredientAdmin(id);
+    setIngredients((prev) => prev.filter((ing) => ing.id !== id));
+    closeDeleteModal();
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -329,7 +340,7 @@ const IngredientManagement = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(ing.id)}
+                      onClick={() => openDeleteModal(ing)}
                       className="text-red-600 hover:underline"
                     >
                       Delete
@@ -362,63 +373,53 @@ const IngredientManagement = () => {
       </div>
 
       {editModal.open && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Edit Ingredient</h3>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeEditModal} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            <h3 className="text-xl font-bold mb-4">Editar Ingrediente</h3>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
+                <label className="block text-sm font-medium mb-1">Nombre</label>
                 <input
                   type="text"
                   name="name"
                   value={editForm.name}
                   onChange={handleEditChange}
                   className="w-full border p-2 rounded"
-                  placeholder="Name"
+                  placeholder="Nombre"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Categories (comma-separated)
-                </label>
+                <label className="block text-sm font-medium mb-1">Categorías (separadas por coma)</label>
                 <input
                   type="text"
                   name="categories"
                   value={editForm.categories}
                   onChange={handleEditChange}
                   className="w-full border p-2 rounded"
-                  placeholder="Categories"
+                  placeholder="Categorías"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Unit Type
-                </label>
+                <label className="block text-sm font-medium mb-1">Tipo de unidad</label>
                 <input
                   type="text"
                   name="unit_type"
                   value={editForm.unit_type}
                   onChange={handleEditChange}
                   className="w-full border p-2 rounded"
-                  placeholder="Unit Type"
+                  placeholder="Tipo de unidad"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Approved
-                </label>
+                <label className="block text-sm font-medium mb-1">Aprobado</label>
                 <select
                   name="is_approved"
                   value={editForm.is_approved ? "true" : "false"}
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      is_approved: e.target.value === "true",
-                    })
-                  }
+                  onChange={e => setEditForm({ ...editForm, is_approved: e.target.value === "true" })}
                   className="w-full border p-2 rounded"
                 >
-                  <option value="true">Yes</option>
+                  <option value="true">Sí</option>
                   <option value="false">No</option>
                 </select>
               </div>
@@ -428,13 +429,13 @@ const IngredientManagement = () => {
                   onClick={closeEditModal}
                   className="bg-gray-300 px-4 py-2 rounded"
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded"
                 >
-                  Save
+                  Guardar
                 </button>
               </div>
             </form>
@@ -456,14 +457,14 @@ const IngredientManagement = () => {
                 e.preventDefault();
                 setAddError("");
                 // Validación básica
-                if (
-                  !addForm.name ||
-                  !addForm.quantity ||
-                  !addForm.unit ||
-                  !addForm.unit_type ||
-                  !addForm.categories
-                ) {
+                if (!addForm.name || !addForm.quantity || !addForm.unit || !addForm.unit_type || !addForm.categories) {
                   setAddError("Por favor, completa todos los campos obligatorios.");
+                  return;
+                }
+                // Validar que categories sea array de números
+                const categoriesArr = addForm.categories.split(",").map((id) => id.trim()).filter(Boolean);
+                if (!categoriesArr.every((id) => /^\d+$/.test(id))) {
+                  setAddError("Las categorías deben ser IDs numéricos separados por coma. Ejemplo: 1,2,3");
                   return;
                 }
                 try {
@@ -473,7 +474,7 @@ const IngredientManagement = () => {
                     quantity: Number(addForm.quantity),
                     unit: addForm.unit,
                     unit_type: addForm.unit_type,
-                    categories: addForm.categories.split(",").map((id) => id.trim()),
+                    categories: categoriesArr.map(Number),
                     is_checked: addForm.is_checked,
                     is_approved: addForm.is_approved,
                   };
@@ -637,6 +638,21 @@ const IngredientManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeDeleteModal} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            <h3 className="text-xl font-bold mb-4">¿Seguro que quieres borrar este ingrediente?</h3>
+            <div className="mb-4">Esta acción no se puede deshacer.</div>
+            <div className="flex justify-end space-x-2">
+              <button onClick={closeDeleteModal} className="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+              <button onClick={handleDeleteConfirm} className="bg-red-500 text-white px-4 py-2 rounded">Borrar</button>
+            </div>
           </div>
         </div>
       )}
