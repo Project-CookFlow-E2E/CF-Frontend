@@ -47,6 +47,7 @@ import { useNavigate } from "react-router-dom";
 const USER_TYPE = "USER";
 
 const Profile = () => {
+  const mediaUrl = import.meta.env.VITE_MEDIA_URL;
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bio, setBio] = useState("");
@@ -306,7 +307,7 @@ const Profile = () => {
                     key={recipe.id}
                     id={recipe.id}
                     name={recipe.name}
-                    image={recipe.image}
+                    image={mediaUrl + recipe.user.id + '/' + recipe.image.url}
                     category={recipe.category}
                     time={recipe.time}
                     isFavorite={true}
@@ -326,7 +327,7 @@ const Profile = () => {
                 key={recipe.id}
                 id={recipe.id}
                 name={recipe.name}
-                image={recipe.image}
+                image={mediaUrl + recipe.user.id + '/' + recipe.image.url}
                 category={recipe.category}
                 time={recipe.time}
                 isFavorite={favorites.includes(String(recipe.id))}

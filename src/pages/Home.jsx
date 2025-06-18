@@ -33,6 +33,7 @@ const Home = () => {
     const { categories, selectedCategories, toggleCategory, handleSearchClick } = useCategories(2);
     const navigate = useNavigate();
     const [userName, setUserName] = useState("");
+    const mediaUrl = import.meta.env.VITE_MEDIA_URL
 
     useEffect(() => {
         userService
@@ -113,7 +114,7 @@ const Home = () => {
                             <Card
                                 key={recipe.id}
                                 id={`recipe-card-${recipe.id}`}
-                                image={recipe.image_url}
+                                image={mediaUrl + recipe.user.id + '/' + recipe.image.url}
                                 name={recipe.name}
                                 category={recipe.category}
                                 time={`${recipe.duration_minutes}`}

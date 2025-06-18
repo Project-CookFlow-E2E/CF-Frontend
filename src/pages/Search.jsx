@@ -17,6 +17,7 @@ import useFavorites from "../hooks/useFavorites";
 import { useNavigate } from "react-router-dom";
 
 const Search = () => {
+    const mediaUrl = import.meta.env.VITE_MEDIA_URL;
     const {
         loadingAll,
         categories,
@@ -144,7 +145,7 @@ const Search = () => {
                                 <Card
                                     key={recipe.id}
                                     id={`recipe-card-${recipe.id}`}
-                                    image={recipe.image_url}
+                                    image={mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url}
                                     name={recipe.name}
                                     category={recipe.category}
                                     time={`${recipe.duration_minutes}`}
