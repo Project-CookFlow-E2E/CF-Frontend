@@ -488,14 +488,14 @@ console.log("--- FIN de recipePayload ---");
 
             {/* Selector de categorías padre e hijas */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría padre</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categorías</label>
               <select
                 className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
                 value={selectedParent || ""}
                 onChange={e => setSelectedParent(Number(e.target.value))}
               >
                 <option value="" className="text-gray-400">
-                  Selecciona una categoría padre
+                  Selecciona una categoría
                 </option>
                 {parentCategories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -503,7 +503,7 @@ console.log("--- FIN de recipePayload ---");
               </select>
               {childCategories.length > 0 && (
                 <>
-                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Categorías hijas</label>
+                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Subcategorías</label>
                   <div className="flex flex-wrap gap-2">
                     {childCategories.map((categoria) => (
                       <button
@@ -587,7 +587,7 @@ console.log("--- FIN de recipePayload ---");
                       rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
-                          <Input
+                          {/* { <Input
                             {...field}
                             id={`ingredient-name-${index}`}
                             list={`ingredientes-list-${index}`}
@@ -595,7 +595,24 @@ console.log("--- FIN de recipePayload ---");
                             className="w-full focus:outline-none"
                             onChange={e => handleIngredientChange(e, index)}
                             required
-                          />
+                          /> 
+                          } */}
+                          <select
+                            {...field}
+                            id={`ingredient-name-${index}`}
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none bg-white"
+                            onChange={e => handleIngredientChange(e, index)}
+                            required
+                          >
+                            <option value="">Selecciona un ingrediente</option>
+                            {allIngredients.map(i => (
+                              <option key={i.id} value={i.name}>
+                                {i.name}
+                              </option>
+                            ))}
+                          </select>
+                     
+                          
                           <datalist id={`ingredientes-list-${index}`}>
                             {allIngredients.map(i => (
                               <option key={i.id} value={i.name} />
@@ -675,6 +692,7 @@ console.log("--- FIN de recipePayload ---");
                   type="button"
                   onClick={() => appendIngredient({ name: "", quantity: "", unit: "" })}
                   className="border px-6 py-3 rounded-xl h-10 flex justify-center items-center mt-2"
+                  style={{ width: "100%" }}
                 >
                   Añadir ingrediente <Plus className="w-5 h-5" />
                 </button>
@@ -806,6 +824,7 @@ console.log("--- FIN de recipePayload ---");
                   }
                   className="border rounded-xl px-6 py-3 h-10 flex justify-center items-center"
                   data-testid="add-step-button"
+                  style={{ width: "100%" }}
                 >
                   Añadir paso
                   <Plus className="w-5 h-5" />
