@@ -65,11 +65,11 @@ const Recipe = () => {
               }
 
               return {
-                id: ing.id, // ID del item en la receta
-                ingredientId: ing.ingredient, // <-- este es el que quiere tu backend
+                id: ing.id,
+                ingredientId: ing.ingredient,
                 name: ingredientDetail.name,
                 quantity: ing.quantity,
-                unitId: ing.unit, // <-- ID real de unidad
+                unitId: ing.unit,
                 unit: unitDetail.name,
               };
             } catch (innerErr) {
@@ -98,9 +98,12 @@ const Recipe = () => {
           id: rawRecipeData.id,
           titulo: rawRecipeData.name,
           tiempo: rawRecipeData.duration_minutes,
-          imagen: rawRecipeData.image ? mediaUrl + rawRecipeData.user.id + '/' + rawRecipeData.image.url : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display",
+          imagen: rawRecipeData.image
+            ? mediaUrl + rawRecipeData.user.id + "/" + rawRecipeData.image.url
+            : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display",
           ingredientes: ingredientsWithDetails,
           pasos: rawRecipeData.steps || [],
+          userId: rawRecipeData.user.id,
         });
       } catch (err) {
         console.error("Error FATAL al cargar la receta completa:", err);
@@ -197,13 +200,6 @@ const Recipe = () => {
     >
       <main className="flex-grow p-6 max-w-4xl mx-auto pb-32">
         <div className="flex items-center justify-between mb-4">
-          <button
-            data-testid="btn-anterior"
-            disabled={true}
-            className="text-3xl opacity-50 cursor-not-allowed"
-          >
-            &lt;
-          </button>
           <div
             data-testid="recipe-title-container"
             className="text-center flex-1"
@@ -225,13 +221,6 @@ const Recipe = () => {
               className="mt-2 flex justify-center"
             />
           </div>
-          <button
-            data-testid="btn-siguiente"
-            disabled={true}
-            className="text-3xl opacity-50 cursor-not-allowed"
-          >
-            &gt;
-          </button>
         </div>
 
         <img
@@ -253,10 +242,11 @@ const Recipe = () => {
             data-testid="btn-add-to-shopping-list"
             onClick={handleAddToShoppingList}
             disabled={!hasIngredientes}
-            className={`py-3 rounded-lg font-medium transition duration-300 ${hasIngredientes
-              ? "bg-accent text-white hover:bg-accent/90"
-              : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
-              }`}
+            className={`py-3 rounded-lg font-medium transition duration-300 ${
+              hasIngredientes
+                ? "bg-accent text-white hover:bg-accent/90"
+                : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
+            }`}
           >
             ¡A comprar!
           </Button>
@@ -264,10 +254,11 @@ const Recipe = () => {
             data-testid="btn-start-cooking"
             onClick={handleStartCooking}
             disabled={!areAllChecked}
-            className={`py-3 rounded-lg font-medium transition duration-300 ${areAllChecked
-              ? "bg-accent text-white hover:bg-accent/90"
-              : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
-              }`}
+            className={`py-3 rounded-lg font-medium transition duration-300 ${
+              areAllChecked
+                ? "bg-accent text-white hover:bg-accent/90"
+                : "bg-background !text-accent border-2 border-accent cursor-not-allowed"
+            }`}
           >
             ¡A cocinar!
           </Button>
@@ -293,17 +284,19 @@ const Recipe = () => {
                 >
                   Paso {index + 1}
                 </span>
-                <img
-                  data-testid={`step-image-${index + 1}`}
-                  src={paso.imagen}
-                  alt={`Paso ${index + 1}`}
-                  className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
-                />
+                {paso.image && paso.image.url && (
+                  <img
+                    data-testid={`step-image-${index + 1}`}
+                    src={mediaUrl + receta.userId + "/" + paso.image.url}
+                    alt={`Paso ${index + 1}`}
+                    className="w-full max-w-md h-52 object-cover rounded-lg shadow-lg mb-4"
+                  />
+                )}
                 <p
                   data-testid={`step-desc-${index + 1}`}
                   className="text-gray-700 text-center text-base sm:text-lg font-medium"
                 >
-                  {paso.descripcion}
+                  {paso.description}
                 </p>
               </li>
             ))}
