@@ -6,6 +6,7 @@
  * @modifiedby Ána Castro
  * @modified Recuperar la lista de la compra desde la base de datos, añadir funcionalidad para marcar productos como comprados,
  * eliminar productos y limpiar la lista.
+ * @modified Ángel Áragón - Añadido manejo de errores y mensajes de éxito, mejorado el manejo del estado de los ítems.
  */
 
 import React, { useState, useEffect } from "react";

@@ -15,10 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { ingredientService } from "../services/ingredientService";
 import { unitService } from "../services/unitService";
 import { unitTypeService } from "../services/unitTypeService";
-// import { getUserIdFromToken } from "../services/authService";
-
-
-
 
 const AddRecipe = () => {
   const [parentCategories, setParentCategories] = useState([]);
@@ -311,23 +307,30 @@ const AddRecipe = () => {
         order: idx + 1
       }));
 
-      recipePayload.append("steps", JSON.stringify(formattedSteps));
-      const recetaGuardada = await recipeService.createRecipe(recipePayload);
-      const recetaId = recetaGuardada.id;
-      setRecipeId(recetaId);
-      setMensaje("Receta guardada correctamente. ID: " + recetaId);
-      reset();
-      setValue("categoriasSeleccionadas", []);
-    } catch (error) {
-      let errorMsg = "Error al guardar la receta.";
-      if (error.response && error.response.data) {
-        errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
-      } else if (error.message) {
-        errorMsg += "\nDetalles: " + error.message;
-      }
-      setMensaje(errorMsg);
+console.log("Pasos formateados para el backend:", formattedSteps);
+recipePayload.append("steps", JSON.stringify(formattedSteps));
+
+console.log("--- FIN de recipePayload ---");
+
+    const recetaGuardada = await recipeService.createRecipe(recipePayload);
+    const recetaId = recetaGuardada.id;
+
+    console.log("Receta guardada con ID:", recetaId);
+
+    setRecipeId(recetaId);
+    setMensaje("Receta guardada correctamente. ID: " + recetaId);
+    reset();
+    setValue("categoriasSeleccionadas", []);
+  } catch (error) {
+    let errorMsg = "Error al guardar la receta.";
+    if (error.response && error.response.data) {
+      errorMsg += "\nDetalles: " + JSON.stringify(error.response.data, null, 2);
+    } else if (error.message) {
+      errorMsg += "\nDetalles: " + error.message;
     }
-  };
+    setMensaje(errorMsg);
+  }
+};
 
   return (
     <div className="min-h-screen pb-20 bg-background p-4" data-testid="add-recipe-page">
@@ -349,13 +352,7 @@ const AddRecipe = () => {
             {mensaje}
           </div>
         )}
-        {recipeId && (
-          <div className="mb-4 px-3 py-2 rounded-lg text-sm font-mono bg-green-100 text-green-800">
-            <strong>recipe_id generado:</strong> {recipeId}
-          </div>
-        )}
-
-        {/* Imagen de la receta */}
+       {/* Imagen de la receta */}
         <div
           className={`bg-white border border-gray-300 rounded-xl h-48 flex flex-col justify-center items-center mb-6 overflow-hidden relative transition-all duration-200 ${isDragOver ? "border-accent border-2 bg-accent/5" : ""
             }`}
@@ -545,16 +542,7 @@ const AddRecipe = () => {
                       rules={{ required: "El nombre del ingrediente es obligatorio" }}
                       render={({ field }) => (
                         <>
-                          {/* { <Input
-                            {...field}
-                            id={`ingredient-name-${index}`}
-                            list={`ingredientes-list-${index}`}
-                            placeholder="Ej: Harina, Leche..."
-                            className="w-full focus:outline-none"
-                            onChange={e => handleIngredientChange(e, index)}
-                            required
-                          /> 
-                          } */}
+                          
                           <select
                             {...field}
                             id={`ingredient-name-${index}`}
