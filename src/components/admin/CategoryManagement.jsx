@@ -2,14 +2,15 @@
  * @file CategoryManagement.jsx
  * @description
  * Componente de administración de categorías para el panel de administración.
- * Permite visualizar, buscar, editar y gestionar categorías de recetas.
+ * Permite visualizar, buscar, añadir, editar y borrar categorías de recetas.
  *
  * Funcionalidades principales:
  * - Listar todas las categorías existentes.
  * - Buscar categorías por nombre mediante un input de búsqueda.
+ * - Añadir nuevas categorías mediante un modal conectado al backend.
  * - Editar el nombre y la categoría padre de una categoría mediante un modal.
- * - Botón para añadir nuevas categorías (funcionalidad pendiente de implementar).
- * - Acciones de edición y borrado para cada categoría.
+ * - Borrar categorías con confirmación mediante modal (pregunta antes de borrar y elimina en la BBDD).
+ * - Acciones de edición y borrado para cada categoría, con overlays semitransparentes que dejan visible el panel de fondo.
  * - Paginación: muestra 5 categorías por página, con navegación entre páginas.
  * - Ordena las categorías de la más reciente a la más antigua según la fecha de creación.
  *
@@ -18,20 +19,30 @@
  * - loading: booleano para mostrar el estado de carga.
  * - editModal: controla la visibilidad y datos del modal de edición.
  * - editForm: almacena los valores del formulario de edición.
+ * - addModal: controla la visibilidad del modal de añadir categoría.
+ * - addForm: almacena los valores del formulario de añadir categoría.
+ * - deleteModal: controla la visibilidad y datos del modal de confirmación de borrado.
  * - page: página actual de la paginación.
  * - search: término de búsqueda para filtrar categorías por nombre.
  *
  * Servicios utilizados:
  * - categoryService.getAllCategories(): obtiene todas las categorías.
+ * - categoryService.createCategoryAdmin(data): crea una nueva categoría.
  * - categoryService.updateCategoryAdmin(id, data): actualiza una categoría.
+ * - categoryService.deleteCategoryAdmin(id): elimina una categoría.
  *
  * Uso:
  * Este componente está pensado para ser usado por administradores.
- * Permite buscar y modificar los campos "Nombre" y "Categoría Padre" de cada categoría,
- * navegar entre páginas y ver las categorías ordenadas por fecha de creación.
+ * Permite buscar, añadir, modificar y borrar categorías de forma sencilla y segura,
+ * con confirmación visual y overlays que no ocultan completamente el panel de administración.
  *
- * @author
- * Lorena Martínez, Noemi Casaprima
+ * Cambios recientes:
+ * - Añadida funcionalidad para añadir categorías desde el panel (modal y conexión a backend).
+ * - Añadida funcionalidad de borrado con confirmación y modal (incluye overlay semitransparente).
+ * - Mejorada la experiencia visual de los modales para dejar visible el panel de fondo.
+ *
+ * @author Lorena Martínez, Noemi Casaprima
+ * @modifiedBy Noemi Casaprima  (añadido: alta y borrado de categorías, overlays y experiencia de usuario en modales)
  */
 
 import { useState, useEffect } from "react";
@@ -49,8 +60,13 @@ const CategoryManagement = () => {
     parent_category_id: "",
   });
 
+  const [addModal, setAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", parent_category_id: "" });
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+
+  const [deleteModal, setDeleteModal] = useState({ open: false, category: null });
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -100,7 +116,15 @@ const CategoryManagement = () => {
     closeEditModal();
   };
 
- 
+  const openDeleteModal = (category) => setDeleteModal({ open: true, category });
+  const closeDeleteModal = () => setDeleteModal({ open: false, category: null });
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.category.id;
+    await categoryService.deleteCategoryAdmin(id);
+    setCategories((prev) => prev.filter((cat) => cat.id !== id));
+    closeDeleteModal();
+  };
+
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -119,7 +143,7 @@ const CategoryManagement = () => {
         <h2 className="text-2xl font-bold text-gray-800">
           Administrador de categorías
         </h2>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center">
+        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center" onClick={() => setAddModal(true)}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 mr-2"
@@ -200,7 +224,7 @@ const CategoryManagement = () => {
                     >
                       Editar
                     </button>
-                    <button className="text-red-600 hover:text-red-900">
+                    <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(category)}>
                       Borrar
                     </button>
                   </td>
@@ -231,8 +255,9 @@ const CategoryManagement = () => {
       </div>
 
       {editModal.open && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeEditModal} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
             <h3 className="text-xl font-bold mb-4">Editar Categoría</h3>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
@@ -275,6 +300,61 @@ const CategoryManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de AÑADIR categoría */}
+      {addModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={() => setAddModal(false)} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            <h3 className="text-xl font-bold mb-4">Añadir Categoría</h3>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const newCategory = await categoryService.createCategoryAdmin(addForm);
+                setCategories((prev) => [newCategory, ...prev]);
+                setAddModal(false);
+                setAddForm({ name: "", parent_category_id: "" });
+              } catch (err) {
+                let msg = "Error al crear categoría";
+                if (err && err.response && err.response.data) {
+                  if (typeof err.response.data === 'string') msg += ": " + err.response.data;
+                  else if (typeof err.response.data.detail === 'string') msg += ": " + err.response.data.detail;
+                  else msg += ": " + JSON.stringify(err.response.data);
+                }
+                alert(msg);
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Nombre</label>
+                <input type="text" name="name" value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} className="w-full border p-2 rounded" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Categoría Padre (ID)</label>
+                <input type="text" name="parent_category_id" value={addForm.parent_category_id} onChange={e => setAddForm(f => ({ ...f, parent_category_id: e.target.value }))} className="w-full border p-2 rounded" placeholder="ID de la categoría padre (opcional)" />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button type="button" onClick={() => setAddModal(false)} className="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Crear</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de CONFIRMACIÓN de borrado */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 z-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} onClick={closeDeleteModal} />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md z-10 relative">
+            <h3 className="text-xl font-bold mb-4">¿Seguro que quieres borrar esta categoría?</h3>
+            <div className="mb-4">Esta acción no se puede deshacer.</div>
+            <div className="flex justify-end space-x-2">
+              <button onClick={closeDeleteModal} className="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+              <button onClick={handleDeleteConfirm} className="bg-red-500 text-white px-4 py-2 rounded">Borrar</button>
+            </div>
           </div>
         </div>
       )}
