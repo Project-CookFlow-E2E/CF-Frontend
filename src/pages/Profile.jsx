@@ -131,15 +131,16 @@ const Profile = () => {
   if (!user) return <div>Cargando perfil...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8" data-testid="profile-page">
       <div className="flex flex-col items-center text-center space-y-4">
-        <h2 className="text-base font-medium leading-tight">
+        <h2 className="text-base font-medium leading-tight" data-testid="profile-name">
           {user.name} {user.surname}
         </h2>
 
         <div className="flex items-center mb-4">
           <div className="relative">
             <img
+              data-testid="profile-image"
               src={
                 profileImg?.url
                   ? "http://localhost:8000/media/img/" +
@@ -147,12 +148,13 @@ const Profile = () => {
                   "/" +
                   profileImg.url
                   : "https://ui-avatars.com/api/?name=" +
-                  encodeURIComponent(user.name)
+                    encodeURIComponent(user.name)
               }
               alt="Foto de perfil"
               className="w-24 h-24 rounded-full object-cover border"
             />
             <button
+              data-testid="edit-image-button"
               className="absolute bottom-0 right-0 bg-emerald-700 text-white w-8 h-8 rounded-full"
               onClick={() => setImgModalOpen(true)}
               title="Editar foto de perfil"
@@ -166,6 +168,7 @@ const Profile = () => {
           {editingBio ? (
             <div>
               <textarea
+                data-testid="biography-textarea"
                 className="border rounded w-90 md:w-250 p-2 mt-1 h-32 md:h-50"
                 rows={3}
                 value={bio}
@@ -176,6 +179,7 @@ const Profile = () => {
                 {bio.length}/500 caracteres
               </div>
               <button
+                data-testid="save-bio-button"
                 className="bg-emerald-700 text-white cursor-pointer px-3 py-1 rounded mt-2 mr-2"
                 onClick={handleBioSave}
                 disabled={bioLoading}
@@ -191,8 +195,9 @@ const Profile = () => {
             </div>
           ) : (
             <div>
-              <span className="mr-2">{user.biography || "Sin biografía."}</span>
+              <span className="mr-2" data-testid="biography-text">{user.biography || "Sin biografía."}</span>
               <button
+                data-testid="edit-bio-button"
                 className="text-blue-600 cursor-pointer underline"
                 onClick={() => setEditingBio(true)}
               >
@@ -207,6 +212,7 @@ const Profile = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-0">
           <div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-2xl relative">
             <button
+              data-testid="close-image-modal-button"
               className="absolute top-3 right-3 text-gray-400 cursor-pointer text-xl"
               onClick={() => setImgModalOpen(false)}
               aria-label="Cerrar"
@@ -218,6 +224,7 @@ const Profile = () => {
             </h3>
             <div className="flex flex-col items-center">
               <img
+                data-testid="image-preview"
                 src={
                   imgFile
                     ? URL.createObjectURL(imgFile)
@@ -249,6 +256,7 @@ const Profile = () => {
                 </svg>
                 Seleccionar archivo
                 <input
+                  data-testid="file-input"
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImgFile(e.target.files[0])}
@@ -257,6 +265,7 @@ const Profile = () => {
               </label>
               <div className="flex gap-2 mt-2">
                 <button
+                  data-testid="upload-image-button"
                   className="bg-emerald-700 text-white cursor-pointer px-4 py-2 rounded transition"
                   onClick={handleImgSave}
                   disabled={imgLoading || !imgFile}
@@ -265,6 +274,7 @@ const Profile = () => {
                 </button>
                 {profileImg && (
                   <button
+                    data-testid="delete-image-button"
                     className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded transition"
                     onClick={handleImgDelete}
                     disabled={imgLoading}
@@ -280,6 +290,7 @@ const Profile = () => {
 
       <div className="mb-6 flex gap-0">
         <button
+          data-testid="saved-recipes-tab"
           className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "saved"
             ? "bg-red-400 text-white scale-100"
             : "bg-gray-200 text-gray-600 scale-90"
@@ -289,6 +300,7 @@ const Profile = () => {
           Recetas favoritas ({favoriteRecipes.length})
         </button>
         <button
+          data-testid="created-recipes-tab"
           className={`px-2 py-2 rounded font-semibold transition-colors ${activeTab === "created"
               ? "bg-red-400 text-white scale-100"
               : "bg-gray-200 text-gray-600 scale-90"
@@ -307,7 +319,7 @@ const Profile = () => {
             ) : favoriteRecipes.length === 0 ? (
               <div>No tienes recetas favoritas.</div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10" data-testid="favorite-recipes-grid">
                 {favoriteRecipes.map((recipe) => (
                   <Card
                     key={recipe.id}
@@ -341,7 +353,7 @@ const Profile = () => {
         ) : paginatedRecipes.length === 0 ? (
           <div>No hay recetas para mostrar.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10" data-testid="created-recipes-grid">
             {paginatedRecipes.map((recipe) => (
               <Card
                 key={recipe.id}
