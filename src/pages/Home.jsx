@@ -45,11 +45,11 @@ const Home = () => {
         <div className="min-h-screen bg-background w-full" data-testid="home-page">
             <div className="w-full bg-background pt-7 pb-12 px-4 sm:px-6 lg:px-20" id="home-header">
                 <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                    <div className="flex flex-col ml-12 justify-center items-center lg:items-start text-center lg:text-left">
+                    <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
                         <p className="text-gray-600 mb-8 text-lg" data-testid="prompt-text">
                             {userName ? (
                                 <>
-                                    <span className="font-bold">Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
+                                    <span className="font-bold">¡Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
                                 </>
                             ) : (
                                 "¿No sabes qué elegir?"
