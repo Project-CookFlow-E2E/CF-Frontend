@@ -82,173 +82,89 @@ const Search = () => {
                 </div>
             </div>
 
-            <div className="w-full flex flex-col lg:flex-row flex-wrap items-start gap-12 px-0 md:px-4">
-  {/* panel de filtros */}
-  <div className="w-full lg:w-1/3 relative">
-    <div className="flex items-center justify-between mb-4">
-      <span className="text-lg font-semibold">Filtros</span>
-      <button
-        className="flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
-        title={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
-        type="button"
-      >
-        {isOpen ? (
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
-          </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="9" y="5" width="2" height="10" rx="1" fill="currentColor" />
-            <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
-          </svg>
-        )}
-      </button>
-    </div>
+            <div className="w-full flex flex-col lg:flex-row flex-wrap gap-30 px-0 md:px-4">
+                {/* panel de filtros */}
+                <div className="w-full lg:w-[40%] relative">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-semibold">Filtros</span>
+                        <button
+                            className="flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition"
+                            onClick={() => setIsOpen(!isOpen)}
+                            aria-label={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
+                            title={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
+                            type="button"
+                        >
+                            {isOpen ? (
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
+                                </svg>
+                            ) : (
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="9" y="5" width="2" height="10" rx="1" fill="currentColor" />
+                                    <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
 
-    {isOpen && (
-      <>
-        <RecipeFiltersPanel
-          general={categories}
-          type={typeCategories}
-          origin={originCategories}
-          selected={{
-            selectedCategory,
-            selectedType,
-            selectedOrigin,
-          }}
-          setSelected={{
-            setSelectedCategory,
-            setSelectedType,
-            setSelectedOrigin,
-          }}
-        />
-        <div className="flex justify-center mt-4">
-          <Button onClick={() => {}}>Buscar</Button>
-        </div>
-      </>
-    )}
-  </div>
+                    {isOpen && (
+                        <>
+                            <RecipeFiltersPanel
+                                general={categories}
+                                type={typeCategories}
+                                origin={originCategories}
+                                selected={{
+                                    selectedCategory,
+                                    selectedType,
+                                    selectedOrigin,
+                                }}
+                                setSelected={{
+                                    setSelectedCategory,
+                                    setSelectedType,
+                                    setSelectedOrigin,
+                                }}
+                            />
+                            <div className="flex justify-center mt-4">
+                                <Button onClick={() => {}}>Buscar</Button>
+                            </div>
+                        </>
+                    )}
+                </div>
 
-  {/* cards de recetas */}
-  <div className="w-full lg:flex-1 mt-8 lg:mt-0">
-    <div className="flex justify-between items-center px-1 sm:px-2 mb-4">
-      <h4 className="text-xl font-bold text-black">Recetas populares</h4>
-      <h4 className="text-l text-gray-500 cursor-pointer" onClick={toggleMostrarTodo}>
-        {showingAll ? "Ocultar todas" : "Mostrar todas"}
-      </h4>
-    </div>
+                {/* cards de recetas */}
+                <div className="w-full lg:flex-1 mb-10 lg:mt-0">
+                    <div className="flex justify-between items-center px-1 sm:px-2 mb-4">
+                        <h4 className="text-xl font-bold text-black">Recetas populares</h4>
+                        <h4 className="text-l text-gray-500 cursor-pointer" onClick={toggleMostrarTodo}>
+                            {showingAll ? "Ocultar todas" : "Mostrar todas"}
+                        </h4>
+                    </div>
 
-    {Array.isArray(recipesToShow) && recipesToShow.length > 0 ? (
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-        {recipesToShow.map((recipe) => (
-          <Card
-            key={recipe.id}
-            id={`recipe-card-${recipe.id}`}
-            image={recipe.image_url}
-            name={recipe.name}
-            category={recipe.category}
-            time={`${recipe.duration_minutes}`}
-            isFavorite={
-              Array.isArray(favorites) &&
-              favorites.some((fav) => fav?.recipe_id === recipe.id)
-            }
-            onToggleFavorite={() => toggleFavorite(recipe.id)}
-            onClick={() => navigate(`/recipe/${recipe.id}`)}
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="text-center text-gray-600 text-lg mt-10 mb-40">
-        No hay recetas que coincidan con los filtros seleccionados.
-      </div>
-    )}
-  </div>
-</div><div className="w-full flex flex-col lg:flex-row flex-wrap items-start gap-12 px-0 md:px-4">
-  {/* panel de filtros */}
-  <div className="w-full lg:w-1/3 relative">
-    <div className="flex items-center justify-between mb-4">
-      <span className="text-lg font-semibold">Filtros</span>
-      <button
-        className="flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
-        title={isOpen ? "Ocultar filtros" : "Mostrar filtros"}
-        type="button"
-      >
-        {isOpen ? (
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
-          </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="9" y="5" width="2" height="10" rx="1" fill="currentColor" />
-            <rect x="5" y="9" width="10" height="2" rx="1" fill="currentColor" />
-          </svg>
-        )}
-      </button>
-    </div>
-
-    {isOpen && (
-      <>
-        <RecipeFiltersPanel
-          general={categories}
-          type={typeCategories}
-          origin={originCategories}
-          selected={{
-            selectedCategory,
-            selectedType,
-            selectedOrigin,
-          }}
-          setSelected={{
-            setSelectedCategory,
-            setSelectedType,
-            setSelectedOrigin,
-          }}
-        />
-        <div className="flex justify-center mt-4">
-          <Button onClick={() => {}}>Buscar</Button>
-        </div>
-      </>
-    )}
-  </div>
-
-  {/* cards de recetas */}
-  <div className="w-full lg:flex-1 mt-8 lg:mt-0">
-    <div className="flex justify-between items-center px-1 sm:px-2 mb-4">
-      <h4 className="text-xl font-bold text-black">Recetas populares</h4>
-      <h4 className="text-l text-gray-500 cursor-pointer" onClick={toggleMostrarTodo}>
-        {showingAll ? "Ocultar todas" : "Mostrar todas"}
-      </h4>
-    </div>
-
-    {Array.isArray(recipesToShow) && recipesToShow.length > 0 ? (
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-        {recipesToShow.map((recipe) => (
-          <Card
-            key={recipe.id}
-            id={`recipe-card-${recipe.id}`}
-            image={recipe.image_url}
-            name={recipe.name}
-            category={recipe.category}
-            time={`${recipe.duration_minutes}`}
-            isFavorite={
-              Array.isArray(favorites) &&
-              favorites.some((fav) => fav?.recipe_id === recipe.id)
-            }
-            onToggleFavorite={() => toggleFavorite(recipe.id)}
-            onClick={() => navigate(`/recipe/${recipe.id}`)}
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="text-center text-gray-600 text-lg mt-10 mb-40">
-        No hay recetas que coincidan con los filtros seleccionados.
-      </div>
-    )}
-  </div>
-
+                    {Array.isArray(recipesToShow) && recipesToShow.length > 0 ? (
+                        <div className="w-full grid grid-cols-1 sm:grid-cols-2 mt-10 lg:grid-cols-3 gap-x-6 gap-y-10">
+                            {recipesToShow.map((recipe) => (
+                                <Card
+                                    key={recipe.id}
+                                    id={`recipe-card-${recipe.id}`}
+                                    image={recipe.image_url}
+                                    name={recipe.name}
+                                    category={recipe.category}
+                                    time={`${recipe.duration_minutes}`}
+                                    isFavorite={
+                                        Array.isArray(favorites) &&
+                                        favorites.some((fav) => fav?.recipe_id === recipe.id)
+                                    }
+                                    onToggleFavorite={() => toggleFavorite(recipe.id)}
+                                    onClick={() => navigate(`/recipe/${recipe.id}`)}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center text-gray-600 text-lg mt-10 mb-40">
+                            No hay recetas que coincidan con los filtros seleccionados.
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
