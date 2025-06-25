@@ -24,7 +24,7 @@ Cypress.Commands.add('loginAPI', (username, password) => {
         username: username,
         password: password
       }
-    }).then((response) => {
+    }).then((response) => { 
       expect(response.status).to.eq(200);
       const token = response.body.access;
       const refreshToken = response.body.refresh;
@@ -56,7 +56,6 @@ Cypress.Commands.add('interceptUserMe', (userFixture) => {
   }).as('getUserMe');
 });
 
-// Common dashboard setup after login and visit
 Cypress.Commands.add('setupDashboardPage', (username, password) => {
   const validUser = {
     username: username,
@@ -65,11 +64,7 @@ Cypress.Commands.add('setupDashboardPage', (username, password) => {
     email: `${username}@example.com`,
     first_name: 'Ana'
   };
-
-  // Intercept the /users/me/ call for this setup
   cy.interceptUserMe(validUser);
-
-  // Perform API login
   cy.loginAPI(validUser.username, validUser.password);
   cy.visit('/main');
   cy.wait('@getUserMe');
@@ -78,7 +73,6 @@ Cypress.Commands.add('setupDashboardPage', (username, password) => {
   cy.getDataTest('main-title').should('be.visible').and('contain.text', '¿Qué te apetece?');
 });
 
-// Command for logout
 Cypress.Commands.add('logoutUI', () => {
     cy.getDataTest('custom-button')
       .contains('Cerrar Sesión')
