@@ -1,15 +1,23 @@
+version: '3.8'
+
 services:
   frontend:
     build: .
     ports:
       - "5173:5173"
+    # It's also a good idea to add volumes for the frontend for live reloading
+    volumes:
+      - ./cookflow-frontend:/app # Assuming your frontend code is here
     depends_on:
       - backend
-
 
   backend:
     build:
       context: ../cookflow-backend
+    # --- ADD THIS VOLUMES SECTION ---
+    volumes:
+      - ../cookflow-backend:/app # Mounts your local backend code into the container's /app directory
+    # --- END ADDITION ---
     ports:
       - "8000:8000"
     environment:
@@ -17,8 +25,12 @@ services:
       DB_NAME: cookflow_db
       DB_USER: admin
       DB_PASSWORD: admin
+      # It's also good practice to define SECRET_KEY and DEBUG here for development
+      SECRET_KEY: "your_insecure_dev_secret_key" # IMPORTANT: Use a strong, unique key in production
+      DEBUG: "True" # Set to "False" for production
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Ensure DB is healthy before starting backend
 
   db:
     image: postgres:latest
@@ -29,7 +41,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-        - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck: # Add healthcheck for db to ensure backend waits for it
+      test: ["CMD-SHELL", "pg_isready -U admin -d cookflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  postgres_data: 
+  postgres_data:

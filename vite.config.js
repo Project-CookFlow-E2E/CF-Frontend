@@ -9,13 +9,6 @@ export default defineConfig({
   test: {
     globals: true, // Permite usar 'describe', 'it', 'expect' globalmente
     environment: 'jsdom', // Simula un entorno de navegador (DOM) para tus tests
-    setupFiles: './src/setupTests.js', // Ruta a tu archivo de configuración de tests
-    
-    // Configuración de cobertura de código
-    // coverage: {
-    //   provider: 'v8', // Puedes usar 'v8' o 'istanbul'
-    //   reporter: ['text', 'json', 'html'], // Formatos de reporte de cobertura
-    //   exclude: ['node_modules/', 'src/main.jsx', 'src/App.jsx'], // Excluye archivos y carpetas del reporte
-    // },
+    setupFiles: './src/setupTests.js', 
   },
 })

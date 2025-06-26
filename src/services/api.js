@@ -1,34 +1,20 @@
-/**
- * api.js
- *
- * Axios instance configured with baseURL from environment.
- *
- * - Uses the VITE_API_URL environment variable (or an empty string by default).
- * - Serves as the centralized instance for all HTTP requests in the app.
- *
- * Example usage:
- * import api from './api';
- * api.get('/path');
- *
- * @module api
- * @requires axios
- * @author Nico
- * @modified by Saturnino Méndez
- */
-import axios from "axios";
-import { getToken, refreshAuthToken, isTokenValid, logout } from "../services/authService"
+// src/api.js (or wherever your Axios instance is defined)
+import axios from 'axios';
+// Only import the necessary functions for the initial setup and request interceptor
+import { getToken, isTokenValid } from "../services/authService";
 
 /**
  * The base URL for the API, obtained from environment variables.
- * 
- * @type {string}
+ * * @type {string}
  */
 const apiUrl = import.meta.env.VITE_API_URL || "";
 
+// Log to console to verify the URL during development
+console.log("API_BASE_URL used in api.js:", apiUrl);
+
 /**
  * Axios instance configured for API requests, handling authentication and token refreshing.
- * 
- * @type {import('axios').AxiosInstance}
+ * * @type {import('axios').AxiosInstance}
  */
 const api = axios.create({
   baseURL: apiUrl,
@@ -61,9 +47,9 @@ api.interceptors.request.use(
     // Rutas que NO deben llevar un Authorization header (login, refresh)
     const excludeAuthHeaderUrls = [
       `${apiUrl}/token/`,
-      `/token/`,
+      `/token/`, // Handle relative paths too
       `${apiUrl}/token/refresh/`,
-      `/token/refresh/`,
+      `/token/refresh/`, // Handle relative paths too
     ];
 
     const isAuthHeaderExcluded = excludeAuthHeaderUrls.some(url => config.url.includes(url));
@@ -109,6 +95,9 @@ api.interceptors.response.use(
         isRefreshing = true;
         try {
           console.warn("Access token expired or unauthorized. Attempting to refresh token...");
+          // Dynamically import authService functions needed for refresh and logout
+          // This breaks the circular dependency
+          const { refreshAuthToken, logout } = await import('../services/authService'); 
           const newAccessToken = await refreshAuthToken(); 
           
           if (newAccessToken === false){
@@ -131,6 +120,8 @@ api.interceptors.response.use(
           processQueue(refreshError, null); 
 
           console.error("Failed to refresh token. Logging out.", refreshError);
+          // Dynamically import logout again, or ensure it's available from the first dynamic import
+          const { logout } = await import('../services/authService'); 
           logout(); // Deletes stored tokens
           return Promise.reject(refreshError); // Rejects original promse with refreshError
         };
