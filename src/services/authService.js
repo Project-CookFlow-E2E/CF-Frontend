@@ -34,7 +34,7 @@
  * @requires jwt-decode
  * @author Nico
  * @modified by Saturnino
- * @modified by Ana Castro  
+ * @modified by Ana Castro
  * @modified Added function getUserIdFromToken() to obtain user ID through token
  *
  */
@@ -204,6 +204,6 @@ export const getUserIdFromToken = () => {
     throw new Error("Token not found");
   }
 
-  const decoded = jwtDecode(token); 
+  const decoded = jwtDecode(token);
   return decoded.user_id;
 };

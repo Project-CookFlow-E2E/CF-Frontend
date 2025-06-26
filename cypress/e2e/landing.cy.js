@@ -20,7 +20,6 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
     cy.getDataTest('problem-section').should('be.visible');
     cy.getDataTest('problem-title').should('be.visible').and('contain.text', 'De la frustración a la diversión');
     cy.getDataTest('problem-cards-container').should('be.visible');
-
     cy.getDataTest('problem-card-1').should('be.visible')
       .and('contain.text', '¿Que cocinamos hoy?');
     cy.getDataTest('problem-card-2').should('be.visible')
@@ -33,7 +32,6 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
     cy.getDataTest('solution-description').should('be.visible').and('not.be.empty');
     cy.getDataTest('recipe-cards-grid').should('be.visible');
     cy.getDataTest('main-card-container').should('have.length.at.least', 1);
-
     cy.getDataTest('signup-button-container').should('be.visible');
     cy.getDataTest('signup-link')
       .should('be.visible')
@@ -66,7 +64,7 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
     cy.url().should('match', /\/recipe\/\d+$/);
   });
 
-  it.skip('8. Displays "Cargando recetas..." when recipes are loading', () => {
+  it('8. Displays "Cargando recetas..." when recipes are loading', () => {
     cy.intercept('GET', '/api/recipes/recipes/?ordering=-created_at&limit=32', (req) => {
       req.reply({
         delay: 500,
@@ -81,7 +79,7 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
     cy.getDataTest('recipe-cards-grid').find('[data-testid^="recipe-card-"]').should('have.length.at.least', 1);
   });
 
-  it.skip('9. Displays "No hay recetas disponibles." when no recipes are returned', () => {
+  it('9. Displays "No hay recetas disponibles." when no recipes are returned', () => {
     cy.intercept('GET', '/api/recipes/recipes/?ordering=-created_at&limit=32', {
       statusCode: 200,
       body: {

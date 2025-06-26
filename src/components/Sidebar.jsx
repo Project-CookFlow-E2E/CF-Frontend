@@ -42,11 +42,10 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex transition-colors duration-300 ${
-        open
-          ? "bg-black/80 pointer-events-auto"
-          : "bg-black/0 pointer-events-none"
-      }`}
+      className={`fixed inset-0 z-50 flex transition-colors duration-300 ${open
+        ? "bg-black/80 pointer-events-auto"
+        : "bg-black/0 pointer-events-none"
+        }`}
       style={{ transitionProperty: "background-color" }}
       aria-hidden={!open}
     >
