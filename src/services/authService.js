@@ -5,9 +5,10 @@
  * and JWT validation (expiration check) for client-side auth flows.
  *
  * Features:
- * - Stores JWT tokens in localStorage under a fixed key.
+ * - Stores JWT tokens in localStorage under fixed keys.
  * - Decodes and validates token expiration using `jwt-decode`.
  * - Interfaces with an Axios instance (`api`) to perform login requests.
+ * - Clears 'processedRecipeIds_inspireme_local' from localStorage on login and logout.
  *
  * Example usage:
  * import * as authService from './authService';
@@ -36,7 +37,8 @@
  * @modified by Saturnino
  * @modified by Ana Castro
  * @modified Added function getUserIdFromToken() to obtain user ID through token
- *
+ * @modified by Gemini
+ * @modified Added clearing of 'processedRecipeIds_inspireme_local' on login and logout.
  */
 import api from "./api";
 import { jwtDecode } from "jwt-decode";
@@ -55,8 +57,18 @@ const ACCESS_TOKEN_KEY = "cookflow_accessToken";
 const REFRESH_TOKEN_KEY = "cookflow_refreshToken";
 
 /**
+ * Key used by InspireMe.jsx to store processed recipe IDs in localStorage.
+ * This needs to be cleared on login/logout to provide a fresh experience.
+ *
+ * @type {"processedRecipeIds_inspireme_local"}
+ */
+const PROCESSED_RECIPES_STORAGE_KEY = 'processedRecipeIds_inspireme_local';
+
+
+/**
  * Performs a login request to the backend to obtain JWT tokens.
  * Stores the access token and refresh token in localStorage upon successful authentication.
+ * Also clears previously processed recipe IDs from local storage to ensure a fresh experience.
  *
  * @async
  * @param {string} username - The username/email for login.
@@ -73,7 +85,11 @@ export const login = async (username, password) => {
     const res = await api.post("/token/", { username, password });
     const accessToken = res.data.access;
     const refreshToken = res.data.refresh;
+
     if (res.status === 200 && accessToken) {
+      // Clear processed recipes from local storage for a fresh start for the new user
+      localStorage.removeItem(PROCESSED_RECIPES_STORAGE_KEY);
+
       localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       window.dispatchEvent(new Event("authchange"));
@@ -139,7 +155,7 @@ export const isTokenValid = () => {
 
 /**
  * Logs out the user by removing both access and refresh tokens from localStorage.
- * This function does not perform a backend call, as JWTs are inherently stateless.
+ * This function also clears the 'processedRecipeIds_inspireme_local' from localStorage.
  * It is recommended to add backend logic to invalidate the refresh token if necessary
  * for enhanced security (e.g., refresh token blocklisting).
  *
@@ -151,6 +167,9 @@ export const logout = async () => {
 
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+  // Clear processed recipes from local storage on logout
+  localStorage.removeItem(PROCESSED_RECIPES_STORAGE_KEY);
+
   window.dispatchEvent(new Event("authchange"));
 
   if (refreshToken) {
@@ -187,7 +206,7 @@ export const refreshAuthToken = async () => {
     return newAccessToken;
   } catch (error) {
     console.error("Error refreshing token:", error);
-    logout();
+    logout(); // Call logout which now includes clearing processed recipes
     throw error;
   }
 };
