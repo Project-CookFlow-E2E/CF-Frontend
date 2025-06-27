@@ -21,6 +21,11 @@ import { jwtDecode } from "jwt-decode";
 
 const REFRESH_THRESHOLD_SECONDS = 240; //in seconds
 
+// Define the fixed height for the footer when it's active (logged in)
+// YOU WILL NEED TO ADJUST THIS VALUE BASED ON YOUR FOOTER'S ACTUAL HEIGHT.
+// Measure your fixed footer's height in the browser developer tools and set it here.
+const FIXED_FOOTER_HEIGHT_PX = '72px'; // Example: Set this to your footer's exact height
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     authService.isTokenValid()
@@ -100,44 +105,53 @@ function App() {
     <BrowserRouter data-testid="app-browser-router">
       <Header data-testid="app-header" isAuthenticated={isAuthenticated} />
       <ScrollToTop />
-      <Routes data-testid="app-routes">
-        <Route path="/" element={<Landing />} />
-        <Route
-          path="/login"
-          element={isAuthenticated ? <Navigate to="/main" /> : <Login />}
-        />
-        <Route path="/register" element={<SignUp />} />
-        <Route
-          path="/profile"
-          element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
-        />
-        <Route path="/recipe/:id" element={<Recipe />} />
-        <Route path="/search" element={<Search />} />
-        <Route
-          path="/inspire-me"
-          element={isAuthenticated ? <InspireMe /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/add-recipe"
-          element={isAuthenticated ? <AddRecipe /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/admin-dashboard"
-          element={
-            isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />
-          }
-        />
-        <Route
-          path="/shopping-list"
-          element={
-            isAuthenticated ? <ShoppingList /> : <Navigate to="/login" />
-          }
-        />
-        <Route
-          path="/main"
-          element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
-        />
-      </Routes>
+      {/* This div is your main content area.
+        When the user is authenticated, the footer is fixed, so we add padding-bottom
+        equal to the footer's height to prevent content from going underneath it.
+      */}
+      <div 
+        className="flex-grow" // Ensures this div takes up available vertical space
+        style={{ paddingBottom: isAuthenticated ? FIXED_FOOTER_HEIGHT_PX : '0px' }}
+      >
+        <Routes data-testid="app-routes">
+          <Route path="/" element={<Landing />} />
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/main" /> : <Login />}
+          />
+          <Route path="/register" element={<SignUp />} />
+          <Route
+            path="/profile"
+            element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
+          />
+          <Route path="/recipe/:id" element={<Recipe />} />
+          <Route path="/search" element={<Search />} />
+          <Route
+            path="/inspire-me"
+            element={isAuthenticated ? <InspireMe /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/add-recipe"
+            element={isAuthenticated ? <AddRecipe /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/admin-dashboard"
+            element={
+              isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/shopping-list"
+            element={
+              isAuthenticated ? <ShoppingList /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/main"
+            element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
+          />
+        </Routes>
+      </div>
       <Footer data-testid="app-footer" />
     </BrowserRouter>
   );
