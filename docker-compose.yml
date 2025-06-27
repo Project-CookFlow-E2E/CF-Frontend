@@ -1,0 +1,52 @@
+version: '3.8' # The 'version' warning is minor, you can ignore it for now or remove this line.
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules # This line is correct and crucial for frontend's node_modules
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://127.0.0.1:8000/api
+
+  backend:
+    build:
+      context: ../cookflow-backend # <--- FIX THIS LINE: Go up one level, then into cookflow-backend
+    volumes:
+      - ../cookflow-backend:/app # <--- FIX THIS LINE: Go up one level, then into cookflow-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_NAME: cookflow_db
+      DB_USER: admin
+      DB_PASSWORD: admin
+      SECRET_KEY: "your_insecure_dev_secret_key"
+      DEBUG: "True"
+      # CORS_ALLOWED_ORIGINS: "http://localhost:5173" # Add this if you face CORS issues
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: cookflow_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d cookflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -96,7 +96,6 @@ api.interceptors.response.use(
         try {
           console.warn("Access token expired or unauthorized. Attempting to refresh token...");
           // Dynamically import authService functions needed for refresh and logout
-          // This breaks the circular dependency
           const { refreshAuthToken, logout } = await import('../services/authService'); 
           const newAccessToken = await refreshAuthToken(); 
           
@@ -108,11 +107,11 @@ api.interceptors.response.use(
             return Promise.reject(new Error("No refresh token available."));
           };
 
-          isRefreshing = false; // Unlocks the refresh
+          isRefreshing = false;
           processQueue(null, newAccessToken); 
 
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return api(originalRequest); // Resends the original
+          return api(originalRequest);
 
         } 
         catch (refreshError) {
@@ -120,10 +119,9 @@ api.interceptors.response.use(
           processQueue(refreshError, null); 
 
           console.error("Failed to refresh token. Logging out.", refreshError);
-          // Dynamically import logout again, or ensure it's available from the first dynamic import
           const { logout } = await import('../services/authService'); 
-          logout(); // Deletes stored tokens
-          return Promise.reject(refreshError); // Rejects original promse with refreshError
+          logout();
+          return Promise.reject(refreshError);
         };
       };
 
@@ -131,11 +129,9 @@ api.interceptors.response.use(
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
       }).then(token => {
-        // When the refresh is complete, this promise will be called with the new token
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
       }).catch(err => {
-        // Promise reject if refresh fails
         return Promise.reject(err);
       });
     }
