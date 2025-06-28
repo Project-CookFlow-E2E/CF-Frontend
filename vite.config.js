@@ -1,14 +1,32 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+// cookflow-frontend/vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
 
-  test: {
-    globals: true, // Permite usar 'describe', 'it', 'expect' globalmente
-    environment: 'jsdom', // Simula un entorno de navegador (DOM) para tus tests
-    setupFiles: './src/setupTests.js', 
+  server: {
+    host: '0.0.0.0',
+    port: 80,
+    cors: true,
+    hmr: {
+      clientPort: 80,
+      host: 'frontend',
+      protocol: 'ws',
+    },
+    origin: '*',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    },
+    allowedHosts: ['frontend', 'localhost', '127.0.0.1'],
   },
-})
+
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+  },
+});
