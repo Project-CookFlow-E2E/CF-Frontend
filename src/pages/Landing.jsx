@@ -121,7 +121,7 @@ const Landing = () => {
           id="register-button-container"
         >
           <Link to="/login" data-testid="register-link" id="register-link">
-            <Button>A cocinar</Button>
+            <Button data-testid="acocinar-button">A cocinar</Button>
           </Link>
         </div>
       </div>

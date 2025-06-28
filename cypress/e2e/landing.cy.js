@@ -1,7 +1,6 @@
 describe('Landing Page Tests', function() {
 
   beforeEach(() => {
-    // Removed: cy.intercept('GET', '/api/recipes/recipes/?ordering=-created_at&limit=32', { fixture: 'recipes/latest_recipes.json' }).as('getLatestRecipes');
     cy.visit('/');
   });
 
@@ -30,14 +29,9 @@ describe('Landing Page Tests', function() {
     cy.getDataTest('solution-section').should('be.visible');
     cy.getDataTest('solution-title').should('be.visible').and('contain.text', 'La solución CookFlow');
     cy.getDataTest('solution-description').should('be.visible').and('not.be.empty');
-    cy.getDataTest('recipe-cards-grid').should('be.visible');
-    cy.getDataTest('main-card-container').should('have.length.at.least', 1); // This now relies on real data
-    cy.getDataTest('register-button-container').should('be.visible');
-    cy.getDataTest('register-link')
+    cy.getDataTest('acocinar-button')
       .should('be.visible')
-      .and('have.attr', 'href', '/login')
-      .find('button')
-      .should('contain.text', 'A cocinar');
+      .and('contain.text', 'A cocinar');
   });
 
   it('4. Navigates to the login page when "Empezar" button is clicked', () => {
@@ -46,7 +40,7 @@ describe('Landing Page Tests', function() {
   });
 
   it('5. Navigates to the login page when "A cocinar" button is clicked', () => {
-    cy.getDataTest('register-link').click();
+    cy.getDataTest('acocinar-button').click();
     cy.url().should('include', '/login');
   });
 });

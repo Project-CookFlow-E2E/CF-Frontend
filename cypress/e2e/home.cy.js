@@ -14,19 +14,13 @@ describe('Home Page Tests', function() {
       .and('have.attr', 'src', '/home-page.jpeg');
   });
 
-  it('2. Displays the "Buscar" (Search) button in the header section', () => {
-    cy.getDataTest('custom-button').contains('Buscar')
-      .should('be.visible')
-      .and('be.enabled');
-  });
-
-  it('3. Displays the welcome message with the user\'s name', () => {
+  it('2. Displays the welcome message with the user\'s name', () => {
     cy.getDataTest('firstname-text')
       .should('be.visible')
       .and('contain.text', 'Hola, Ana!');
   });
 
-  it('4. Displays category filter badges and allows selection', () => {
+  it('3. Displays category filter badges and allows selection', () => {
     // Verify Category & Items List Visibility
     cy.getDataTest('category-list').should('be.visible');
     cy.getDataTest('badge-label').contains('Comida').should('exist')
@@ -46,9 +40,11 @@ describe('Home Page Tests', function() {
 
     // On multi-selection, "Comida" should still be selected and styled
     cy.getDataTest('badge-label').contains('Comida').should('have.class', 'bg-pink-500');
+
+    cy.getDataTest('search-button').click();
+    cy.url().should('include', '/search');
   });
 
-  
 
   it('5. Displays the "Últimas recetas" (Latest Recipes) section title', () => {
     cy.getDataTest('latest-recipes-section').scrollIntoView().should('be.visible');
@@ -79,7 +75,7 @@ describe('Home Page Tests', function() {
     cy.getDataTest('inspire-title')
       .should('be.visible')
       .and('contain.text', '¿Aún no sabes que hacer?');
-    cy.getDataTest('custom-button').contains('Inspire me')
+    cy.getDataTest('inspire-button')
       .should('be.visible')
       .and('not.be.disabled');
   });
@@ -98,9 +94,8 @@ describe('Home Page Tests', function() {
   });
 
   it('10. Navigation from header to "Mi Perfil" (My Profile) works', () => {
-    cy.getDataTest('custom-button')
-      .contains('Mi Perfil')
-      .should('be.visible')
+    cy.getDataTest('profile-button')
+      .should('contain.text', 'Mi Perfil')
       .click();
     cy.url().should('include', '/profile');
   });

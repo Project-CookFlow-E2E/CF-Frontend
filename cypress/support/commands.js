@@ -74,8 +74,7 @@ Cypress.Commands.add('setupDashboardPage', (username, password) => {
 });
 
 Cypress.Commands.add('logoutUI', () => {
-    cy.getDataTest('custom-button')
-      .contains('Cerrar Sesión')
+    cy.getDataTest('logout-button')
       .should('be.visible')
       .and('be.enabled')
       .click();

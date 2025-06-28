@@ -6,30 +6,6 @@ import { isTokenValid, logout, getToken } from "../services/authService";
 import { Menu, Shield } from "lucide-react";
 import Sidebar from "./Sidebar";
 
-/**
- * Header es el encabezado principal de la aplicación.
- *
- * Muestra contenido diferente según el estado de autenticación:
- * - Si el usuario está logueado (`isLoggedIn`), se muestra el logo con un enlace al perfil.
- * - Si no lo está, se muestran botones para iniciar sesión o registrarse.
- * - Si el usuario es administrador (según el JWT), se muestra un botón con icono de escudo y texto "Admin" que enlaza al panel de administración (`/admin-dashboard`).
- *
- * El botón de administrador solo es visible si el token JWT contiene alguno de los siguientes campos:
- *   - `is_staff: true`
- *   - `is_admin: true`
- *   - `role: "admin"`
- *
- * @component
- * @param {Object} props - Props del componente.
- * @param {boolean} [props.isLoggedIn=true] - Indica si el usuario ha iniciado sesión.
- * @returns {JSX.Element} Encabezado dinámico de la aplicación.
- *
- * @modifiedby Ángel Aragón
- * @modified Añadido Sidebar para navegación móvil y logout.
- * @modified Añadido botón de acceso al panel de administración visible solo para administradores.
- * @modifiedby Noemi Casaprima
- */
-
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(isTokenValid());
   const [sidebarOpen, setSidebarOpen] = useState(false);

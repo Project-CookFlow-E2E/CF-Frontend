@@ -125,6 +125,7 @@ const Home = () => {
                         ¿Aún no sabes que hacer?
                     </h2>
                     <Button
+                        data-testid="inspire-button"
                         onClick={() => navigate("/inspire-me")}
                         ariaLabel="Inspire me"
                         className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-accent flex items-center justify-center mx-auto hover:bg-rose-600 transition"

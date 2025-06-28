@@ -89,7 +89,7 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
               <Link to="/profile" data-testid="profile-link" onClick={onClose}>
                 <Button
                   className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
-                  data-testid="profile-button"
+                  data-testid="sidebar-profile-button"
                 >
                   Mi Perfil
                 </Button>
@@ -97,7 +97,7 @@ const Sidebar = ({ open, onClose, isLoggedIn, onLogout }) => {
               <Link to="/" data-testid="logout-link" onClick={onClose}>
                 <Button
                   className="w-full bg-accent text-white px-6 py-2 rounded-full font-semibold shadow-md hover:bg-accent-dark transition-colors duration-200 flex items-center justify-center"
-                  data-testid="logout-button"
+                  data-testid="sidebar-logout-button"
                   onClick={onLogout}
                 >
                   Cerrar Sesión
