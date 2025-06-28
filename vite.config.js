@@ -12,7 +12,7 @@ export default defineConfig({
     cors: true,
     hmr: {
       clientPort: 80,
-      host: 'frontend',
+      host: process.env.VITE_HMR_HOST || 'localhost',
       protocol: 'ws',
     },
     origin: '*',

@@ -1,7 +1,6 @@
 # docker-compose.yml
 services:
   db:
-    # ... (no change to db service)
     image: postgres:latest
     environment:
       POSTGRES_DB: cookflow_db
@@ -47,6 +46,7 @@ services:
       - "5173:80"
     environment:
       VITE_API_URL: http://backend:8000/api
+      VITE_HMR_HOST: frontend
       CYPRESS_BASE_URL: http://frontend:80
     volumes:
       - .:/app
