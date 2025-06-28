@@ -10,7 +10,14 @@ Cypress.Commands.add('loginUI', (username, password, visitLoginPage = false) => 
   }
   cy.getDataTest('username-input').type(username);
   cy.getDataTest('password-input').type(password);
-  cy.getDataTest('custom-button').contains('Iniciar sesión').click();
+  cy.getDataTest('login-button-container')
+      .should('be.visible')
+      .find('button')
+      .contains('Iniciar sesión')
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
+
   cy.url().should('include', '/main');
   cy.get('header').should('contain.text', 'Mi Perfil', { timeout: 10000 });
 });
