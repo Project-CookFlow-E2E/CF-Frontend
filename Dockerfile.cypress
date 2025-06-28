@@ -5,8 +5,8 @@ WORKDIR /e2e
 
 COPY package*.json ./
 
-RUN npm ci
-
+RUN npm ci # Installs node_modules
+RUN npx cypress install --force 
 COPY . .
 
 CMD ["npm", "run", "cypress:run"]

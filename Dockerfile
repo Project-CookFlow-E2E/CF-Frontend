@@ -1,23 +1,14 @@
-FROM node:22-slim AS build
+# cookflow-frontend/Dockerfile
+FROM cypress/browsers:latest
 
-WORKDIR /app
+WORKDIR /e2e
 
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm cache clean --force && npm ci
+COPY package*.json ./
 
-RUN ls -la /app/package.json /app/package-lock.json || echo "ERROR: package-lock.json or package.json not found in /app"
-RUN echo "--- Start of package-lock.json in container ---" && cat /app/package-lock.json | head -n 10 || echo "ERROR: Could not read package-lock.json"
-RUN echo "--- End of package-lock.json in container ---"
-
-RUN if [ -f "./node_modules/.bin/vite" ]; then echo "Vite executable found at ./node_modules/.bin/vite!"; else echo "ERROR: Vite executable NOT found at ./node_modules/.bin/vite!"; fi
-RUN which npm || echo "npm not in PATH"
-RUN npm config get prefix
-RUN ls -la /app/node_modules/rollup/dist || echo "rollup/dist not found"
-RUN ls -la /app/node_modules/@rollup || echo "@rollup not found"
+RUN npm ci # This installs JS package dependencies
+RUN npx cypress install --force
 
 COPY . .
 
-EXPOSE 5173
-
-CMD ["npm", "run", "dev"]
+EXPOSE 80
+CMD ["npm", "run", "dev"] 
