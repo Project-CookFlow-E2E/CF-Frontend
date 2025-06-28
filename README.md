@@ -1,24 +1,17 @@
 # CookFlow Front End Forked Repo
 
-## Shortcut
-chmod +x run_tests.sh
-./run_tests.sh
----
-
-### For Multi Container: Use Docker Compose
+### 1. Build Docker & Run it
 
 ```bash
-docker compose down
-docker compose up --build -d
-docker compose exec backend python manage.py makemigrations
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py createsuperuser
+docker compose down --volumes
+docker-compose build
+docker-compose up -d
+docker-compose exec backend python manage.py createsuperuser
 ```
-(create the superuser)
-
 ### Seed Data
 ```bash
 docker compose exec backend python manage.py seed_all
+docker-compose up -d
 ```
 
 ### Run Cypress

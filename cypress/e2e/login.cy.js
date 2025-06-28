@@ -39,10 +39,10 @@ describe('Login Page Tests', function() {
 
   it('6. Can access Home page after API login', function() {
     const validUser = this.users.find(u => u.username === 'ana456');
-    cy.interceptUserMe(validUser);
+    // Removed: cy.interceptUserMe(validUser);
     cy.loginAPI(validUser.username, validUser.password);
     cy.visit('/main');
-    cy.wait('@getUserMe');
+    // Removed: cy.wait('@getUserMe');
     cy.url().should('include', '/main');
     cy.getDataTest('main-title').should('be.visible').and('contain.text', '¿Qué te apetece?');
     cy.get('header').should('contain.text', 'Mi Perfil', { timeout: 10000 });

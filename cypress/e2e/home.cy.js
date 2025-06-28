@@ -1,29 +1,32 @@
-// cypress/e2e/dashboard/dashboard.cy.js
-
-describe('Dashboard/Home Page Tests', function() {
+describe('Home Page Tests', function() {
 
   before(() => {
     cy.viewport(1280, 800);
   });
 
   beforeEach(function() {
-    const validUser = this.users.find(u => u.username === 'ana456');
-    cy.setupDashboardPage(validUser.username, validUser.password);
+    cy.setupDashboardPage('ana456', 'testpass456');
   });
 
-  it('1. Displays the welcome message with the user\'s name', () => {
-    cy.getDataTest('prompt-text')
-      .should('be.visible')
-      .and('contain.text', 'Hola, Ana!');
-  });
-
-  it('2. Displays the main home page image', () => {
+  it('1. Displays the main home page image', () => {
     cy.getDataTest('home-image')
       .should('be.visible')
       .and('have.attr', 'src', '/home-page.jpeg');
   });
 
-  it('3. Displays category filter badges and allows selection', () => {
+  it('2. Displays the "Buscar" (Search) button in the header section', () => {
+    cy.getDataTest('custom-button').contains('Buscar')
+      .should('be.visible')
+      .and('be.enabled');
+  });
+
+  it('3. Displays the welcome message with the user\'s name', () => {
+    cy.getDataTest('firstname-text')
+      .should('be.visible')
+      .and('contain.text', 'Hola, Ana!');
+  });
+
+  it('4. Displays category filter badges and allows selection', () => {
     // Verify Category & Items List Visibility
     cy.getDataTest('category-list').should('be.visible');
     cy.getDataTest('badge-label').contains('Comida').should('exist')
@@ -37,7 +40,7 @@ describe('Dashboard/Home Page Tests', function() {
       .should('exist').and('have.class', 'bg-pink-500');
 
     // Click 'Desayuno', assert selection
-    cy.getDataTest('badge-label').contains('Desayuno').click();    
+    cy.getDataTest('badge-label').contains('Desayuno').click();
     cy.getDataTest('badge-label').contains('Desayuno')
       .should('exist').and('have.class', 'bg-pink-500');
 
@@ -45,11 +48,7 @@ describe('Dashboard/Home Page Tests', function() {
     cy.getDataTest('badge-label').contains('Comida').should('have.class', 'bg-pink-500');
   });
 
-  it('4. Displays the "Buscar" (Search) button in the header section', () => {
-    cy.getDataTest('custom-button').contains('Buscar')
-      .should('be.visible')
-      .and('be.enabled');
-  });
+  
 
   it('5. Displays the "Últimas recetas" (Latest Recipes) section title', () => {
     cy.getDataTest('latest-recipes-section').scrollIntoView().should('be.visible');

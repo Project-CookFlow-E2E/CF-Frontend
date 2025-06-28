@@ -1,24 +1,3 @@
-/**
- * Home Page Component
- *
- * Página principal que permite al usuario:
- * - Seleccionar categorías para buscar recetas.
- * - Ver las últimas recetas destacadas.
- * - Marcar recetas como favoritas (persistidas en localStorage).
- * - Recibir inspiración aleatoria con un botón.
- *
- * Usa `useNavigate` para la navegación entre páginas.
- * Usa `useFavorites` para gestionar las recetas favoritas del usuario
- *
- * @author Yuliia Martynovych
- * @module Home 
- * @modifiedby Ana Castro
- * @modified adaptar el componente Card.jsx para usarlo directamente, gestion de favorites a través del hook useFavorites,
- * gestion de categorias a través del hook useCategories,
- *  añadida la sección de inspiración con un botón que redirige a /inspire-me.
- *  Seleccion de las tres ultimas recetas creadas en la db.
- */
-
 import { Badge, Button, Card } from "../components";
 import useFavorites from "../hooks/useFavorites";
 import useCategories from "../hooks/useCategories";
@@ -50,7 +29,7 @@ const Home = () => {
                         <p className="text-gray-600 mb-8 text-lg" data-testid="prompt-text">
                             {userName ? (
                                 <>
-                                    <span className="font-bold">¡Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
+                                    <span className="font-bold" data-testid="firstname-text">¡Hola, {userName}!</span> ¿No sabes qué cocinar hoy?
                                 </>
                             ) : (
                                 "¿No sabes qué elegir?"
