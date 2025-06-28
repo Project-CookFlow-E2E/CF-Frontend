@@ -1,0 +1,12 @@
+# Dockerfile.cypress
+FROM cypress/browsers:latest
+
+WORKDIR /e2e
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY . .
+
+CMD ["npm", "run", "cypress:run"]

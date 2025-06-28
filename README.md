@@ -1,5 +1,10 @@
 # CookFlow Front End Forked Repo
 
+## Shortcut
+chmod +x run_tests.sh
+./run_tests.sh
+---
+
 ### For Multi Container: Use Docker Compose
 
 ```bash
