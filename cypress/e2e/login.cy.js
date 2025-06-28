@@ -9,7 +9,7 @@ describe('Login Page Tests', function() {
   });
 
   it('2. Displays Sign Up link on the login page', () => {
-    cy.getDataTest('signup-link').contains('Sign Up').should('exist');
+    cy.getDataTest('register-link').contains('Sign Up').should('exist');
   });
 
   it('3. Displays login image on the login page', () => {

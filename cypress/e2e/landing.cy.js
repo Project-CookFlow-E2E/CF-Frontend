@@ -5,11 +5,11 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
     cy.visit('/');
   });
 
-  it('1. Displays the main hero section with title, subtitle, and signup link', () => {
+  it('1. Displays the main hero section with title, subtitle, and register link', () => {
     cy.getDataTest('hero-section').should('be.visible');
     cy.getDataTest('hero-title').should('be.visible').and('contain.text', 'CookFlow');
     cy.getDataTest('hero-subtitle').should('be.visible').and('contain.text', 'Redescubre el placer de cocinar');
-    cy.getDataTest('hero-signup-link')
+    cy.getDataTest('hero-register-link')
       .should('be.visible')
       .and('have.attr', 'href', '/login')
       .find('button')
@@ -32,8 +32,8 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
     cy.getDataTest('solution-description').should('be.visible').and('not.be.empty');
     cy.getDataTest('recipe-cards-grid').should('be.visible');
     cy.getDataTest('main-card-container').should('have.length.at.least', 1);
-    cy.getDataTest('signup-button-container').should('be.visible');
-    cy.getDataTest('signup-link')
+    cy.getDataTest('register-button-container').should('be.visible');
+    cy.getDataTest('register-link')
       .should('be.visible')
       .and('have.attr', 'href', '/login')
       .find('button')
@@ -41,12 +41,12 @@ describe('Landing Page Tests (Mocked API - UI Presence Focused)', function() {
   });
 
   it('4. Navigates to the login page when "Empezar" button is clicked', () => {
-    cy.getDataTest('hero-signup-link').click();
+    cy.getDataTest('hero-register-link').click();
     cy.url().should('include', '/login');
   });
 
   it('5. Navigates to the login page when "A cocinar" button is clicked', () => {
-    cy.getDataTest('signup-link').click();
+    cy.getDataTest('register-link').click();
     cy.url().should('include', '/login');
   });
 

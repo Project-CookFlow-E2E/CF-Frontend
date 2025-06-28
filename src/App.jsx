@@ -9,7 +9,7 @@ import {
   Profile,
   Recipe,
   Search,
-  SignUp,
+  Register,
   ShoppingList,
   Landing,
 } from "./pages";
@@ -119,7 +119,7 @@ function App() {
             path="/login"
             element={isAuthenticated ? <Navigate to="/main" /> : <Login />}
           />
-          <Route path="/register" element={<SignUp />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/profile"
             element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
