@@ -3,7 +3,7 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5173',
+    baseUrl: 'http://frontend:80',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.js',
     viewportWidth: 1280,
@@ -12,12 +12,9 @@ export default defineConfig({
     screenshotOnRunFailure: false,
     defaultCommandTimeout: 5000,
     requestTimeout: 10000,
-     env: {
-      API_URL: 'http://127.0.0.1:8000/api'
-    },
     setupNodeEvents(on, config) {
+      config.env.API_URL = process.env.CYPRESS_API_URL;
       return config;
     },
-    
   },
 });
