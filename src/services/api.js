@@ -1,21 +1,10 @@
-// src/api.js (or wherever your Axios instance is defined)
 import axios from 'axios';
-// Only import the necessary functions for the initial setup and request interceptor
 import { getToken, isTokenValid } from "../services/authService";
 
-/**
- * The base URL for the API, obtained from environment variables.
- * * @type {string}
- */
 const apiUrl = import.meta.env.VITE_API_URL || "";
 
-// Log to console to verify the URL during development
 console.log("API_BASE_URL used in api.js:", apiUrl);
 
-/**
- * Axios instance configured for API requests, handling authentication and token refreshing.
- * * @type {import('axios').AxiosInstance}
- */
 const api = axios.create({
   baseURL: apiUrl,
   headers: {
@@ -38,26 +27,19 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 }
 
-/**
- * Request Interceptor:
- * Automatically adds the JWT Access Token to the Authorization header of outgoing requests.
- */
 api.interceptors.request.use(
   (config) => {
-    // Rutas que NO deben llevar un Authorization header (login, refresh)
     const excludeAuthHeaderUrls = [
       `${apiUrl}/token/`,
-      `/token/`, // Handle relative paths too
+      `/token/`,
       `${apiUrl}/token/refresh/`,
-      `/token/refresh/`, // Handle relative paths too
+      `/token/refresh/`,
     ];
 
     const isAuthHeaderExcluded = excludeAuthHeaderUrls.some(url => config.url.includes(url));
 
-    // Si la URL no está excluida, intenta adjuntar el token
     if (!isAuthHeaderExcluded) {
       const token = getToken();
-      // Solo adjunta el token si existe y es válido (no ha expirado)
       if (token && isTokenValid()) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -69,11 +51,6 @@ api.interceptors.request.use(
   }
 );
 
-/**
- * Response Interceptor:
- * Handles responses, specifically 401 Unauthorized errors for token refreshing and request retries.
- * Logs out the user if token refresh fails.
- */
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -95,7 +72,6 @@ api.interceptors.response.use(
         isRefreshing = true;
         try {
           console.warn("Access token expired or unauthorized. Attempting to refresh token...");
-          // Dynamically import authService functions needed for refresh and logout
           const { refreshAuthToken, logout } = await import('../services/authService'); 
           const newAccessToken = await refreshAuthToken(); 
           
@@ -125,7 +101,6 @@ api.interceptors.response.use(
         };
       };
 
-      // If a refresh request is already in progress, the current request is added to the queue.
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
       }).then(token => {
