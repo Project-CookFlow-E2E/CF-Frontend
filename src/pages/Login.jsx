@@ -1,21 +1,3 @@
-/**
- * @file Login.jsx
- * @description Página de inicio de sesión (Login) para usuarios registrados.
- * Permite al usuario introducir su correo electrónico y contraseña, y simula
- * la autenticación redirigiendo al home.
- *
- * Componentes utilizados:
- * - Input: Campo reutilizable con icono (correo y contraseña)
- * - Button: Botón reutilizable para enviar el formulario
- * - Icons: Mail y Lock (de Lucide React)
- *
- * Navegación:
- * - Al hacer clic en "Iniciar sesión" se redirige al home (`/`)
- * - Enlace para redirigir a la página de registro (`/signup`)
- *
- * @module pages/Login
- */
-
 import React from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -27,15 +9,6 @@ import { login, getToken } from "../services/authService";
 import SuccessMsg from "../components/SuccessMsg";
 import ErrorMsg from "../components/ErrorMsg";
 
-/**
- * Página de inicio de sesión para acceder a la app.
- * Contiene imagen decorativa, formulario con campos de email y contraseña,
- * y un botón para simular login.
- *
- * @returns {JSX.Element} Vista de login
- * @modifiedby Ángel Aragón
- * @modified Arreglado componente Button, añadido SuccessMsg, usamos login de authService para manejar el inicio de sesión.
- */
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -170,15 +143,15 @@ const Login = () => {
 
           <h4
             className="text-xs mb-12 text-black"
-            data-testid="signup-redirect-text"
-            id="signup-redirect-text"
+            data-testid="register-redirect-text"
+            id="register-redirect-text"
           >
             ¿No tienes cuenta? Regístrate aquí:{" "}
             <Link
-              to="/signup"
+              to="/register"
               className="text-blue-600 hover:underline"
-              data-testid="signup-link"
-              id="signup-link"
+              data-testid="register-link"
+              id="register-link"
             >
               Sign Up
             </Link>

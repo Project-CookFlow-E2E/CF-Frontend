@@ -1,0 +1,79 @@
+# docker-compose.yml
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: cookflow_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - cookflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d cookflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../cookflow-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_ALLOWED_HOSTS: "frontend,backend,localhost,127.0.0.1,host.docker.internal"
+      DJANGO_CORS_ALLOWED_ORIGINS: "http://frontend:80,http://localhost:5173,http://127.0.0.1:5173,http://localhost:80,http://127.0.0.1:80,http://host.docker.internal:80"
+      DATABASE_URL: postgres://admin:admin@db:5432/cookflow_db
+    volumes:
+      - ../cookflow-backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py seed_all &&
+             python manage.py runserver 0.0.0.0:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/login/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      VITE_API_URL: http://backend:8000/api
+      VITE_HMR_HOST: frontend
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  cypress:
+    build:
+      context: .
+      dockerfile: Dockerfile.cypress
+    image: cookflow-frontend-cypress-custom
+    environment:
+      CYPRESS_BASE_URL: http://frontend:80
+      CYPRESS_API_URL: http://backend:8000/api
+      DISPLAY: host.docker.internal:0.0
+      QT_XKB_CONFIG_ROOT: /usr/share/X11/xkb
+    volumes:
+      - .:/e2e
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    working_dir: /e2e
+    depends_on:
+      - frontend
+      - backend
+    restart: "no"
+
+volumes:
+  cookflow_db_data:

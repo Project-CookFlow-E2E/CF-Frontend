@@ -66,7 +66,7 @@ const Card = ({
           </h3>
           {onToggleFavorite && (
             <Button
-                
+
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleFavorite(id);
@@ -87,21 +87,21 @@ const Card = ({
 
         <div className="flex justify-between items-center">
           <div className="flex flex-row gap-2 mt-1">
-  {Array.isArray(category) ? (
-    category.map((cat, idx) => (
-      <span
-        key={idx}
-        className="ring ring-accent text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded-full"
-      >
-        {cat}
-      </span>
-    ))
-  ) : (
-    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-      {category || "LUNCH"}
-    </span>
-  )}
-</div>
+            {Array.isArray(category) ? (
+              category.map((cat, idx) => (
+                <span
+                  key={idx}
+                  className="ring ring-accent text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                >
+                  {cat}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                {category || "LUNCH"}
+              </span>
+            )}
+          </div>
 
           <TimerBadge minutes={time} color="text-gray-600" />
         </div>
@@ -126,7 +126,7 @@ Card.propTypes = {
 };
 
 Card.defaultProps = {
-  onClick: () => {},
+  onClick: () => { },
 };
 
 export default Card;

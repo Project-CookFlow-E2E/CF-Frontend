@@ -1,62 +1,13 @@
-/**
- * @file Landing.jsx
- * @description Página de bienvenida (Landing Page) para usuarios no registrados.
- * Presenta la propuesta de valor de CookFlow con una introducción visual, problemas comunes
- * relacionados con la cocina y una sección de recetas destacadas.
- *
- * Esta página actúa como punto de entrada para que los usuarios nuevos entiendan el objetivo
- * de la plataforma y se registren para empezar a usarla.
- *
- * Componentes utilizados:
- * - Button: Botón reutilizable
- * - Card: Vista individual de receta
- * - useFavorites: Hook para gestionar recetas favoritas
- * - mockRecipes: Datos simulados de recetas destacadas
- * Navegación:
- * - Los botones redirigen a la ruta `/signup` para incentivar el registro.
- *
- * @module pages/Landing
- */
-
 import { Button, Card } from "../components";
 import { Link, useNavigate } from "react-router-dom";
-import useLatestRecipesCookflow from "../hooks/useLatestRecipesCookflow";
 import { FaGear } from "react-icons/fa6";
-import useCategories from "../hooks/useCategories";
 import { useEffect } from "react";
 import { isTokenValid } from "../services/authService";
 
-/**
- * Renderiza una receta individual dentro del carrusel de recetas destacadas.
- * Si el usuario hace clic en el icono de favorito, se le redirige al registro.
- *
- * @param {Object} props
- * @param {number} props.id - ID de la receta
- * @author Yuliia Martynovych
- * @modifiedby Ána Castro, Ángel Aragón
- * @modified - Adaptadción del componente Card.jsx para usarlo directamente mediante props.Gestion de favoritos a través del hook useFavorites.
- * - Agregado el icono de engranaje para representar la receta y arreglado tiempo en card.
- * - Carga las últimas 3 recetas del usuario cookflow desde la API.
- * @returns {JSX.Element} Componente de tarjeta de receta
- */
-
-/**
- * Página principal de entrada para nuevos usuarios.
- * Contiene:
- * - Sección Hero con llamada a la acción
- * - Descripción de problemas comunes al cocinar
- * - Propuesta de solución con recetas destacadas
- *
- * @returns {JSX.Element}
- */
-
 const Landing = () => {
-  const { latestRecipes, loading } = useLatestRecipesCookflow();
   const navigate = useNavigate();
   const mediaUrl = import.meta.env.VITE_MEDIA_URL;
-  const { categories } = useCategories(2);
 
-  // Redirigir a Home si el usuario está logueado
   useEffect(() => {
     if (isTokenValid()) {
       navigate("/main", { replace: true });
@@ -89,7 +40,7 @@ const Landing = () => {
         >
           Redescubre el placer de cocinar
         </p>
-        <Link to="/login" data-testid="hero-signup-link" id="hero-signup-link">
+        <Link to="/login" data-testid="hero-register-link" id="hero-register-link">
           <Button>Empezar →</Button>
         </Link>
       </div>
@@ -165,50 +116,12 @@ const Landing = () => {
           eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </p>
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-12"
-          data-testid="recipe-cards-grid"
-          id="recipe-cards-grid"
-        >
-          {loading ? (
-            <p>Cargando recetas...</p>
-          ) : Array.isArray(latestRecipes) && latestRecipes.length > 0 ? (
-            latestRecipes.map((recipe) => (
-              <Card
-                key={recipe.id}
-                id={`recipe-card-${recipe.id}`}
-                image={
-                  recipe?.user?.id && recipe?.image?.url
-                    ? mediaUrl + recipe.user.id + "/" + recipe.image.url
-                    : "https://placehold.co/800?text=Placeholder+Image&font=playfair-display"
-                }
-                name={recipe.name}
-                category={
-                    Array.isArray(recipe.categories)
-                        ? recipe.categories
-                                .map((cat) => {
-                                    const catId = typeof cat === "object" ? cat.id : cat;
-                                    const fullCat = categories.find((c) => c.id === catId);
-                                    return fullCat?.name;
-                                })
-                                .filter(Boolean)
-                        : ["Sin categoría"]
-                }
-                time={`${recipe.duration_minutes}`}
-                onToggleFavorite={() => navigate("/login")}
-                onClick={() => navigate(`/recipe/${recipe.id}`)}
-              />
-            ))
-          ) : (
-            <p>No hay recetas disponibles.</p>
-          )}
-        </div>
-        <div
           className="pb-20"
-          data-testid="signup-button-container"
-          id="signup-button-container"
+          data-testid="register-button-container"
+          id="register-button-container"
         >
-          <Link to="/login" data-testid="signup-link" id="signup-link">
-            <Button>A cocinar</Button>
+          <Link to="/login" data-testid="register-link" id="register-link">
+            <Button data-testid="acocinar-button">A cocinar</Button>
           </Link>
         </div>
       </div>

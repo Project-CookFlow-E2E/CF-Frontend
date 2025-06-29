@@ -19,6 +19,6 @@ export { default as Login } from './Login';
 export { default as Profile } from './Profile';
 export { default as Recipe } from './Recipe';
 export { default as Search } from './Search';
-export { default as SignUp } from './SignUp';
+export { default as Register } from './Register';
 export { default as ShoppingList } from './ShoppingList';
 export { default as Landing } from './Landing';

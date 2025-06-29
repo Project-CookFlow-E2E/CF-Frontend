@@ -74,7 +74,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
     const handlePointerMove = useCallback((e) => {
         if (!isDragging || isSwipingOut) return;
 
-        e.preventDefault(); 
+        e.preventDefault();
 
         const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         setCurrentX(clientX);
@@ -110,7 +110,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
                 }
                 setTimeout(() => {
                     onSkip();
-                }, 300); 
+                }, 300);
             }
         } else {
             if (cardRef.current) {
@@ -129,7 +129,7 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
         document.addEventListener('pointermove', handlePointerMove);
         document.addEventListener('pointerup', handlePointerUp);
         document.addEventListener('pointercancel', handlePointerUp);
-        document.addEventListener('pointerleave', handlePointerUp); 
+        document.addEventListener('pointerleave', handlePointerUp);
 
         return () => {
             cardElement.removeEventListener('pointerdown', handlePointerDown);
@@ -257,13 +257,13 @@ const SwipeCard = ({ recipe, onToggleFavorite, onSkip }) => {
 
                     {categoriesToDisplay.length > 0 && (
                         <div className="flex justify-center flex-wrap gap-2 mb-3">
-                             {categoriesToDisplay.map((category) => (
-                                 <span
-                                     key={category.id}
-                                     className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
-                                 >
-                                     {category.name}
-                                 </span>
+                            {categoriesToDisplay.map((category) => (
+                                <span
+                                    key={category.id}
+                                    className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                                >
+                                    {category.name}
+                                </span>
                             ))}
                         </div>
                     )}

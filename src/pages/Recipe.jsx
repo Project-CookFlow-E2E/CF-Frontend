@@ -24,7 +24,7 @@ const Recipe = () => {
   const navigate = useNavigate();
   const pasosRef = useRef(null);
 
-  const [receta, setReceta] = useState(null);
+  const [receta, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -94,7 +94,7 @@ const Recipe = () => {
           ingredientsWithDetailsPromises
         );
 
-        setReceta({
+        setRecipe({
           id: rawRecipeData.id,
           titulo: rawRecipeData.name,
           tiempo: rawRecipeData.duration_minutes,

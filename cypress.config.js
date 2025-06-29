@@ -3,7 +3,8 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5173',
+    // Use process.env.CYPRESS_BASE_URL, with a fallback for local development if not set
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:80', // Changed this line
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.js',
     viewportWidth: 1280,
@@ -12,12 +13,9 @@ export default defineConfig({
     screenshotOnRunFailure: false,
     defaultCommandTimeout: 5000,
     requestTimeout: 10000,
-     env: {
-      API_URL: 'http://127.0.0.1:8000/api'
-    },
     setupNodeEvents(on, config) {
+      config.env.API_URL = process.env.CYPRESS_API_URL || 'http://localhost:8000/api'; // Changed this line
       return config;
     },
-    
   },
 });

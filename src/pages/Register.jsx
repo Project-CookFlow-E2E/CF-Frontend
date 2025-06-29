@@ -1,34 +1,3 @@
-/**
- * @file SignUp.jsx
- * @description Página de registro de nuevos usuarios en la aplicación CookFlow.
- *
- * Esta vista permite al usuario crear una cuenta proporcionando los siguientes datos:
- * - Nombre
- * - Primer y segundo apellido
- * - Correo electrónico
- * - Contraseña y confirmación
- *
- * Funcionalidades:
- * - Campos con íconos para mejor experiencia visual.
- * - Navegación hacia la página de login si el usuario ya tiene cuenta.
- * - Diseño responsivo con imagen lateral en pantallas grandes.
- *
- * Componentes utilizados:
- * - Input: campo reutilizable con ícono.
- * - Button: botón estilizado para envío de formulario.
- *
- * Navegación:
- * - Redirecciona a la página principal ("/") al hacer clic en "Crear cuenta".
- * - Enlace hacia la página de inicio de sesión ("/login").
- *
- * @author Nico
- * @modifiedby Ángel Aragón
- * @modified
- * - Agregado validación de contraseña para evitar coincidencias con datos personales.
- * - Implementado el hook useForm de react-hook-form para manejo de formularios.
- * - Agregado manejo de errores y mensajes de validación.
- */
-
 import { Button } from "../components";
 import Input from "../components/Input";
 import { Mail, Lock, PersonStanding } from "lucide-react";
@@ -53,7 +22,7 @@ const passwordValidation = (value, allValues) => {
   return true;
 };
 
-const SignUp = () => {
+const Register= () => {
   const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
   const {
@@ -97,23 +66,23 @@ const SignUp = () => {
   return (
     <div
       className="min-h-screen flex bg-[#FDF3E8]"
-      data-testid="signup-container"
+      data-testid="register-container"
     >
       <div
         className="hidden md:block w-1/2"
-        data-testid="signup-image-container"
+        data-testid="register-image-container"
       >
         <img
           src="/login.png"
           alt="Sign Up Illustration"
           className="h-full w-full object-cover"
-          data-testid="signup-image"
+          data-testid="register-image"
         />
       </div>
 
       <div
         className="w-full md:w-1/2 flex justify-center items-start pt-20"
-        data-testid="signup-form-container"
+        data-testid="register-form-container"
       >
         <form
           className="w-[320px] flex flex-col items-center px-4"
@@ -122,27 +91,27 @@ const SignUp = () => {
         >
           <h2
             className="text-3xl font-bold mb-2 text-black whitespace-nowrap"
-            data-testid="signup-welcome-title"
+            data-testid="register-welcome-title"
           >
             ¡Bienvenido!
           </h2>
           <h4
             className="text-sm mb-8 text-black text-center leading-snug"
-            data-testid="signup-subtitle"
+            data-testid="register-subtitle"
           >
             Únete a CookFlow y empieza tu viaje culinario
           </h4>
           {apiError && (
             <div
               className="text-red-500 text-sm mb-4"
-              data-testid="signup-api-error"
+              data-testid="register-api-error"
             >
               {apiError}
             </div>
           )}
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="signup-username-container"
+            data-testid="register-username-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -169,7 +138,7 @@ const SignUp = () => {
           </div>
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="signup-name-container"
+            data-testid="register-name-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -189,7 +158,7 @@ const SignUp = () => {
           </div>
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="signup-lastname1-container"
+            data-testid="register-lastname1-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -212,7 +181,7 @@ const SignUp = () => {
 
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="signup-lastname2-container"
+            data-testid="register-lastname2-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -235,7 +204,7 @@ const SignUp = () => {
 
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="signup-email-container"
+            data-testid="register-email-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -262,7 +231,7 @@ const SignUp = () => {
 
           <div
             className="flex flex-col mb-4 w-full"
-            data-testid="signup-password-container"
+            data-testid="register-password-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -285,7 +254,7 @@ const SignUp = () => {
 
           <div
             className="flex flex-col mb-12 w-full"
-            data-testid="signup-repeat-password-container"
+            data-testid="register-repeat-password-container"
           >
             <label
               className="text-xs mb-2 font-bold text-black"
@@ -307,19 +276,19 @@ const SignUp = () => {
             />
           </div>
 
-          <Button type="submit" data-testid="signup-create-account-btn">
+          <Button type="submit" data-testid="register-create-account-btn">
             Crear cuenta
           </Button>
 
           <h4
             className="text-xs mt-4 mb-12 text-black"
-            data-testid="signup-login-link-container"
+            data-testid="register-login-link-container"
           >
             ¿Ya tienes una cuenta? Entra aquí:{" "}
             <Link
               to="/login"
               className="text-blue-600 hover:underline"
-              data-testid="signup-login-link"
+              data-testid="register-login-link"
             >
               Log In
             </Link>
@@ -330,4 +299,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Register;

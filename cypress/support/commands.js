@@ -10,7 +10,14 @@ Cypress.Commands.add('loginUI', (username, password, visitLoginPage = false) => 
   }
   cy.getDataTest('username-input').type(username);
   cy.getDataTest('password-input').type(password);
-  cy.getDataTest('custom-button').contains('Iniciar sesión').click();
+  cy.getDataTest('login-button-container')
+      .should('be.visible')
+      .find('button')
+      .contains('Iniciar sesión')
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
+
   cy.url().should('include', '/main');
   cy.get('header').should('contain.text', 'Mi Perfil', { timeout: 10000 });
 });
@@ -24,7 +31,7 @@ Cypress.Commands.add('loginAPI', (username, password) => {
         username: username,
         password: password
       }
-    }).then((response) => {
+    }).then((response) => { 
       expect(response.status).to.eq(200);
       const token = response.body.access;
       const refreshToken = response.body.refresh;
@@ -41,47 +48,16 @@ Cypress.Commands.add('loginAPI', (username, password) => {
   });
 });
 
-// Set up the intercept for /users/me/
-Cypress.Commands.add('interceptUserMe', (userFixture) => {
-  cy.intercept('GET', `${Cypress.env('API_URL')}/users/me/`, {
-    statusCode: 200,
-    body: {
-      id: userFixture.id,
-      username: userFixture.username,
-      email: userFixture.email,
-      first_name: userFixture.first_name || userFixture.username.charAt(0).toUpperCase() + userFixture.username.slice(1, 3),
-      last_name: userFixture.last_name || ''
-    },
-    delay: 50
-  }).as('getUserMe');
-});
-
-// Common dashboard setup after login and visit
-Cypress.Commands.add('setupDashboardPage', (username, password) => {
-  const validUser = {
-    username: username,
-    password: password,
-    id: 2,
-    email: `${username}@example.com`,
-    first_name: 'Ana'
-  };
-
-  // Intercept the /users/me/ call for this setup
-  cy.interceptUserMe(validUser);
-
-  // Perform API login
-  cy.loginAPI(validUser.username, validUser.password);
+Cypress.Commands.add('setupHomePage', (username, password) => {
+  cy.loginAPI(username, password);
   cy.visit('/main');
-  cy.wait('@getUserMe');
   cy.get('header').should('be.visible').and('contain.text', 'Mi Perfil', { timeout: 10000 });
   cy.getDataTest('footer-link-search').should('be.visible').and('contain.text', 'Buscar');
   cy.getDataTest('main-title').should('be.visible').and('contain.text', '¿Qué te apetece?');
 });
 
-// Command for logout
 Cypress.Commands.add('logoutUI', () => {
-    cy.getDataTest('custom-button')
-      .contains('Cerrar Sesión')
+    cy.getDataTest('logout-button')
       .should('be.visible')
       .and('be.enabled')
       .click();

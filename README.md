@@ -1,12 +1,59 @@
-# React + Vite
+# CookFlow Front End Forked Repo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### 1. Build Docker & Run it
 
-Currently, two official plugins are available:
+```bash
+docker compose down --volumes
+docker-compose build
+docker-compose up -d
+docker-compose exec backend python manage.py createsuperuser
+```
+### Seed Data
+```bash
+docker compose exec backend python manage.py seed_all
+docker-compose up -d
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Run Cypress
+```bash
+docker compose run --rm cypress
+```
+===
 
-## Expanding the ESLint configuration
+### To Build Only Front
+```bash
+docker compose build frontend
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### To Build Only Back
+```bash
+docker compose build backend
+```
+===
+
+### To Apply Migrations
+```bash
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
+```
+
+### To Create Superuser
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+### To Seed Data
+```bash
+docker compose exec backend python manage.py seed_all
+```
+
+# To Start Cypress in Interactive mode
+
+```bash
+docker compose up -d --build backend --force-recreate
+# Start in interactive mode
+docker compose run --rm \
+  --entrypoint "" \
+  cypress \
+  sh -c "cd /e2e && npx cypress open --project ./"
+```
