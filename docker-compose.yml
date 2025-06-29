@@ -64,8 +64,11 @@ services:
     environment:
       CYPRESS_BASE_URL: http://frontend:80
       CYPRESS_API_URL: http://backend:8000/api
+      DISPLAY: host.docker.internal:0.0
+      QT_XKB_CONFIG_ROOT: /usr/share/X11/xkb
     volumes:
       - .:/e2e
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /e2e
     depends_on:
       - frontend
