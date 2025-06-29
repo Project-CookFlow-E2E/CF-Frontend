@@ -1,5 +1,19 @@
 # CookFlow Front End Forked Repo
 
+
+## Option 1: Start Cypress in Interactive mode
+
+```bash
+docker compose up -d --build backend --force-recreate
+# Start in interactive mode
+docker compose run --rm \
+  --entrypoint "" \
+  cypress \
+  sh -c "cd /e2e && npx cypress open --project ./"
+```
+
+---
+
 ### 1. Build Docker & Run it
 
 ```bash
