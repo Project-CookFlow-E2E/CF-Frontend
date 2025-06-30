@@ -51,7 +51,19 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Cypress & Start All Services
-        run: docker compose up -d --build
+        run: docker compose up -d --build`
+        
+      - name: Debug Service Health and Logs (Temporary Step)
+        run: |
+          echo "--- Docker Compose PS ---"
+          docker compose ps -a
+          echo "--- Backend Container Logs ---"
+          docker compose logs backend
+          echo "--- Frontend Container Logs ---"
+          docker compose logs frontend
+          echo "--- DB Container Logs ---"
+          docker compose logs db
+        continue-on-error: true
 
       - name: Wait for services to be healthy
         run: |
