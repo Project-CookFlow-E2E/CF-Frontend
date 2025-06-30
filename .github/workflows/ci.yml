@@ -1,4 +1,4 @@
-# cookflow-frontend/.github/workflows/ci.yml
+# CF-Frontend/.github/workflows/ci.yml
 name: Frontend CI & E2E Tests
 
 on:
@@ -52,7 +52,11 @@ jobs:
 
       - name: Build Cypress & Start All Services
         run: docker compose up -d --build
-        
+      
+      - name: Wait briefly for backend logs (Temporary Debugging)
+        run: sleep 15
+        continue-on-error: true
+
       - name: Debug Service Health and Logs (Temporary Step)
         run: |
           echo "--- Docker Compose PS ---"
