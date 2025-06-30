@@ -71,5 +71,3 @@ docker compose run --rm \
   cypress \
   sh -c "cd /e2e && npx cypress open --project ./"
 ```
-
-CI Check
