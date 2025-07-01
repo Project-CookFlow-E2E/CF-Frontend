@@ -39,6 +39,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       VITE_API_URL: http://backend:8000/api
       VITE_HMR_HOST: frontend

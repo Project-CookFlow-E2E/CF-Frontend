@@ -69,6 +69,18 @@ jobs:
           docker compose logs db
         continue-on-error: true
 
+      - name: Verify Service Health BEFORE Wait (Temporary Step)
+        run: |
+          echo "--- Docker Compose PS BEFORE WAIT ---"
+          docker compose ps -a
+          echo "--- Backend Container Logs BEFORE WAIT ---"
+          docker compose logs backend
+          echo "--- Frontend Container Logs BEFORE WAIT ---"
+          docker compose logs frontend
+          echo "--- DB Container Logs BEFORE WAIT ---"
+          docker compose logs db
+        continue-on-error: true
+
       - name: Wait for services to be healthy
         run: |
           docker compose wait db
