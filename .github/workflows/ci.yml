@@ -71,36 +71,21 @@ jobs:
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
 
-      # --- START: Temporary Backend Startup Test (replaces previous Debug Backend step) ---
-      - name: Test Backend Startup Command and Capture Output
-        run: |
-          echo "Attempting to run backend startup command directly..."
-          # The actual CMD from CF-backend/Dockerfile is: CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-          # We'll run it with a timeout to prevent it from hanging and capture its output
-          # And redirect stderr to stdout for comprehensive logging
-          set +e # Don't exit immediately on error, allow capturing output
-          OUTPUT=$(timeout 10s docker compose exec -T backend sh -c "python manage.py runserver 0.0.0.0:8000 2>&1")
-          EXIT_CODE=$?
-          set -e # Re-enable exit on error
-
-          echo "--- Backend Command Output ---"
-          echo "$OUTPUT"
-          echo "--- Backend Command Exit Code ---"
-          echo "$EXIT_CODE"
-
-          if [ $EXIT_CODE -eq 124 ]; then
-            echo "Note: The backend command timed out after 10 seconds. This is expected if it started successfully."
-            echo "A timeout implies the server started and kept running, which is good."
-          elif [ $EXIT_CODE -eq 0 ]; then
-            echo "Note: The backend command exited cleanly (exit code 0). This is usually unexpected for a server that should keep running."
-          else
-            echo "Error: The backend command exited with a non-zero code: $EXIT_CODE. This indicates a crash or failure."
-          fi
-        continue-on-error: true # Allow the workflow to proceed for now
-      # --- END: Temporary Backend Startup Test ---
-
       - name: Wait for Backend to be healthy
-        run: docker compose wait backend # This will still hang if no healthcheck is present
+        run: docker compose wait backend
+
+      # --- START: Debug Backend Healthcheck Status (New Debugging Step) ---
+      - name: Debug Backend Healthcheck Status
+        if: always() # Run this even if previous steps fail
+        run: |
+          echo "--- Current Docker Compose Services Status ---"
+          docker compose ps -a
+          echo "--- Inspecting Backend Container Health ---"
+          docker inspect --format='{{json .State.Health}}' cf-frontend-backend-1 || echo "Could not inspect backend health."
+          echo "--- Full Backend Container Logs (from Docker) ---"
+          docker logs cf-frontend-backend-1 || echo "Could not retrieve backend logs."
+        continue-on-error: true # Allow the workflow to finish, don't stop here
+      # --- END: Debug Backend Healthcheck Status ---
 
       - name: Wait for Frontend to be healthy
         run: docker compose wait frontend
