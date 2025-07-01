@@ -40,10 +40,10 @@ services:
     ports:
       - "5173:80"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: ["CMD-SHELL", "nc -z localhost 80 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
     environment:
       VITE_API_URL: http://backend:8000/api
       VITE_HMR_HOST: frontend
