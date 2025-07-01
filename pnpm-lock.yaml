@@ -13,7 +13,7 @@ importers:
       axios:
         specifier: ^1.9.0
         version: 1.9.0
-      cf-frontend:
+      CF-Frontend:
         specifier: 'file:'
         version: file:(@types/react@19.1.6)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1))
       jwt-decode:
@@ -1284,10 +1284,10 @@ packages:
         integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==,
       }
 
-  "cf-frontend@file:":
+  "CF-Frontend@file:":
     resolution: { directory: "", type: directory }
 
-  'cf-frontend@file:':
+  'CF-Frontend@file:':
     resolution: {directory: '', type: directory}
 
   cookie@1.0.2:
@@ -3731,7 +3731,7 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  cf-frontend@file:(@types/react@19.1.6)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)):
+  CF-Frontend@file:(@types/react@19.1.6)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)):
     dependencies:
       '@tailwindcss/vite': 4.1.8(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1))
       axios: 1.9.0
