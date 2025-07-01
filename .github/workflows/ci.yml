@@ -30,8 +30,8 @@ jobs:
           context: .
           push: true
           tags: |
-            hemaps/CF-Frontend:latest
-            hemaps/CF-Frontend:${{ github.sha }}
+            hemaps/cf-frontend:latest
+            hemaps/cf-frontend:${{ github.sha }}
 
   e2e-tests:
     runs-on: ubuntu-latest
