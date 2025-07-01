@@ -1,4 +1,3 @@
-# CF-Frontend/.github/workflows/ci.yml
 name: Frontend CI & E2E Tests
 
 on:
@@ -53,30 +52,30 @@ jobs:
       - name: Build Cypress & Start All Services
         run: docker compose up -d --build
 
-      # --- START: Temporary DB Health Debugging ---
-      - name: Debug DB Healthcheck (Temporary Step)
+      # Custom Wait for DB (replaces 'docker compose wait db')
+      - name: Custom Wait for DB to be healthy (using pg_isready)
         run: |
-          echo "--- Docker Compose PS (After Up, Before Wait) ---"
-          docker compose ps -a
-          echo "--- DB Container Logs (After Up, Before Wait) ---"
-          docker compose logs db
-          echo "--- Attempting DB Internal Health Check (pg_isready) ---"
-          # Assuming default postgres user and port
-          docker compose exec -T db sh -c "pg_isready -h localhost -p 5432 -U postgres" || echo "pg_isready failed or not found"
-          echo "Exit code for pg_isready: $?"
-        continue-on-error: true # Allow the workflow to proceed even if this debug step fails
-      # --- END: Temporary DB Health Debugging ---
-
-      # --- START: Separated Wait Steps ---
-      - name: Wait for DB to be healthy
-        run: docker compose wait db
+          echo "Starting custom wait for DB..."
+          MAX_RETRIES=60 # Roughly 5 minutes (60 retries * 5 seconds sleep)
+          RETRY_COUNT=0
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES: Checking DB readiness..."
+            # The -T flag is important to prevent pseudo-TTY allocation issues in CI.
+            if docker compose exec -T db sh -c "pg_isready -h localhost -p 5432 -U postgres"; then
+              echo "DB is ready! Proceeding."
+              exit 0
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 5 # Wait for 5 seconds before retrying
+          done
+          echo "Error: DB did not become healthy within the timeout period."
+          exit 1
 
       - name: Wait for Backend to be healthy
         run: docker compose wait backend
 
       - name: Wait for Frontend to be healthy
-        run: docker compose wait wait frontend
-      # --- END: Separated Wait Steps ---
+        run: docker compose wait frontend
 
       - name: Run Backend Migrations & Seed Data
         run: docker compose run --rm backend sh -c "python manage.py migrate --noinput && python manage.py seed_all"
