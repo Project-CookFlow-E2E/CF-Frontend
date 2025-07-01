@@ -30,8 +30,8 @@ jobs:
           context: .
           push: true
           tags: |
-            hemaps/cookflow-frontend:latest
-            hemaps/cookflow-frontend:${{ github.sha }}
+            hemaps/CF-Frontend:latest
+            hemaps/CF-Frontend:${{ github.sha }}
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -48,6 +48,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Verify Compose Config
+        run: docker compose config
 
       - name: Start Database Only
         run: docker compose up -d db
@@ -69,24 +72,38 @@ jobs:
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
 
+      - name: List All Containers (Debug)
+        if: always()
+        run: docker ps -a
+
       - name: Run Backend Migrations
         run: docker compose run --rm backend sh -c "python manage.py migrate --noinput"
 
       - name: Start All Services
         run: docker compose up -d --build
 
+      - name: List Running Containers After Startup
+        if: always()
+        run: docker compose ps -a
+
+      - name: Check Backend Startup Logs
+        if: always()
+        run: docker compose logs backend --tail=50
+
       - name: Wait for Backend to be healthy
         run: |
           echo "Waiting for backend to be healthy..."
-          docker compose wait backend
+          docker compose wait backend || (docker compose logs backend && exit 1)
 
       - name: Debug Backend Healthcheck Status
         if: always()
         run: |
           echo "--- Current Docker Compose Services Status ---"
           docker compose ps -a
-          echo "--- Inspecting Backend Container Health ---"
-          docker inspect --format='{{json .State.Health}}' cookflow-frontend-backend-1
+          echo "--- Trying Dynamic Container ID ---"
+          BACKEND_CONTAINER=$(docker compose ps -q backend)
+          echo "Backend container ID: $BACKEND_CONTAINER"
+          docker inspect --format='{{json .State.Health}}' $BACKEND_CONTAINER
           echo "--- Full Backend Container Logs ---"
           docker compose logs backend
         continue-on-error: true

@@ -1,4 +1,4 @@
-# cookflow-frontend/Dockerfile
+# CF-frontend/Dockerfile
 FROM cypress/browsers:latest
 RUN apt-get update && apt-get install -y curl --no-install-recommends && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
