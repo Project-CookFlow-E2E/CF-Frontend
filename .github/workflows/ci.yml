@@ -1,4 +1,4 @@
-# cookflow-frontend/.github/workflows/ci.yml
+# CF-Frontend/.github/workflows/ci.yml
 name: Frontend CI & E2E Tests
 
 on:
@@ -53,6 +53,20 @@ jobs:
       - name: Build Cypress & Start All Services
         run: docker compose up -d --build
 
+      # --- START: Temporary DB Health Debugging ---
+      - name: Debug DB Healthcheck (Temporary Step)
+        run: |
+          echo "--- Docker Compose PS (After Up, Before Wait) ---"
+          docker compose ps -a
+          echo "--- DB Container Logs (After Up, Before Wait) ---"
+          docker compose logs db
+          echo "--- Attempting DB Internal Health Check (pg_isready) ---"
+          # Assuming default postgres user and port
+          docker compose exec -T db sh -c "pg_isready -h localhost -p 5432 -U postgres" || echo "pg_isready failed or not found"
+          echo "Exit code for pg_isready: $?"
+        continue-on-error: true # Allow the workflow to proceed even if this debug step fails
+      # --- END: Temporary DB Health Debugging ---
+
       # --- START: Separated Wait Steps ---
       - name: Wait for DB to be healthy
         run: docker compose wait db
@@ -61,7 +75,7 @@ jobs:
         run: docker compose wait backend
 
       - name: Wait for Frontend to be healthy
-        run: docker compose wait frontend
+        run: docker compose wait wait frontend
       # --- END: Separated Wait Steps ---
 
       - name: Run Backend Migrations & Seed Data
