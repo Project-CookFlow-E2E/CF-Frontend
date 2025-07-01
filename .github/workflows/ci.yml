@@ -1,4 +1,4 @@
-# CF-Frontend/.github/workflows/ci.yml
+# cookflow-frontend/.github/workflows/ci.yml
 name: Frontend CI & E2E Tests
 
 on:
@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Cypress & Start All Services
         run: docker compose up -d --build
-      
+
       - name: Wait briefly for backend logs (Temporary Debugging)
         run: sleep 15
         continue-on-error: true
@@ -66,6 +66,40 @@ jobs:
           echo "--- Frontend Container Logs ---"
           docker compose logs frontend
           echo "--- DB Container Logs ---"
+          docker compose logs db
+        continue-on-error: true
+
+      # NEW CRUCIAL DEBUG STEP ADDED HERE
+      - name: Debug Frontend Healthcheck Command (Crucial Step)
+        run: |
+          echo "--- Checking healthcheck commands inside frontend container ---"
+          echo "Attempting 'curl -f http://localhost:80/'..."
+          docker compose exec -T frontend sh -c "curl -f http://localhost:80/"
+          echo "Exit code for curl: $?"
+
+          echo "Checking if curl is installed..."
+          docker compose exec -T frontend sh -c "which curl || echo 'curl not found'"
+
+          echo "Attempting 'nc -z localhost 80'..."
+          docker compose exec -T frontend sh -c "nc -z localhost 80"
+          echo "Exit code for nc: $?"
+
+          echo "Checking if nc is installed..."
+          docker compose exec -T frontend sh -c "which nc || echo 'nc not found'"
+
+          echo "--- Current status of frontend process inside container ---"
+          docker compose exec -T frontend sh -c "ps aux"
+        continue-on-error: true # Ensure the workflow continues even if this log collection has issues
+
+      - name: Verify Service Health BEFORE Wait (Temporary Step)
+        run: |
+          echo "--- Docker Compose PS BEFORE WAIT ---"
+          docker compose ps -a
+          echo "--- Backend Container Logs BEFORE WAIT ---"
+          docker compose logs backend
+          echo "--- Frontend Container Logs BEFORE WAIT ---"
+          docker compose logs frontend
+          echo "--- DB Container Logs BEFORE WAIT ---"
           docker compose logs db
         continue-on-error: true
 
