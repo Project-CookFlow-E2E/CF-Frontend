@@ -71,6 +71,16 @@ jobs:
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
 
+      # --- START: Temporary Backend Health Debugging ---
+      - name: Debug Backend Healthcheck (Temporary Step)
+        run: |
+          echo "--- Docker Compose PS (After Custom DB Wait, Before Backend Wait) ---"
+          docker compose ps -a
+          echo "--- Backend Container Logs (After Custom DB Wait, Before Backend Wait) ---"
+          docker compose logs backend
+        continue-on-error: true # Allow the workflow to proceed even if this debug step fails
+      # --- END: Temporary Backend Health Debugging ---
+
       - name: Wait for Backend to be healthy
         run: docker compose wait backend
 
