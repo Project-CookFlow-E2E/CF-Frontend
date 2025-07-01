@@ -53,61 +53,16 @@ jobs:
       - name: Build Cypress & Start All Services
         run: docker compose up -d --build
 
-      - name: Wait briefly for backend logs (Temporary Debugging)
-        run: sleep 15
-        continue-on-error: true
+      # --- START: Separated Wait Steps ---
+      - name: Wait for DB to be healthy
+        run: docker compose wait db
 
-      - name: Debug Service Health and Logs (Temporary Step)
-        run: |
-          echo "--- Docker Compose PS ---"
-          docker compose ps -a
-          echo "--- Backend Container Logs ---"
-          docker compose logs backend
-          echo "--- Frontend Container Logs ---"
-          docker compose logs frontend
-          echo "--- DB Container Logs ---"
-          docker compose logs db
-        continue-on-error: true
+      - name: Wait for Backend to be healthy
+        run: docker compose wait backend
 
-      # NEW CRUCIAL DEBUG STEP ADDED HERE
-      - name: Debug Frontend Healthcheck Command (Crucial Step)
-        run: |
-          echo "--- Checking healthcheck commands inside frontend container ---"
-          echo "Attempting 'curl -f http://localhost:80/'..."
-          docker compose exec -T frontend sh -c "curl -f http://localhost:80/"
-          echo "Exit code for curl: $?"
-
-          echo "Checking if curl is installed..."
-          docker compose exec -T frontend sh -c "which curl || echo 'curl not found'"
-
-          echo "Attempting 'nc -z localhost 80'..."
-          docker compose exec -T frontend sh -c "nc -z localhost 80"
-          echo "Exit code for nc: $?"
-
-          echo "Checking if nc is installed..."
-          docker compose exec -T frontend sh -c "which nc || echo 'nc not found'"
-
-          echo "--- Current status of frontend process inside container ---"
-          docker compose exec -T frontend sh -c "ps aux"
-        continue-on-error: true # Ensure the workflow continues even if this log collection has issues
-
-      - name: Verify Service Health BEFORE Wait (Temporary Step)
-        run: |
-          echo "--- Docker Compose PS BEFORE WAIT ---"
-          docker compose ps -a
-          echo "--- Backend Container Logs BEFORE WAIT ---"
-          docker compose logs backend
-          echo "--- Frontend Container Logs BEFORE WAIT ---"
-          docker compose logs frontend
-          echo "--- DB Container Logs BEFORE WAIT ---"
-          docker compose logs db
-        continue-on-error: true
-
-      - name: Wait for services to be healthy
-        run: |
-          docker compose wait db
-          docker compose wait backend
-          docker compose wait frontend
+      - name: Wait for Frontend to be healthy
+        run: docker compose wait frontend
+      # --- END: Separated Wait Steps ---
 
       - name: Run Backend Migrations & Seed Data
         run: docker compose run --rm backend sh -c "python manage.py migrate --noinput && python manage.py seed_all"
