@@ -3,15 +3,22 @@ describe('Home Page Tests', function () {
   before(() => {
     cy.viewport(1280, 800);
   });
-  console.log('Running tests for Home Page');
-  
 
   beforeEach(function () {
     cy.setupHomePage('ana456', 'testpass456');
+
+    // **IMPORTANT CHANGE:** Intercept all requests to your API base URL and log them.
+    // Replace 'http://backend:8000/api/' with your actual VITE_API_URL base.
+    // Assuming your API calls look like http://backend:8000/api/recipes/categories/
+    cy.intercept('GET', 'http://backend:8000/api/**').as('allApiRequests').debug();
+
+    // Now, specifically intercept and wait for the categories and latest recipes
     cy.intercept('GET', '/api/recipes/categories/').as('getCategories');
     cy.intercept('GET', '/api/recipes/latest/').as('getLatestRecipes');
-    // cy.wait('@getCategories', { timeout: 15000 });
-    // cy.wait('@getLatestRecipes', { timeout: 15000 });
+
+    // Re-introduce cy.wait() to ensure categories and recipes are fetched before proceeding
+    cy.wait('@getCategories', { timeout: 15000 });
+    cy.wait('@getLatestRecipes', { timeout: 15000 });
   });
 
   it('1. Displays the main home page image', () => {
@@ -40,6 +47,9 @@ describe('Home Page Tests', function () {
     cy.get('@desayunoBadge').click().should('have.class', 'bg-pink-500');
 
     cy.get('@comidaBadge').should('have.class', 'bg-pink-500');
+    // It's still strange this line is here after clicking desayuno.
+    // If you intend to check both are pink, add:
+    // cy.get('@desayunoBadge').should('have.class', 'bg-pink-500');
 
     cy.getDataTest('search-button').click();
     cy.url().should('include', '/search');
