@@ -50,7 +50,7 @@ services:
       VITE_HMR_HOST: frontend
     volumes:
       - .:/app
-      - /app/node_modules
+      - /app/node_modules # Important: This shadows the host's node_modules and uses the one from the image or built inside
     depends_on:
       - backend
 
@@ -62,10 +62,9 @@ services:
     environment:
       CYPRESS_BASE_URL: http://frontend:80
       CYPRESS_API_URL: http://backend:8000/api
-      # Removed DISPLAY and QT_XKB_CONFIG_ROOT for headless execution
     volumes:
       - .:/e2e
-      # Removed /tmp/.X11-unix volume mount for headless execution
+      - /e2e/node_modules # <--- ADD THIS LINE! This ensures built node_modules persist
     working_dir: /e2e
     depends_on:
       - frontend
