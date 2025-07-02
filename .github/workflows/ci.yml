@@ -41,8 +41,8 @@ jobs:
     if: |
       github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') ||
       github.event_name == 'repository_dispatch' && github.event.action == 'backend_update'
-    steps:
-      - name: Checkout Frontend Code
+    steps: # This 'steps:' line should be indented with 4 spaces relative to 'e2e-tests:'
+      - name: Checkout Frontend Code # This '- name:' line should be indented with 6 spaces
         uses: actions/checkout@v4
 
       - name: Login to Docker Registry
@@ -61,7 +61,7 @@ jobs:
         run: docker compose up -d db
 
       - name: Custom Wait for DB to be healthy
-        run: |
+        run: | # The content of this 'run' block must be indented by 2 spaces relative to 'run: |'
           echo "Starting custom wait for DB..."
           MAX_RETRIES=60
           RETRY_COUNT=0
@@ -77,9 +77,9 @@ jobs:
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
 
-      - name: Debug
+      - name: Debug Check curl in backend container # This '- name:' line should be indented with 6 spaces
         continue-on-error: true
-        run: |
+        run: | # The content of this 'run' block must be indented by 2 spaces relative to 'run: |'
           echo "Checking for curl in backend container..."
           docker compose exec -T backend sh -c "which curl && curl --version" || echo "curl not found in backend container or failed to execute."
 
@@ -94,12 +94,22 @@ jobs:
 
       - name: Wait for Backend to be healthy
         timeout-minutes: 5
-        run: |
+        run: | # The content of this 'run' block must be indented by 2 spaces relative to 'run: |'
           echo "Waiting for backend to be healthy..."
+          MAX_RETRIES=30
+          RETRY_COUNT=0
           until docker compose exec -T backend curl http://localhost:8000/admin/; do
-            sleep 5
-            echo "Backend not ready yet..."
-          done || (docker compose logs backend && exit 1)
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+              echo "Error: Backend did not become healthy within the timeout period."
+              docker compose logs backend
+              exit 1
+            fi
+            sleep 10
+            echo "Backend not ready yet... Retrying in 10s."
+            docker compose logs backend
+          done
+          echo "Backend is healthy!"
 
       - name: Wait for Frontend to be healthy
         run: |
