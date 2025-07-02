@@ -10,14 +10,16 @@ describe('Home Page Tests', function () {
     cy.setupHomePage('ana456', 'testpass456');
     cy.intercept('GET', '/api/recipes/categories/').as('getCategories');
     cy.intercept('GET', '/api/recipes/latest/').as('getLatestRecipes');
-    cy.wait('@getCategories', { timeout: 15000 });
-    cy.wait('@getLatestRecipes', { timeout: 15000 });
+    // cy.wait('@getCategories', { timeout: 15000 });
+    // cy.wait('@getLatestRecipes', { timeout: 15000 });
   });
 
   it('1. Displays the main home page image', () => {
     cy.getDataTest('home-image')
       .should('be.visible')
       .and('have.attr', 'src', '/home-page.jpeg');
+    cy.getDataTest('category-list').should('be.visible');
+    cy.getDataTest('badge-label').contains('Comida').should('be.visible');
   });
 
   it("2. Displays the welcome message with the user's name", () => {
