@@ -90,7 +90,7 @@ jobs:
         timeout-minutes: 5
         run: |
           echo "Waiting for backend to be healthy..."
-          until docker compose exec -T backend curl -sf http://localhost:8000/healthz/; do
+          until docker compose exec -T backend curl -sf http://localhost:8000/admin/; do
             sleep 5
             echo "Backend not ready yet..."
           done || (docker compose logs backend && exit 1)
