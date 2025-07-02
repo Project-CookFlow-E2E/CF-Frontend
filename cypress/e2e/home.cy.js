@@ -8,8 +8,8 @@ describe('Home Page Tests', function () {
 
   beforeEach(function () {
     cy.setupHomePage('ana456', 'testpass456');
-    cy.intercept('GET', '**/recipes/categories/').as('getCategories');
-    cy.intercept('GET', '**/api/recipes/latest/').as('getLatestRecipes');
+    cy.intercept('GET', '/api/recipes/categories/').as('getCategories');
+    cy.intercept('GET', '/api/recipes/latest/').as('getLatestRecipes');
     cy.wait('@getCategories', { timeout: 15000 });
     cy.wait('@getLatestRecipes', { timeout: 15000 });
   });
