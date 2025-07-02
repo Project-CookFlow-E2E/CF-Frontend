@@ -24,6 +24,7 @@ describe('Home Page Tests', function () {
   });
 
   it('3. Displays category filter badges and allows selection', () => {
+    cy.refesh();
     cy.getDataTest('category-list').should('be.visible');
     cy.getDataTest('badge-label').contains('Comida').should('be.visible');
 
