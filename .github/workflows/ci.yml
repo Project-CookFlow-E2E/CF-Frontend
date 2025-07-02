@@ -41,8 +41,8 @@ jobs:
     if: |
       github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') ||
       github.event_name == 'repository_dispatch' && github.event.action == 'backend_update'
-    steps: # This 'steps:' line should be indented with 4 spaces relative to 'e2e-tests:'
-      - name: Checkout Frontend Code # This '- name:' line should be indented with 6 spaces
+    steps:
+      - name: Checkout Frontend Code
         uses: actions/checkout@v4
 
       - name: Login to Docker Registry
@@ -61,7 +61,7 @@ jobs:
         run: docker compose up -d db
 
       - name: Custom Wait for DB to be healthy
-        run: | # The content of this 'run' block must be indented by 2 spaces relative to 'run: |'
+        run: |
           echo "Starting custom wait for DB..."
           MAX_RETRIES=60
           RETRY_COUNT=0
@@ -77,9 +77,9 @@ jobs:
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
 
-      - name: Debug Check curl in backend container # This '- name:' line should be indented with 6 spaces
+      - name: Debug
         continue-on-error: true
-        run: | # The content of this 'run' block must be indented by 2 spaces relative to 'run: |'
+        run: |
           echo "Checking for curl in backend container..."
           docker compose exec -T backend sh -c "which curl && curl --version" || echo "curl not found in backend container or failed to execute."
 
@@ -94,7 +94,7 @@ jobs:
 
       - name: Wait for Backend to be healthy
         timeout-minutes: 5
-        run: | # The content of this 'run' block must be indented by 2 spaces relative to 'run: |'
+        run: |
           echo "Waiting for backend to be healthy..."
           MAX_RETRIES=30
           RETRY_COUNT=0
@@ -112,12 +112,23 @@ jobs:
           echo "Backend is healthy!"
 
       - name: Wait for Frontend to be healthy
+        timeout-minutes: 5 # Ensure this timeout is sufficient
         run: |
           echo "Waiting for frontend to be healthy..."
+          MAX_RETRIES=30 # Total attempts over 5 minutes (30 * 10 seconds)
+          RETRY_COUNT=0
           until curl -sf http://frontend:80 >/dev/null; do
-            sleep 5
-            echo "Frontend not ready yet..."
-          done || (docker compose logs frontend && exit 1)
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+              echo "Error: Frontend did not become healthy within the timeout period."
+              docker compose logs frontend # Dump logs one last time on failure
+              exit 1
+            fi
+            sleep 10 # Increased sleep to 10 seconds
+            echo "Frontend not ready yet... Retrying in 10s."
+            docker compose logs frontend # Dumps logs after each failed attempt
+          done
+          echo "Frontend is healthy!" # Success message
 
       - name: Seed Database
         run: docker compose run --rm backend python manage.py seed_all
@@ -133,15 +144,15 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-screenshots
-          path: cypress/screenshots
+            name: cypress-screenshots
+            path: cypress/screenshots
 
       - name: Upload Cypress Videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-videos
-          path: cypress/videos
+            name: cypress-videos
+            path: cypress/videos
 
       - name: Clean up Docker Compose
         if: always()
