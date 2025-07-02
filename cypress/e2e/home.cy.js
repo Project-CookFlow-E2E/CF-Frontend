@@ -18,8 +18,6 @@ describe('Home Page Tests', function () {
     cy.getDataTest('home-image')
       .should('be.visible')
       .and('have.attr', 'src', '/home-page.jpeg');
-    cy.getDataTest('category-list').should('be.visible');
-    cy.getDataTest('badge-label').contains('Comida').should('be.visible');
   });
 
   it("2. Displays the welcome message with the user's name", () => {
@@ -30,6 +28,7 @@ describe('Home Page Tests', function () {
 
   it('3. Displays category filter badges and allows selection', () => {
     cy.getDataTest('category-list').should('be.visible');
+    cy.getDataTest('badge-label').contains('Comida').should('be.visible');
 
     cy.getDataTest('badge-label').contains('Comida').as('comidaBadge');
     cy.getDataTest('badge-label').contains('Desayuno').as('desayunoBadge');
