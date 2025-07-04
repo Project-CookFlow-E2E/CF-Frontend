@@ -1,4 +1,3 @@
-# CF-Frontend/.github/workflows/ci.yml
 name: Frontend CI & E2E Tests
 
 on:
@@ -58,6 +57,7 @@ jobs:
       - name: Verify Paths
         run: |
           echo "Workspace: ${{ github.workspace }}"
+          echo "Frontend path: ${{ github.workspace }}/CF-Frontend"
           echo "Backend path: ${{ github.workspace }}/CF-Backend"
           ls -la ${{ github.workspace }}/CF-Backend/
           echo "Dockerfile exists: $(test -f ${{ github.workspace }}/CF-Backend/Dockerfile && echo 'Yes' || echo 'No')"
@@ -70,29 +70,17 @@ jobs:
 
       - name: Set Project Name
         run: echo "COMPOSE_PROJECT_NAME=cf" >> $GITHUB_ENV
-        working-directory: ${{ github.workspace }}/CF-Frontend
 
       - name: Verify Compose Config
         run: docker compose config
         working-directory: ${{ github.workspace }}/CF-Frontend
 
-      # --- DEBUG STEP 1: List contents of CF-Backend to confirm Dockerfile presence ---
-      - name: Debug - List CF-Backend Directory Contents
-        run: |
-          echo "Listing contents of the backend context directory (relative to docker-compose.yml):"
-          ls -la ../CF-Backend/
-          echo "" # Add a newline for clarity
-          echo "--- Content of ../CF-Backend/Dockerfile ---"
-          cat ../CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist."
+      - name: Build Services
+        run: docker compose build --no-cache
         working-directory: ${{ github.workspace }}/CF-Frontend
 
-      # --- DEBUG STEP 2: Explicitly try to build backend only, with no cache ---
-      - name: Debug -  Explicitly Build Backend Service (No Cache)
-        run: docker compose build --no-cache backend
-        working-directory: ${{ github.workspace }}/CF-Frontend
-
-      - name: Build and Start All Services
-        run: docker compose up -d --build
+      - name: Start Services
+        run: docker compose up -d
         working-directory: ${{ github.workspace }}/CF-Frontend
 
       - name: Wait for DB to be healthy
@@ -121,13 +109,13 @@ jobs:
           echo "Waiting for backend to be healthy..."
           MAX_RETRIES=30
           RETRY_COUNT=0
-          until docker compose exec -T backend curl -f http://localhost:8000/admin/; do # Added -f for fail silently
+          until docker compose exec -T backend curl -f http://localhost:8000/admin/; do
             RETRY_COUNT=$((RETRY_COUNT + 1))
             if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
               echo "Error: Backend did not become healthy within the timeout period."
               docker compose logs backend
               exit 1
-            Kfi
+            fi
             sleep 10
             echo "Backend not ready yet... Retrying in 10s."
             docker compose logs backend
@@ -179,15 +167,15 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-            name: cypress-screenshots
-            path: CF-Frontend/cypress/screenshots
+          name: cypress-screenshots
+          path: ${{ github.workspace }}/CF-Frontend/cypress/screenshots
 
       - name: Upload Cypress Videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-            name: cypress-videos
-            path: CF-Frontend/cypress/videos
+          name: cypress-videos
+          path: ${{ github.workspace }}/CF-Frontend/cypress/videos
 
       - name: Clean up Docker Compose
         if: always()
