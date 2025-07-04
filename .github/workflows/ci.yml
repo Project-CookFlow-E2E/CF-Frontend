@@ -42,20 +42,19 @@ jobs:
       github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') ||
       github.event_name == 'repository_dispatch' && github.event.action == 'backend_update'
     steps:
-      - name: Create common workspace directory
-        run: mkdir common-workspace
+      # Removed: - name: Create common workspace directory
 
       - name: Checkout Frontend Code
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-          path: common-workspace/CF-Frontend
+          path: CF-Frontend # Checkout directly into CF-Frontend folder
 
       - name: Checkout Backend Code
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/CF-Backend
-          path: common-workspace/CF-Backend
+          path: CF-Backend # Checkout directly into CF-Backend folder
 
       - name: Login to Docker Registry
         uses: docker/login-action@v3
@@ -65,35 +64,30 @@ jobs:
 
       - name: Set Project Name
         run: echo "COMPOSE_PROJECT_NAME=cf" >> $GITHUB_ENV
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Verify Compose Config
         run: docker compose config
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
-      # --- NEW DEBUG STEP 1: List contents of CF-Backend to confirm Dockerfile presence ---
+      # --- DEBUG STEP 1: List contents of CF-Backend to confirm Dockerfile presence ---
       - name: Debug - List CF-Backend Directory Contents
         run: |
           echo "Listing contents of the backend context directory (relative to docker-compose.yml):"
-          ls -la ../CF-Backend/ # <--- CORRECTED PATH
+          ls -la ../CF-Backend/
           echo "" # Add a newline for clarity
           echo "--- Content of ../CF-Backend/Dockerfile ---"
-          cat ../CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist." # <--- CORRECTED PATH
-        working-directory: common-workspace/CF-Frontend # Ensures commands run from the correct base
+          cat ../CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist."
+        working-directory: CF-Frontend # Updated path
 
-      # --- NEW DEBUG STEP 2: Explicitly try to build backend only, with no cache ---
-      - name: Debug - Explicitly Build Backend Service (No Cache)
-        # This will force a fresh build and give us specific output for the backend build.
-        # If this passes, the next step (Start All Services) will be faster.
+      # --- DEBUG STEP 2: Explicitly try to build backend only, with no cache ---
+      - name: Debug -  Explicitly Build Backend Service (No Cache)
         run: docker compose build --no-cache backend
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
-      # --- CRITICAL CHANGE: Build and Start ALL services early ---
       - name: Build and Start All Services
-        # This step will now mostly start, as backend should be built by the debug step.
-        # If Debug step fails, this step will be skipped.
         run: docker compose up -d --build
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Wait for DB to be healthy
         timeout-minutes: 5
@@ -113,7 +107,7 @@ jobs:
           done
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Wait for Backend to be healthy
         timeout-minutes: 5
@@ -127,13 +121,13 @@ jobs:
               echo "Error: Backend did not become healthy within the timeout period."
               docker compose logs backend
               exit 1
-            fi
+            Kfi
             sleep 10
             echo "Backend not ready yet... Retrying in 10s."
             docker compose logs backend
           done
           echo "Backend is healthy!"
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Wait for Frontend to be healthy
         timeout-minutes: 5
@@ -153,20 +147,19 @@ jobs:
             docker compose logs frontend
           done
           echo "Frontend is healthy!"
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
-      # --- Now that all services are built and running, execute commands on them ---
       - name: Verify Backend Python Environment
         run: docker compose exec backend sh -c "which python && python --version && pip list"
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Run Backend Migrations
         run: docker compose exec backend python manage.py migrate --noinput
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Seed Database
         run: docker compose exec backend python manage.py seed_all
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Run Cypress E2E Tests (Headless)
         timeout-minutes: 10
@@ -174,23 +167,23 @@ jobs:
         env:
           CYPRESS_BASE_URL: http://frontend:80
           CYPRESS_API_URL: http://backend:8000/api
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
 
       - name: Upload Cypress Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
             name: cypress-screenshots
-            path: common-workspace/CF-Frontend/cypress/screenshots
+            path: CF-Frontend/cypress/screenshots # Updated path
 
       - name: Upload Cypress Videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
             name: cypress-videos
-            path: common-workspace/CF-Frontend/cypress/videos
+            path: CF-Frontend/cypress/videos # Updated path
 
       - name: Clean up Docker Compose
         if: always()
         run: docker compose down -v --remove-orphans
-        working-directory: common-workspace/CF-Frontend
+        working-directory: CF-Frontend # Updated path
