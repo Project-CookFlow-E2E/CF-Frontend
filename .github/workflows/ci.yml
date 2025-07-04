@@ -71,8 +71,27 @@ jobs:
         run: docker compose config
         working-directory: common-workspace/CF-Frontend
 
+      # --- NEW DEBUG STEP 1: List contents of CF-Backend to confirm Dockerfile presence ---
+      - name: Debug - List CF-Backend Directory Contents
+        run: |
+          echo "Listing contents of common-workspace/CF-Backend/"
+          ls -la common-workspace/CF-Backend/
+          echo "" # Add a newline for clarity
+          echo "--- Content of common-workspace/CF-Backend/Dockerfile ---"
+          cat common-workspace/CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist."
+        working-directory: common-workspace/CF-Frontend # Ensures commands run from the correct base
+
+      # --- NEW DEBUG STEP 2: Explicitly try to build backend only, with no cache ---
+      - name: Debug - Explicitly Build Backend Service (No Cache)
+        # This will force a fresh build and give us specific output for the backend build.
+        # If this passes, the next step (Start All Services) will be faster.
+        run: docker compose build --no-cache backend
+        working-directory: common-workspace/CF-Frontend
+
       # --- CRITICAL CHANGE: Build and Start ALL services early ---
       - name: Build and Start All Services
+        # This step will now mostly start, as backend should be built by the debug step.
+        # If Debug step fails, this step will be skipped.
         run: docker compose up -d --build
         working-directory: common-workspace/CF-Frontend
 
@@ -175,5 +194,3 @@ jobs:
         if: always()
         run: docker compose down -v --remove-orphans
         working-directory: common-workspace/CF-Frontend
-
-# The Backend CI & E2E Trigger workflow (in CF-Backend repo) remains unchanged.
