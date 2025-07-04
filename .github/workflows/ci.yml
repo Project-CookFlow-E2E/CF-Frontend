@@ -43,19 +43,18 @@ jobs:
       github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') ||
       github.event_name == 'repository_dispatch' && github.event.action == 'backend_update'
     steps:
-      # Removed: - name: Create common workspace directory
-
       - name: Checkout Frontend Code
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-          path: CF-Frontend # Checkout directly into CF-Frontend folder
+          path: CF-Frontend
 
       - name: Checkout Backend Code
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/CF-Backend
-          path: CF-Backend # Checkout directly into CF-Backend folder
+          path: CF-Backend
+          ref: ${{ github.event.client_payload.ref }}
 
       - name: Login to Docker Registry
         uses: docker/login-action@v3
