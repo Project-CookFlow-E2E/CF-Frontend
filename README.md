@@ -1,7 +1,5 @@
 # CookFlow Front End Forked Repo
 
-CI
-
 ## Option 1: Start Cypress in Interactive mode
 
 ```bash
