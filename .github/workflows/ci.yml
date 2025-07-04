@@ -64,11 +64,11 @@ jobs:
 
       - name: Set Project Name
         run: echo "COMPOSE_PROJECT_NAME=cf" >> $GITHUB_ENV
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Verify Compose Config
         run: docker compose config
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       # --- DEBUG STEP 1: List contents of CF-Backend to confirm Dockerfile presence ---
       - name: Debug - List CF-Backend Directory Contents
@@ -78,16 +78,16 @@ jobs:
           echo "" # Add a newline for clarity
           echo "--- Content of ../CF-Backend/Dockerfile ---"
           cat ../CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist."
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       # --- DEBUG STEP 2: Explicitly try to build backend only, with no cache ---
       - name: Debug -  Explicitly Build Backend Service (No Cache)
         run: docker compose build --no-cache backend
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Build and Start All Services
         run: docker compose up -d --build
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Wait for DB to be healthy
         timeout-minutes: 5
@@ -107,7 +107,7 @@ jobs:
           done
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Wait for Backend to be healthy
         timeout-minutes: 5
@@ -127,7 +127,7 @@ jobs:
             docker compose logs backend
           done
           echo "Backend is healthy!"
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Wait for Frontend to be healthy
         timeout-minutes: 5
@@ -147,19 +147,19 @@ jobs:
             docker compose logs frontend
           done
           echo "Frontend is healthy!"
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Verify Backend Python Environment
         run: docker compose exec backend sh -c "which python && python --version && pip list"
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Run Backend Migrations
         run: docker compose exec backend python manage.py migrate --noinput
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Seed Database
         run: docker compose exec backend python manage.py seed_all
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Run Cypress E2E Tests (Headless)
         timeout-minutes: 10
@@ -167,23 +167,23 @@ jobs:
         env:
           CYPRESS_BASE_URL: http://frontend:80
           CYPRESS_API_URL: http://backend:8000/api
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
 
       - name: Upload Cypress Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
             name: cypress-screenshots
-            path: CF-Frontend/cypress/screenshots # Updated path
+            path: CF-Frontend/cypress/screenshots
 
       - name: Upload Cypress Videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
             name: cypress-videos
-            path: CF-Frontend/cypress/videos # Updated path
+            path: CF-Frontend/cypress/videos
 
       - name: Clean up Docker Compose
         if: always()
         run: docker compose down -v --remove-orphans
-        working-directory: CF-Frontend # Updated path
+        working-directory: CF-Frontend
