@@ -74,11 +74,11 @@ jobs:
       # --- NEW DEBUG STEP 1: List contents of CF-Backend to confirm Dockerfile presence ---
       - name: Debug - List CF-Backend Directory Contents
         run: |
-          echo "Listing contents of common-workspace/CF-Backend/"
-          ls -la common-workspace/CF-Backend/
+          echo "Listing contents of the backend context directory (relative to docker-compose.yml):"
+          ls -la ../CF-Backend/ # <--- CORRECTED PATH
           echo "" # Add a newline for clarity
-          echo "--- Content of common-workspace/CF-Backend/Dockerfile ---"
-          cat common-workspace/CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist."
+          echo "--- Content of ../CF-Backend/Dockerfile ---"
+          cat ../CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist." # <--- CORRECTED PATH
         working-directory: common-workspace/CF-Frontend # Ensures commands run from the correct base
 
       # --- NEW DEBUG STEP 2: Explicitly try to build backend only, with no cache ---
