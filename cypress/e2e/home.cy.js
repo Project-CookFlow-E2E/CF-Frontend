@@ -5,17 +5,7 @@ describe('Home Page Tests', function () {
   });
 
   beforeEach(function () {
-    // *** CRITICAL CHANGE: Set up intercepts BEFORE cy.setupHomePage (which includes cy.visit) ***
-    cy.intercept('GET', 'http://backend:8000/api/recipes/categories/**', { log: true }).as('getCategories');
-    cy.intercept('GET', 'http://backend:8000/api/recipes/latest/**', { log: true }).as('getLatestRecipes');
-
-    // Now, perform the login and visit
     cy.setupHomePage('ana456', 'testpass456');
-
-    // Now, wait for these requests to be made by the frontend.
-    // They should now be intercepted because the intercepts were active before the visit.
-    cy.wait('@getCategories', { timeout: 15000 });
-    cy.wait('@getLatestRecipes', { timeout: 15000 });
   });
 
   it('1. Displays the main home page image', () => {

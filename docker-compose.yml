@@ -16,7 +16,9 @@ services:
       retries: 5
 
   backend:
-    image: hemaps/cf-backend:latest
+    build:
+      context: ../CF-Backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -50,7 +52,7 @@ services:
       VITE_HMR_HOST: frontend
     volumes:
       - .:/app
-      - /app/node_modules # Important: This shadows the host's node_modules and uses the one from the image or built inside
+      - /app/node_modules
     depends_on:
       - backend
 
@@ -62,14 +64,16 @@ services:
     environment:
       CYPRESS_BASE_URL: http://frontend:80
       CYPRESS_API_URL: http://backend:8000/api
+      DISPLAY: 172.30.48.1:0.0
     volumes:
       - .:/e2e
-      - /e2e/node_modules # <--- ADD THIS LINE! This ensures built node_modules persist
+      - /e2e/node_modules
     working_dir: /e2e
     depends_on:
       - frontend
       - backend
-    restart: "no"
+    ports:
+      - "8080:8080"
 
 volumes:
   cookflow_db_data:
