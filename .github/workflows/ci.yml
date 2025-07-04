@@ -42,23 +42,20 @@ jobs:
       github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') ||
       github.event_name == 'repository_dispatch' && github.event.action == 'backend_update'
     steps:
-      # --- NEW STEPS TO CHECKOUT BOTH REPOS INTO A COMMON WORKSPACE ---
       - name: Create common workspace directory
         run: mkdir common-workspace
 
       - name: Checkout Frontend Code
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }} # This is 'your-org/CF-Frontend'
-          path: common-workspace/CF-Frontend # Checkout frontend into a subfolder
+          repository: ${{ github.repository }}
+          path: common-workspace/CF-Frontend
 
       - name: Checkout Backend Code
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/CF-Backend # Assuming 'CF-Backend' is in the same org/user
-          path: common-workspace/CF-Backend # Checkout backend into a sibling subfolder
-
-      # --- END NEW CHECKOUT STEPS ---
+          repository: ${{ github.repository_owner }}/CF-Backend
+          path: common-workspace/CF-Backend
 
       - name: Login to Docker Registry
         uses: docker/login-action@v3
@@ -68,17 +65,19 @@ jobs:
 
       - name: Set Project Name
         run: echo "COMPOSE_PROJECT_NAME=cf" >> $GITHUB_ENV
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
 
       - name: Verify Compose Config
         run: docker compose config
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
 
-      - name: Start Database Only
-        run: docker compose up -d db
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+      # --- CRITICAL CHANGE: Build and Start ALL services early ---
+      - name: Build and Start All Services
+        run: docker compose up -d --build
+        working-directory: common-workspace/CF-Frontend
 
-      - name: Custom Wait for DB to be healthy
+      - name: Wait for DB to be healthy
+        timeout-minutes: 5
         run: |
           echo "Starting custom wait for DB..."
           MAX_RETRIES=60
@@ -91,29 +90,11 @@ jobs:
             fi
             RETRY_COUNT=$((RETRY_COUNT + 1))
             sleep 5
+            echo "DB not ready yet... Retrying in 5s."
           done
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
-
-      - name: Debug Check curl in backend container
-        continue-on-error: true
-        run: |
-          echo "Checking for curl in backend container..."
-          docker compose exec -T backend sh -c "which curl && curl --version" || echo "curl not found in backend container or failed to execute."
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
-
-      - name: Verify Backend Python Environment
-        run: docker compose run --rm backend sh -c "which python && python --version && pip list"
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
-
-      - name: Run Backend Migrations
-        run: docker compose run --rm backend python manage.py migrate --noinput
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
-
-      - name: Start All Services
-        run: docker compose up -d --build backend frontend
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
 
       - name: Wait for Backend to be healthy
         timeout-minutes: 5
@@ -121,7 +102,7 @@ jobs:
           echo "Waiting for backend to be healthy..."
           MAX_RETRIES=30
           RETRY_COUNT=0
-          until docker compose exec -T backend curl http://localhost:8000/admin/; do
+          until docker compose exec -T backend curl -f http://localhost:8000/admin/; do # Added -f for fail silently
             RETRY_COUNT=$((RETRY_COUNT + 1))
             if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
               echo "Error: Backend did not become healthy within the timeout period."
@@ -133,7 +114,7 @@ jobs:
             docker compose logs backend
           done
           echo "Backend is healthy!"
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
 
       - name: Wait for Frontend to be healthy
         timeout-minutes: 5
@@ -153,11 +134,20 @@ jobs:
             docker compose logs frontend
           done
           echo "Frontend is healthy!"
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
+
+      # --- Now that all services are built and running, execute commands on them ---
+      - name: Verify Backend Python Environment
+        run: docker compose exec backend sh -c "which python && python --version && pip list"
+        working-directory: common-workspace/CF-Frontend
+
+      - name: Run Backend Migrations
+        run: docker compose exec backend python manage.py migrate --noinput
+        working-directory: common-workspace/CF-Frontend
 
       - name: Seed Database
-        run: docker compose run --rm backend python manage.py seed_all
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        run: docker compose exec backend python manage.py seed_all
+        working-directory: common-workspace/CF-Frontend
 
       - name: Run Cypress E2E Tests (Headless)
         timeout-minutes: 10
@@ -165,26 +155,25 @@ jobs:
         env:
           CYPRESS_BASE_URL: http://frontend:80
           CYPRESS_API_URL: http://backend:8000/api
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
 
       - name: Upload Cypress Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
             name: cypress-screenshots
-            path: common-workspace/CF-Frontend/cypress/screenshots # Adjust path if different
+            path: common-workspace/CF-Frontend/cypress/screenshots
 
       - name: Upload Cypress Videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
             name: cypress-videos
-            path: common-workspace/CF-Frontend/cypress/videos # Adjust path if different
+            path: common-workspace/CF-Frontend/cypress/videos
 
       - name: Clean up Docker Compose
         if: always()
         run: docker compose down -v --remove-orphans
-        working-directory: common-workspace/CF-Frontend # Apply to correct working directory
+        working-directory: common-workspace/CF-Frontend
 
-# The Backend CI & E2E Trigger workflow (in CF-Backend repo) remains unchanged as it's just triggering
-# the frontend workflow.
+# The Backend CI & E2E Trigger workflow (in CF-Backend repo) remains unchanged.
