@@ -46,7 +46,6 @@ jobs:
       - name: Checkout Frontend Code
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }}
           path: CF-Frontend
 
       - name: Checkout Backend Code
@@ -58,10 +57,10 @@ jobs:
 
       - name: Verify Paths
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Frontend path: $(pwd)/CF-Frontend"
-          echo "Backend path: $(pwd)/CF-Backend"
-          ls -la CF-Backend/
+          echo "Workspace: ${{ github.workspace }}"
+          echo "Backend path: ${{ github.workspace }}/CF-Backend"
+          ls -la ${{ github.workspace }}/CF-Backend/
+          echo "Dockerfile exists: $(test -f ${{ github.workspace }}/CF-Backend/Dockerfile && echo 'Yes' || echo 'No')"
 
       - name: Login to Docker Registry
         uses: docker/login-action@v3

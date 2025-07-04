@@ -54,7 +54,8 @@ services:
       - .:/app
       - /app/node_modules
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   cypress:
     build:
@@ -70,8 +71,10 @@ services:
       - /e2e/node_modules
     working_dir: /e2e
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     ports:
       - "8080:8080"
 
