@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, dev]
   repository_dispatch:
-    types: [backend_update]
+    types: [backend_update] # This listens for the event from the backend
 
 jobs:
   build-and-push-frontend:
@@ -38,6 +38,7 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     needs: build-and-push-frontend
+    # Condition to run either on push/PR OR on repository_dispatch (from backend)
     if: |
       github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') ||
       github.event_name == 'repository_dispatch' && github.event.action == 'backend_update'
@@ -48,7 +49,7 @@ jobs:
           repository: ${{ github.repository }}
           path: CF-Frontend
 
-      # --- NEW DEBUG STEP: Debug Client Payload Ref ---
+      # --- NEW DEBUG STEP: Crucial for diagnosing the 'ref' issue ---
       - name: Debug Client Payload Ref
         run: |
           echo "--- Debugging Ref Variables ---"
@@ -63,7 +64,8 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/CF-Backend
           path: CF-Backend
-          ref: ${{ github.event.client_payload.ref }} # This is the line we're debugging
+          # This should checkout the specific branch that triggered the backend workflow
+          ref: ${{ github.event.client_payload.ref }} 
 
       - name: Login to Docker Registry
         uses: docker/login-action@v3
@@ -79,6 +81,7 @@ jobs:
         run: docker compose config
         working-directory: CF-Frontend
 
+      # --- Debug steps for Dockerfile not found ---
       - name: Debug - List CF-Backend Directory Contents
         run: |
           echo "Listing contents of the backend context directory (relative to docker-compose.yml):"
@@ -91,6 +94,7 @@ jobs:
       - name: Debug - Explicitly Build Backend Service (No Cache)
         run: docker compose build --no-cache backend
         working-directory: CF-Frontend
+      # --- End Debug steps for Dockerfile not found ---
 
       - name: Build and Start All Services
         run: docker compose up -d --build
