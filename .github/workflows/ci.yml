@@ -45,22 +45,25 @@ jobs:
       - name: Checkout Frontend Code
         uses: actions/checkout@v4
         with:
+          repository: ${{ github.repository }}
           path: CF-Frontend
+
+      # --- NEW DEBUG STEP: Debug Client Payload Ref ---
+      - name: Debug Client Payload Ref
+        run: |
+          echo "--- Debugging Ref Variables ---"
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.ref: ${{ github.ref }}"
+          echo "github.event.ref: ${{ github.event.ref }}"
+          echo "github.event.client_payload.ref: ${{ github.event.client_payload.ref }}"
+          echo "-------------------------------"
 
       - name: Checkout Backend Code
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/CF-Backend
           path: CF-Backend
-          ref: ${{ github.event.client_payload.ref }}
-
-      - name: Verify Paths
-        run: |
-          echo "Workspace: ${{ github.workspace }}"
-          echo "Frontend path: ${{ github.workspace }}/CF-Frontend"
-          echo "Backend path: ${{ github.workspace }}/CF-Backend"
-          ls -la ${{ github.workspace }}/CF-Backend/
-          echo "Dockerfile exists: $(test -f ${{ github.workspace }}/CF-Backend/Dockerfile && echo 'Yes' || echo 'No')"
+          ref: ${{ github.event.client_payload.ref }} # This is the line we're debugging
 
       - name: Login to Docker Registry
         uses: docker/login-action@v3
@@ -70,18 +73,28 @@ jobs:
 
       - name: Set Project Name
         run: echo "COMPOSE_PROJECT_NAME=cf" >> $GITHUB_ENV
+        working-directory: CF-Frontend
 
       - name: Verify Compose Config
         run: docker compose config
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
-      - name: Build Services
-        run: docker compose build --no-cache
-        working-directory: ${{ github.workspace }}/CF-Frontend
+      - name: Debug - List CF-Backend Directory Contents
+        run: |
+          echo "Listing contents of the backend context directory (relative to docker-compose.yml):"
+          ls -la ../CF-Backend/
+          echo ""
+          echo "--- Content of ../CF-Backend/Dockerfile ---"
+          cat ../CF-Backend/Dockerfile || echo "Error: Dockerfile content could not be read or file does not exist."
+        working-directory: CF-Frontend
 
-      - name: Start Services
-        run: docker compose up -d
-        working-directory: ${{ github.workspace }}/CF-Frontend
+      - name: Debug - Explicitly Build Backend Service (No Cache)
+        run: docker compose build --no-cache backend
+        working-directory: CF-Frontend
+
+      - name: Build and Start All Services
+        run: docker compose up -d --build
+        working-directory: CF-Frontend
 
       - name: Wait for DB to be healthy
         timeout-minutes: 5
@@ -101,7 +114,7 @@ jobs:
           done
           echo "Error: DB did not become healthy within the timeout period."
           exit 1
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Wait for Backend to be healthy
         timeout-minutes: 5
@@ -121,7 +134,7 @@ jobs:
             docker compose logs backend
           done
           echo "Backend is healthy!"
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Wait for Frontend to be healthy
         timeout-minutes: 5
@@ -141,19 +154,19 @@ jobs:
             docker compose logs frontend
           done
           echo "Frontend is healthy!"
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Verify Backend Python Environment
         run: docker compose exec backend sh -c "which python && python --version && pip list"
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Run Backend Migrations
         run: docker compose exec backend python manage.py migrate --noinput
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Seed Database
         run: docker compose exec backend python manage.py seed_all
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Run Cypress E2E Tests (Headless)
         timeout-minutes: 10
@@ -161,23 +174,23 @@ jobs:
         env:
           CYPRESS_BASE_URL: http://frontend:80
           CYPRESS_API_URL: http://backend:8000/api
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
 
       - name: Upload Cypress Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-screenshots
-          path: ${{ github.workspace }}/CF-Frontend/cypress/screenshots
+            name: cypress-screenshots
+            path: CF-Frontend/cypress/screenshots
 
       - name: Upload Cypress Videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-videos
-          path: ${{ github.workspace }}/CF-Frontend/cypress/videos
+            name: cypress-videos
+            path: CF-Frontend/cypress/videos
 
       - name: Clean up Docker Compose
         if: always()
         run: docker compose down -v --remove-orphans
-        working-directory: ${{ github.workspace }}/CF-Frontend
+        working-directory: CF-Frontend
