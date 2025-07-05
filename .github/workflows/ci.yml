@@ -174,7 +174,7 @@ jobs:
 
       - name: Run Cypress E2E Tests (Headless)
         timeout-minutes: 10
-        run: docker compose run --rm --entrypoint "" cypress sh -c "cd /e2e && npx cypress run --project ./"
+        run: docker compose run --rm --entrypoint "" cypress sh -c "cd /e2e && npm install && npx cypress run --project ./"
         env:
           CYPRESS_BASE_URL: http://frontend:80
           CYPRESS_API_URL: http://backend:8000/api
