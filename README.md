@@ -4,7 +4,6 @@
 
 ```bash
 docker compose up -d --build backend --force-recreate
-# Start in interactive mode
 docker compose run --rm \
   --entrypoint "" \
   cypress \
