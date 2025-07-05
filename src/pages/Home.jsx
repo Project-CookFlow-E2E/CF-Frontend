@@ -64,7 +64,7 @@ const Home = () => {
                         </Button>
                     </div>
 
-                    <div className="flex justify-center lg:justify-end" data-testid="home-image-container">
+                    <div className="flex justify-center lg:justify-end">
                         <img
                             src="/home-page.jpeg"
                             alt="Delicious food"

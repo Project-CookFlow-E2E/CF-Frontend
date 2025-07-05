@@ -1,17 +1,11 @@
 // cypress/e2e/home.cy.js
-
-describe('Home Page Tests', function() {
-
+describe('Home Page Tests', function () {
   before(() => {
     cy.viewport(1280, 800);
   });
 
-  beforeEach(function() {
+  beforeEach(function () {
     cy.setupHomePage('ana456', 'testpass456');
-    cy.intercept('GET', '**/api/recipes/categories/**').as('getCategories');
-    cy.intercept('GET', '**/api/recipes/latest/').as('getLatestRecipes');
-    cy.wait('@getCategories', { timeout: 15000 });
-    cy.wait('@getLatestRecipes', { timeout: 15000 });
   });
 
   it('1. Displays the main home page image', () => {
@@ -20,14 +14,16 @@ describe('Home Page Tests', function() {
       .and('have.attr', 'src', '/home-page.jpeg');
   });
 
-  it('2. Displays the welcome message with the user\'s name', () => {
+  it("2. Displays the welcome message with the user's name", () => {
     cy.getDataTest('firstname-text')
       .should('be.visible')
       .and('contain.text', 'Hola, Ana!');
   });
 
   it('3. Displays category filter badges and allows selection', () => {
+    // These assertions should now pass if the categories are successfully fetched and rendered
     cy.getDataTest('category-list').should('be.visible');
+    cy.getDataTest('badge-label').contains('Comida').should('be.visible');
 
     cy.getDataTest('badge-label').contains('Comida').as('comidaBadge');
     cy.getDataTest('badge-label').contains('Desayuno').as('desayunoBadge');
@@ -71,9 +67,7 @@ describe('Home Page Tests', function() {
   });
 
   it('8. Displays the "Inspire me" section title and button', () => {
-    cy.getDataTest('inspire-section')
-      .scrollIntoView()
-      .should('be.visible');
+    cy.getDataTest('inspire-section').scrollIntoView().should('be.visible');
     cy.getDataTest('inspire-title')
       .should('be.visible')
       .and('contain.text', '¿Aún no sabes que hacer?');
@@ -83,22 +77,30 @@ describe('Home Page Tests', function() {
   });
 
   it('9. Displays all main footer navigation links', () => {
-    cy.getDataTest('footer').should('be.visible').within(() => {
-      cy.getDataTest('footer-link-search')
-        .should('be.visible')
-        .and('have.attr', 'href', '/search');
-      cy.getDataTest('footer-label-search').should('contain.text', 'Buscar');
+    cy.getDataTest('footer')
+      .should('be.visible')
+      .within(() => {
+        cy.getDataTest('footer-link-search')
+          .should('be.visible')
+          .and('have.attr', 'href', '/search');
+        cy.getDataTest('footer-label-search').should('contain.text', 'Buscar');
 
-      cy.getDataTest('footer-link-add-recipe')
-        .should('be.visible')
-        .and('have.attr', 'href', '/add-recipe');
-      cy.getDataTest('footer-label-add-recipe').should('contain.text', 'Nueva Receta');
+        cy.getDataTest('footer-link-add-recipe')
+          .should('be.visible')
+          .and('have.attr', 'href', '/add-recipe');
+        cy.getDataTest('footer-label-add-recipe').should(
+          'contain.text',
+          'Nueva Receta'
+        );
 
-      cy.getDataTest('footer-link-shopping-list')
-        .should('be.visible')
-        .and('have.attr', 'href', '/shopping-list');
-      cy.getDataTest('footer-label-shopping-list').should('contain.text', 'Cesta');
-    });
+        cy.getDataTest('footer-link-shopping-list')
+          .should('be.visible')
+          .and('have.attr', 'href', '/shopping-list');
+        cy.getDataTest('footer-label-shopping-list').should(
+          'contain.text',
+          'Cesta'
+        );
+      });
   });
 
   it('10. Navigation from header to "Mi Perfil" (My Profile) works', () => {
