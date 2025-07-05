@@ -1,0 +1,16 @@
+name: Test Dispatch Trigger
+
+on:
+  repository_dispatch:
+    types: [simple_test_event]
+
+jobs:
+  check-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Dispatch Event Received
+        run: |
+          echo "SUCCESS: Workflow triggered by repository_dispatch event!"
+          echo "Event type received: ${{ github.event.action }}"
+          echo "Client payload ref: ${{ github.event.client_payload.ref }}"
+          echo "Client payload sha: ${{ github.event.client_payload.sha }}"
