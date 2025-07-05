@@ -1,0 +1,16 @@
+name: Simple Dispatch Test
+
+on:
+  repository_dispatch:
+    types: [backend_update]
+
+jobs:
+  test-dispatch-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Dispatch Event
+        run: |
+          echo "Successfully received a repository_dispatch event!"
+          echo "Event Type: ${{ github.event.action }}"
+          echo "Client Payload Ref: ${{ github.event.client_payload.ref }}"
+          echo "Client Payload SHA: ${{ github.event.client_payload.sha }}"
