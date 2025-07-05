@@ -65,16 +65,14 @@ services:
     environment:
       CYPRESS_BASE_URL: http://frontend:80
       CYPRESS_API_URL: http://backend:8000/api
-      # DISPLAY is often not needed with cypress/included as it handles Xvfb internally
-      # but keeping it won't hurt if your tests need it.
-      DISPLAY: 172.30.48.1:0.0
+      # DISPLAY: 172.30.48.1:0.0
     volumes:
       # Ensure your local Cypress test files and config are mapped into the container
       - ./cypress:/e2e/cypress # Maps your cypress folder containing tests
-      - ./cypress.config.js:/e2e/cypress.config.js # Maps your cypress config file
-      - ./package.json:/e2e/package.json # Maps your package.json for npm commands
-      - ./package-lock.json:/e2e/package-lock.json # Maps your package-lock.json
-      - /e2e/node_modules # This creates a volume for node_modules inside the container
+      - ./cypress.config.js:/e2e/cypress.config.js
+      - ./package.json:/e2e/package.json
+      - ./package-lock.json:/e2e/package-lock.json
+      - /e2e/node_modules
     working_dir: /e2e
     depends_on:
       frontend:
@@ -82,7 +80,7 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "8080:8080" # Only needed if you plan to access Cypress UI from outside, not for headless CI
+      - "8080:8080"
 
 volumes:
   cookflow_db_data:
