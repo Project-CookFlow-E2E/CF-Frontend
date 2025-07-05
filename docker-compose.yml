@@ -58,17 +58,13 @@ services:
         condition: service_healthy
 
   cypress:
-    # --- IMPORTANT CHANGE START ---
-    # Removed 'build' and 'dockerfile' as we are using a pre-built Cypress image.
-    image: cypress/included:13.13.1 # Using a Cypress image that includes all necessary browser dependencies
-    # --- IMPORTANT CHANGE END ---
+    image: cypress/included:14.4.1
     environment:
       CYPRESS_BASE_URL: http://frontend:80
       CYPRESS_API_URL: http://backend:8000/api
       # DISPLAY: 172.30.48.1:0.0
     volumes:
-      # Ensure your local Cypress test files and config are mapped into the container
-      - ./cypress:/e2e/cypress # Maps your cypress folder containing tests
+      - ./cypress:/e2e/cypress
       - ./cypress.config.js:/e2e/cypress.config.js
       - ./package.json:/e2e/package.json
       - ./package-lock.json:/e2e/package-lock.json
